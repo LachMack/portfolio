@@ -1,19 +1,340 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<title>My static Space</title>
-		<link rel="stylesheet" href="style.css" />
-	</head>
-	<body>
-		<div class="card">
-			<h1>Welcome to your static Space!</h1>
-			<p>You can modify this app directly by editing <i>index.html</i> in the Files and versions tab.</p>
-			<p>
-				Also don't forget to check the
-				<a href="https://huggingface.co/docs/hub/spaces" target="_blank">Spaces documentation</a>.
-			</p>
-		</div>
-	</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouthwash - Creative Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        .text-outline {
+            -webkit-text-stroke: 1px white;
+            color: transparent;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #FF4D4D 0%, #F9CB28 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .scroll-down::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 50px;
+            background: white;
+            animation: scrollDown 2s infinite;
+        }
+        @keyframes scrollDown {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+        .project-card {
+            transition: all 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-10px);
+        }
+    </style>
+</head>
+<body class="bg-black text-white font-sans overflow-x-hidden">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 py-6 px-6 md:px-12 flex justify-between items-center">
+        <div class="text-2xl font-bold">
+            <span class="text-outline">LACHLAN MACKENZIE</span>
+        </div>
+        <div class="hidden md:flex space-x-8">
+            <a href="#" class="hover:text-gray-300 transition">ABOUT ME</a>
+            <a href="#" class="hover:text-gray-300 transition">CAREER</a>
+            <a href="#" class="hover:text-gray-300 transition">CONTACT</a>
+        </div>
+        <div class="md:hidden">
+            <button id="menu-toggle" class="text-white focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black z-40 flex flex-col items-center justify-center hidden">
+        <button id="close-menu" class="absolute top-6 right-6 text-white text-2xl">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="flex flex-col space-y-8 text-center">
+            <a href="#" class="text-3xl hover:text-gray-300 transition">ABOUT ME</a>
+            <a href="#" class="text-3xl hover:text-gray-300 transition">CAREER</a>
+            <a href="#" class="text-3xl hover:text-gray-300 transition">CONTACT</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-black to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
+        <div class="container mx-auto px-6 md:px-12 relative z-20 text-center">
+            <h1 class="text-5xl md:text-8xl font-bold mb-6">
+                <span class="text-outline">DESIGNING FOR</span>
+                <span class="gradient-text block md:inline">PEOPLE</span>
+            </h1>
+            <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-12">
+                Strategic design leader with 20+ years' experience driving product vision, scaling teams, and delivering impactful, people-centred solutions.
+            </p>
+            <a href="#" class="inline-block bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition">
+                View My Work
+            </a>
+        </div>
+        <div class="scroll-down z-20"></div>
+        
+        <!-- Floating elements -->
+        <div class="absolute top-1/4 left-1/4 w-16 h-16 rounded-full bg-pink-500 opacity-20 floating" style="animation-delay: 0s;"></div>
+        <div class="absolute top-1/3 right-1/4 w-24 h-24 rounded-full bg-yellow-500 opacity-20 floating" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-20 h-20 rounded-full bg-blue-500 opacity-20 floating" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/3 right-1/3 w-12 h-12 rounded-full bg-green-500 opacity-20 floating" style="animation-delay: 3s;"></div>
+    </section>
+
+    <!-- Clients Section -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6">
+            <h2 class="text-2xl md:text-3xl font-bold mb-12 text-center">Trusted by innovative brands</h2>
+            <div class="flex flex-wrap justify-center items-center gap-12 md:gap-24">
+                <div class="text-3xl font-bold opacity-70">NIKE</div>
+                <div class="text-3xl font-bold opacity-70">APPLE</div>
+                <div class="text-3xl font-bold opacity-70">ADIDAS</div>
+                <div class="text-3xl font-bold opacity-70">SPOTIFY</div>
+                <div class="text-3xl font-bold opacity-70">AIRBNB</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-5xl font-bold mb-16">Selected Projects</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Project 1 -->
+                <div class="project-card bg-gray-900 rounded-3xl overflow-hidden">
+                    <div class="h-64 md:h-80 bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                        <span class="text-4xl font-bold">Project 1</span>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold mb-2">Brand Identity</h3>
+                        <p class="text-gray-400 mb-4">A complete rebrand for a tech startup looking to disrupt the market.</p>
+                        <a href="#" class="text-white font-bold hover:underline">View Case Study →</a>
+                    </div>
+                </div>
+                
+                <!-- Project 2 -->
+                <div class="project-card bg-gray-900 rounded-3xl overflow-hidden">
+                    <div class="h-64 md:h-80 bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center">
+                        <span class="text-4xl font-bold">Project 2</span>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold mb-2">E-commerce Platform</h3>
+                        <p class="text-gray-400 mb-4">A custom-built online store with seamless user experience.</p>
+                        <a href="#" class="text-white font-bold hover:underline">View Case Study →</a>
+                    </div>
+                </div>
+                
+                <!-- Project 3 -->
+                <div class="project-card bg-gray-900 rounded-3xl overflow-hidden">
+                    <div class="h-64 md:h-80 bg-gradient-to-r from-yellow-500 to-red-500 flex items-center justify-center">
+                        <span class="text-4xl font-bold">Project 3</span>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold mb-2">Mobile App</h3>
+                        <p class="text-gray-400 mb-4">An innovative fitness app with personalized workout plans.</p>
+                        <a href="#" class="text-white font-bold hover:underline">View Case Study →</a>
+                    </div>
+                </div>
+                
+                <!-- Project 4 -->
+                <div class="project-card bg-gray-900 rounded-3xl overflow-hidden">
+                    <div class="h-64 md:h-80 bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center">
+                        <span class="text-4xl font-bold">Project 4</span>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold mb-2">Web Experience</h3>
+                        <p class="text-gray-400 mb-4">An immersive digital experience for a luxury fashion brand.</p>
+                        <a href="#" class="text-white font-bold hover:underline">View Case Study →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-16">
+                <a href="#" class="inline-block border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-black transition">
+                    View All Projects
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-12 md:mb-0 md:pr-12">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-8">We're Mouthwash</h2>
+                    <p class="text-xl mb-6">
+                        A collective of designers, developers, and strategists creating digital experiences that matter.
+                    </p>
+                    <p class="text-gray-400 mb-8">
+                        Founded in 2015, we've worked with startups and Fortune 500 companies alike to bring their digital visions to life. Our approach combines strategic thinking with exceptional execution.
+                    </p>
+                    <a href="#" class="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition">
+                        Learn More About Us
+                    </a>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="relative">
+                        <div class="w-full h-80 md:h-96 bg-gradient-to-r from-purple-500 to-blue-500 rounded-3xl"></div>
+                        <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-gradient-to-r from-yellow-500 to-red-500 rounded-2xl"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-5xl font-bold mb-16 text-center">Our Services</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-900 p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-pencil-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Design</h3>
+                    <p class="text-gray-400">
+                        Brand identity, UI/UX design, and visual storytelling that captures attention and communicates clearly.
+                    </p>
+                </div>
+                
+                <div class="bg-gray-900 p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-code text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Development</h3>
+                    <p class="text-gray-400">
+                        Custom web and mobile development with clean, efficient code and cutting-edge technologies.
+                    </p>
+                </div>
+                
+                <div class="bg-gray-900 p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-red-500 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Strategy</h3>
+                    <p class="text-gray-400">
+                        Data-driven digital strategies that align with business goals and drive measurable results.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-32 bg-gradient-to-r from-purple-900 to-blue-900">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-5xl font-bold mb-8">Ready to create something amazing?</h2>
+            <p class="text-xl mb-12 max-w-3xl mx-auto">
+                Whether you have a project in mind or just want to chat about possibilities, we'd love to hear from you.
+            </p>
+            <a href="#" class="inline-block bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition">
+                Get in Touch
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-black">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-2xl font-bold mb-6 md:mb-0">
+                    <span class="text-outline">MOUTHWASH</span>
+                </div>
+                <div class="flex space-x-6 mb-6 md:mb-0">
+                    <a href="#" class="text-xl hover:text-gray-300 transition"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-xl hover:text-gray-300 transition"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-xl hover:text-gray-300 transition"><i class="fab fa-dribbble"></i></a>
+                    <a href="#" class="text-xl hover:text-gray-300 transition"><i class="fab fa-linkedin"></i></a>
+                </div>
+                <div class="text-gray-400">
+                    © 2023 Mouthwash. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeMenu = document.getElementById('close-menu');
+        
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden');
+            mobileMenu.classList.add('flex');
+        });
+        
+        closeMenu.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            mobileMenu.classList.remove('flex');
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenu.classList.remove('flex');
+                    }
+                }
+            });
+        });
+        
+        // Add scroll effect to navbar
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-black');
+                nav.classList.add('bg-opacity-90');
+                nav.classList.add('backdrop-blur-sm');
+            } else {
+                nav.classList.remove('bg-black');
+                nav.classList.remove('bg-opacity-90');
+                nav.classList.remove('backdrop-blur-sm');
+            }
+        });
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=lachlanmack/portfolio" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
 </html>
