@@ -1,0 +1,48 @@
+name: Mirror from Hugging Face Space to GitHub
+
+on:
+  workflow_dispatch:            # run manually from the Actions tab
+  schedule:
+    - cron:  '*/30 * * * *'     # every 30 min (edit or delete as you like)
+
+# ---- this line gives the workflow permission to push ----
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1 Check out the GitHub repo
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0           # need full history for fast-forward
+
+      # 2 Set an identity for the commits the workflow might make
+      - name: Configure git identity
+        run: |
+          git config --global user.email "sync-bot@users.noreply.github.com"
+          git config --global user.name  "HF Sync Bot"
+
+      # 3 Add the Hugging Face Space as a remote (safe if it already exists)
+      - name: Add Hugging Face remote
+        run: |
+          git remote add hf https://huggingface.co/spaces/lachlanmack/portfolio || true
+
+      # 4 Fetch HF → attempt fast-forward → if that fails, hard-reset & force-push
+      - name: Sync main with hf/main
+        run: |
+          set -e
+          git fetch hf main
+          git checkout main
+
+          # Try a normal fast-forward first
+          if git merge --ff-only hf/main; then
+            echo "Fast-forward succeeded ⇒ pushing normally"
+            git push origin main
+          else
+            echo "Histories unrelated ⇒ hard-resetting to hf/main and force-pushing once"
+            git reset --hard hf/main
+            git push --force origin main
+          fi
