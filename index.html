@@ -133,7 +133,7 @@
         <div class="hidden md:flex space-x-8">
             <a href="#about" class="hover:text-gray-300 transition">ABOUT ME</a>
             <a href="#career" class="hover:text-gray-300 transition">CAREER</a>
-            <a href="#work" class="hover:text-gray-300 transition">WORK</a>
+            <a href="#projects" class="hover:text-gray-300 transition">WORK</a>
             <a href="#contact" class="hover:text-gray-300 transition">CONTACT</a>
         </div>
         <div class="md:hidden">
@@ -151,7 +151,7 @@
         <div class="flex flex-col space-y-8 text-center">
             <a href="#about" class="text-3xl hover:text-gray-300 transition">ABOUT ME</a>
             <a href="#career" class="text-3xl hover:text-gray-300 transition">CAREER</a>
-            <a href="#work" class="text-3xl hover:text-gray-300 transition">WORK</a>
+            <a href="#projects" class="text-3xl hover:text-gray-300 transition">WORK</a>
             <a href="#contact" class="text-3xl hover:text-gray-300 transition">CONTACT</a>
         </div>
     </div>
@@ -394,7 +394,7 @@
     </section>
 
     <!-- Projects Section -->
-    <section class="py-20">
+    <section id="projects" class="py-20">
         <div class="container mx-auto px-6">
             <h2 class="text-3xl md:text-5xl font-bold mb-16">Selected Projects</h2>
             
@@ -569,7 +569,7 @@
             <p class="text-xl mb-12 max-w-3xl mx-auto">
                 Whether you have a project in mind or just want to chat about possibilities, I'd love to hear from you.
             </p>
-            <a href="#" class="inline-block bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition">
+            <a href="#contact" class="inline-block bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition">
                 Get in Touch
             </a>
         </div>
@@ -580,20 +580,52 @@
         <div class="container mx-auto px-6">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="text-2xl font-bold mb-6 md:mb-0">
-                    <span class="text-outline">MOUTHWASH</span>
+                    <span class="text-outline">LACHLAN MACKENZIE</span>
                 </div>
                 <div class="flex space-x-6 mb-6 md:mb-0">
-                    <a href="#" class="text-xl hover:text-gray-300 transition"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-xl hover:text-gray-300 transition"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="text-xl hover:text-gray-300 transition"><i class="fab fa-dribbble"></i></a>
-                    <a href="#" class="text-xl hover:text-gray-300 transition"><i class="fab fa-linkedin"></i></a>
+                    <a href="mailto:lachlan@lachlanmackenzie.me" class="text-xl hover:text-gray-300 transition" title="Email">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/lachlan-mackenzie-19666293/" target="_blank" class="text-xl hover:text-gray-300 transition" title="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
                 </div>
                 <div class="text-gray-400">
-                    © 2023 Mouthwash. All rights reserved.
+                    © 2023 lachlanmackenzie.me. All rights reserved.
                 </div>
             </div>
         </div>
     </footer>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-2xl max-w-md w-full p-8 relative">
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <h2 class="text-3xl font-bold mb-6 gradient-text">Get in Touch</h2>
+            <div class="space-y-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">Email</h3>
+                        <a href="mailto:lachlan@lachlanmackenzie.me" class="text-blue-400 hover:underline">lachlan@lachlanmackenzie.me</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-teal-500 rounded-full flex items-center justify-center">
+                        <i class="fab fa-linkedin-in text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">LinkedIn</h3>
+                        <a href="https://www.linkedin.com/in/lachlan-mackenzie-19666293/" target="_blank" class="text-blue-400 hover:underline">linkedin.com/in/lachlan-mackenzie</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Mobile menu toggle
@@ -653,6 +685,30 @@
         
         window.addEventListener('scroll', checkTimeline);
         checkTimeline(); // Run once on load
+        
+        // Contact modal handling
+        const contactModal = document.getElementById('contact-modal');
+        const closeModal = document.getElementById('close-modal');
+        
+        // Open modal when clicking contact links
+        document.querySelectorAll('[href="#contact"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                contactModal.classList.remove('hidden');
+            });
+        });
+        
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            contactModal.classList.add('hidden');
+        });
+        
+        // Close modal when clicking outside content
+        contactModal.addEventListener('click', (e) => {
+            if (e.target === contactModal) {
+                contactModal.classList.add('hidden');
+            }
+        });
         
         // Add scroll effect to navbar
         window.addEventListener('scroll', () => {
