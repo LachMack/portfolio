@@ -51,6 +51,77 @@
         .project-card:hover {
             transform: translateY(-10px);
         }
+        .timeline-item {
+            position: relative;
+            padding: 40px 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #FF4D4D, #F9CB28);
+            transform: translateX(-50%);
+        }
+        .timeline-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            z-index: 1;
+        }
+        .timeline-content {
+            width: calc(50% - 60px);
+            padding: 20px;
+            background: rgba(31, 41, 55, 0.8);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-left: auto;
+        }
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-right: auto;
+        }
+        .timeline-date {
+            font-weight: bold;
+            color: #F9CB28;
+            margin-bottom: 10px;
+        }
+        .timeline-theme {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .skill-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body class="bg-black text-white font-sans overflow-x-hidden">
@@ -60,9 +131,10 @@
             <span class="text-outline">LACHLAN MACKENZIE</span>
         </div>
         <div class="hidden md:flex space-x-8">
-            <a href="#" class="hover:text-gray-300 transition">ABOUT ME</a>
-            <a href="#" class="hover:text-gray-300 transition">CAREER</a>
-            <a href="#" class="hover:text-gray-300 transition">CONTACT</a>
+            <a href="#about" class="hover:text-gray-300 transition">ABOUT ME</a>
+            <a href="#career" class="hover:text-gray-300 transition">CAREER</a>
+            <a href="#work" class="hover:text-gray-300 transition">WORK</a>
+            <a href="#contact" class="hover:text-gray-300 transition">CONTACT</a>
         </div>
         <div class="md:hidden">
             <button id="menu-toggle" class="text-white focus:outline-none">
@@ -77,9 +149,10 @@
             <i class="fas fa-times"></i>
         </button>
         <div class="flex flex-col space-y-8 text-center">
-            <a href="#" class="text-3xl hover:text-gray-300 transition">ABOUT ME</a>
-            <a href="#" class="text-3xl hover:text-gray-300 transition">CAREER</a>
-            <a href="#" class="text-3xl hover:text-gray-300 transition">CONTACT</a>
+            <a href="#about" class="text-3xl hover:text-gray-300 transition">ABOUT ME</a>
+            <a href="#career" class="text-3xl hover:text-gray-300 transition">CAREER</a>
+            <a href="#work" class="text-3xl hover:text-gray-300 transition">WORK</a>
+            <a href="#contact" class="text-3xl hover:text-gray-300 transition">CONTACT</a>
         </div>
     </div>
 
@@ -108,6 +181,204 @@
         <div class="absolute bottom-1/3 right-1/3 w-12 h-12 rounded-full bg-green-500 opacity-20 floating" style="animation-delay: 3s;"></div>
     </section>
 
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                <!-- Headshot Placeholder -->
+                <div class="w-full md:w-1/3 flex justify-center">
+                    <div class="w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-4xl font-bold">
+                        LM
+                    </div>
+                </div>
+                
+                <div class="w-full md:w-2/3">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-8">
+                        <span class="gradient-text">About Me</span>
+                    </h2>
+                    <div class="prose prose-invert text-lg space-y-6">
+                        <div class="relative p-6 bg-gray-800 rounded-xl border-l-4 border-pink-500">
+                            <p class="text-xl italic">"I love good design. Whether in art, homes, print or digital experiences, I look for design which connects to people."</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <p>As a strategic design leader, I bring over two decades of experience spanning design, technology, and human-centred innovation. I began my journey in 2001 and have since evolved from a hands-on designer to a trusted leader shaping product and service strategy.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                <div class="p-4 bg-gray-800 rounded-lg">
+                                    <h4 class="font-bold text-pink-500 mb-2">Leadership Approach</h4>
+                                    <p>People-first philosophy balancing user needs, business goals, and technical constraints to drive innovative outcomes.</p>
+                                </div>
+                                <div class="p-4 bg-gray-800 rounded-lg">
+                                    <h4 class="font-bold text-blue-500 mb-2">Specialties</h4>
+                                    <p>Design Thinking (LUMA Certified), Agile/Scrum, SAFe, cross-functional team alignment, and design-led strategy.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="text-2xl font-bold mt-8 mb-4 text-yellow-400">PERSONAL INTERESTS</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Mountain biking</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Football</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Singing</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Snowboarding</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Speculative fiction</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Food & craft beer</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Family time</span>
+                        </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Career Timeline Section -->
+    <section id="career" class="py-20 bg-black relative overflow-hidden">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-5xl font-bold mb-16 text-center">
+                <span class="gradient-text">Career Journey</span>
+            </h2>
+            
+            <div class="timeline-container relative py-10">
+                <!-- Timeline Item 1 -->
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-gradient-to-r from-purple-500 to-pink-500">💼</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">2007 - 2012</div>
+                        <h3 class="text-2xl font-bold mb-2">Consultant</h3>
+                        <div class="timeline-theme">Soft Skills, Problem/Solution Exploration, client engagement</div>
+                        <p class="text-gray-300 mb-2"><strong>Key Role:</strong> eLearning Developer</p>
+                        <p class="text-gray-300 mb-4"><strong>Companies:</strong> Total Learn, SMS Management & Consulting</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">Skills/Activities:</h4>
+                        <div class="skills-list">
+                            <span class="skill-tag">Needs Analysis</span>
+                            <span class="skill-tag">Instructional design</span>
+                            <span class="skill-tag">UI design</span>
+                            <span class="skill-tag">Stakeholder Engagement</span>
+                        </div>
+                        
+                        <h4 class="font-bold text-blue-400 mt-4 mb-2">Certifications:</h4>
+                        <p class="text-gray-300">Cert IV Training & Assessment</p>
+                        
+                        <h4 class="font-bold text-yellow-400 mt-4 mb-2">Outputs:</h4>
+                        <p class="text-gray-300">Online learning courses, modules and lessons<br>Product/process manuals and quick reference guides</p>
+                    </div>
+                </div>
+                
+                <!-- Timeline Item 2 -->
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-gradient-to-r from-blue-500 to-teal-500">💡</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">2010 - 2014</div>
+                        <h3 class="text-2xl font-bold mb-2">Developer</h3>
+                        <div class="timeline-theme">Technical growth and proficiency</div>
+                        <p class="text-gray-300 mb-2"><strong>Key Role:</strong> Multimedia Developer</p>
+                        <p class="text-gray-300 mb-4"><strong>Companies:</strong> SMS Management & Consulting, Sigma Bravo, Lok Design</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">Skills/Activities:</h4>
+                        <div class="skills-list">
+                            <span class="skill-tag">eLearning Development</span>
+                            <span class="skill-tag">UI design</span>
+                            <span class="skill-tag">Instructional Design</span>
+                            <span class="skill-tag">HTML/CSS/JS</span>
+                            <span class="skill-tag">Video Editing</span>
+                            <span class="skill-tag">Agile practices</span>
+                            <span class="skill-tag">Web Design</span>
+                            <span class="skill-tag">Prototyping</span>
+                        </div>
+                        
+                        <h4 class="font-bold text-blue-400 mt-4 mb-2">Certifications:</h4>
+                        <p class="text-gray-300">Advanced HTML5/CSS3, SCRUM</p>
+                        
+                        <h4 class="font-bold text-yellow-400 mt-4 mb-2">Outputs:</h4>
+                        <p class="text-gray-300">Customer Brochure sites<br>Powerkart Raceway<br>Canberra Symphony Orchestra<br>Jenifer Aniela Fashion Design</p>
+                    </div>
+                </div>
+                
+                <!-- Timeline Item 3 -->
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-gradient-to-r from-yellow-500 to-red-500">🧩</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">2014 - 2019</div>
+                        <h3 class="text-2xl font-bold mb-2">User Experience</h3>
+                        <div class="timeline-theme">Human centred design foundations, user engagement</div>
+                        <p class="text-gray-300 mb-2"><strong>Key Role:</strong> Experience Designer</p>
+                        <p class="text-gray-300 mb-4"><strong>Companies:</strong> Sigma Bravo, Avanade, Teradata</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">Skills/Activities:</h4>
+                        <div class="skills-list">
+                            <span class="skill-tag">UX Design</span>
+                            <span class="skill-tag">Journey mapping</span>
+                            <span class="skill-tag">Wireframes</span>
+                            <span class="skill-tag">Prototypes</span>
+                            <span class="skill-tag">User Research</span>
+                            <span class="skill-tag">Personas</span>
+                            <span class="skill-tag">Design Thinking</span>
+                        </div>
+                        
+                        <h4 class="font-bold text-blue-400 mt-4 mb-2">Certifications:</h4>
+                        <p class="text-gray-300">LUMA HCD Facilitator</p>
+                        
+                        <h4 class="font-bold text-yellow-400 mt-4 mb-2">Outputs:</h4>
+                        <p class="text-gray-300">Joint Mission Planning software<br>BusiBlocks<br>ActewAGL Self-Serve Portal<br>ATO MyTax</p>
+                    </div>
+                </div>
+                
+                <!-- Timeline Item 4 -->
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-gradient-to-r from-green-500 to-blue-500">🧩</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">2018 - Present</div>
+                        <h3 class="text-2xl font-bold mb-2">Service Designer</h3>
+                        <div class="timeline-theme">Systems thinking, empowered teams, design enablement</div>
+                        <p class="text-gray-300 mb-2"><strong>Key Role:</strong> Experience Lead</p>
+                        <p class="text-gray-300 mb-4"><strong>Companies:</strong> Teradata, Publicis Sapient</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">Skills/Activities:</h4>
+                        <div class="skills-list">
+                            <span class="skill-tag">Service Design</span>
+                            <span class="skill-tag">Experience Mapping</span>
+                            <span class="skill-tag">Cross-Functional Collab</span>
+                            <span class="skill-tag">Service Blueprints</span>
+                            <span class="skill-tag">Research Lead</span>
+                            <span class="skill-tag">Product Design</span>
+                            <span class="skill-tag">Empowered Teams</span>
+                        </div>
+                        
+                        <h4 class="font-bold text-yellow-400 mt-4 mb-2">Outputs:</h4>
+                        <p class="text-gray-300">Teradata CloudLake (Vantage) - service blueprints, roadmaps, prototypes, testing and user insights.</p>
+                    </div>
+                </div>
+                
+                <!-- Timeline Item 5 -->
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-gradient-to-r from-purple-500 to-indigo-500">🚀</div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">2020 - Present</div>
+                        <h3 class="text-2xl font-bold mb-2">Design Leader</h3>
+                        <div class="timeline-theme">Design strategy, people leadership, process and governance</div>
+                        <p class="text-gray-300 mb-2"><strong>Key Role:</strong> Experience and Innovation Lead</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">Skills/Activities:</h4>
+                        <div class="skills-list">
+                            <span class="skill-tag">Design Strategy</span>
+                            <span class="skill-tag">Research Ops</span>
+                            <span class="skill-tag">Product Discovery</span>
+                            <span class="skill-tag">Design Thinking</span>
+                            <span class="skill-tag">Curriculum Design</span>
+                            <span class="skill-tag">Team Leadership</span>
+                        </div>
+                        
+                        <h4 class="font-bold text-yellow-400 mt-4 mb-2">Outputs:</h4>
+                        <p class="text-gray-300">Teradata Product Lifecycle<br>Citizen Designer Course</p>
+                        
+                        <h4 class="font-bold text-blue-400 mt-4 mb-2">Looking Ahead:</h4>
+                        <p class="text-gray-300">Team leadership<br>Capability growth</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Clients Section -->
     <section class="py-20 bg-gray-900">
         <div class="container mx-auto px-6">
@@ -127,52 +398,118 @@
         <div class="container mx-auto px-6">
             <h2 class="text-3xl md:text-5xl font-bold mb-16">Selected Projects</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Project 1 -->
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Teradata Citizen Designer -->
                 <div class="project-card bg-gray-900 rounded-3xl overflow-hidden">
                     <div class="h-64 md:h-80 bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                        <span class="text-4xl font-bold">Project 1</span>
+                        <span class="text-4xl font-bold">Teradata 'Citizen Designer'</span>
                     </div>
                     <div class="p-8">
-                        <h3 class="text-2xl font-bold mb-2">Brand Identity</h3>
-                        <p class="text-gray-400 mb-4">A complete rebrand for a tech startup looking to disrupt the market.</p>
-                        <a href="#" class="text-white font-bold hover:underline">View Case Study →</a>
+                        <h3 class="text-2xl font-bold mb-2">Certification Program</h3>
+                        <p class="text-gray-400 mb-4">Interactive training to upskill staff with Human Centred Design skills.</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>User research and insight gathering</li>
+                            <li>3 tiered learning approach</li>
+                            <li>LMS integration with video content</li>
+                            <li>Digital badging system</li>
+                            <li>400+ participants trained</li>
+                        </ul>
+                        
+                        <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
+                        <ul class="list-disc pl-5 mb-6 space-y-2">
+                            <li>Project planning and team management</li>
+                            <li>Content structure and instructional design</li>
+                            <li>Content design and writing</li>
+                            <li>Facilitation and presentation</li>
+                        </ul>
+                        <a href="#" class="text-white font-bold hover:underline">View Details →</a>
                     </div>
                 </div>
                 
-                <!-- Project 2 -->
+                <!-- Teradata Global UX Discovery -->
                 <div class="project-card bg-gray-900 rounded-3xl overflow-hidden">
                     <div class="h-64 md:h-80 bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center">
-                        <span class="text-4xl font-bold">Project 2</span>
+                        <span class="text-4xl font-bold">Teradata Global UX</span>
                     </div>
                     <div class="p-8">
-                        <h3 class="text-2xl font-bold mb-2">E-commerce Platform</h3>
-                        <p class="text-gray-400 mb-4">A custom-built online store with seamless user experience.</p>
-                        <a href="#" class="text-white font-bold hover:underline">View Case Study →</a>
+                        <h3 class="text-2xl font-bold mb-2">Discovery Research</h3>
+                        <p class="text-gray-400 mb-4">Major product review shaping Teradata's future roadmap.</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>400+ client/user/SME interviews</li>
+                            <li>Multiple research formats</li>
+                            <li>Consolidated actionable insights</li>
+                            <li>Core persona set development</li>
+                        </ul>
+                        
+                        <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
+                        <ul class="list-disc pl-5 mb-6 space-y-2">
+                            <li>Project planning and team management</li>
+                            <li>Learning plan development</li>
+                            <li>Script/content creation</li>
+                            <li>Research synthesis</li>
+                        </ul>
+                        <a href="#" class="text-white font-bold hover:underline">View Details →</a>
                     </div>
                 </div>
                 
-                <!-- Project 3 -->
+                <!-- ActewAGL SSP -->
                 <div class="project-card bg-gray-900 rounded-3xl overflow-hidden">
                     <div class="h-64 md:h-80 bg-gradient-to-r from-yellow-500 to-red-500 flex items-center justify-center">
-                        <span class="text-4xl font-bold">Project 35</span>
+                        <span class="text-4xl font-bold">ActewAGL</span>
                     </div>
                     <div class="p-8">
-                        <h3 class="text-2xl font-bold mb-2">Mobile App</h3>
-                        <p class="text-gray-400 mb-4">An innovative fitness app with personalized workout plans.</p>
-                        <a href="#" class="text-white font-bold hover:underline">View Case Study →</a>
+                        <h3 class="text-2xl font-bold mb-2">Self-Service Portal</h3>
+                        <p class="text-gray-400 mb-4">Redesign of customer online engagement platform.</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>Clean, intuitive responsive interface</li>
+                            <li>Simple 2 factor authentication</li>
+                            <li>Easy access to common functions</li>
+                            <li>Enhanced account management</li>
+                        </ul>
+                        
+                        <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
+                        <ul class="list-disc pl-5 mb-6 space-y-2">
+                            <li>UX approach roadmap</li>
+                            <li>Agile project management</li>
+                            <li>Research and workshops</li>
+                            <li>Prototyping and user testing</li>
+                        </ul>
+                        <a href="#" class="text-white font-bold hover:underline">View Details →</a>
                     </div>
                 </div>
                 
-                <!-- Project 4 -->
+                <!-- REDengine -->
                 <div class="project-card bg-gray-900 rounded-3xl overflow-hidden">
                     <div class="h-64 md:h-80 bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center">
-                        <span class="text-4xl font-bold">Project 4</span>
+                        <span class="text-4xl font-bold">REDengine</span>
                     </div>
                     <div class="p-8">
-                        <h3 class="text-2xl font-bold mb-2">Web Experience</h3>
-                        <p class="text-gray-400 mb-4">An immersive digital experience for a luxury fashion brand.</p>
-                        <a href="#" class="text-white font-bold hover:underline">View Case Study →</a>
+                        <h3 class="text-2xl font-bold mb-2">Rapid eLearning Development</h3>
+                        <p class="text-gray-400 mb-4">Web app for developing computer-based training content.</p>
+                        
+                        <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>Clean, intuitive responsive UI</li>
+                            <li>Multi-user functionality</li>
+                            <li>Admin panel management</li>
+                            <li>Flexible output types</li>
+                            <li>Asset library system</li>
+                        </ul>
+                        
+                        <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
+                        <ul class="list-disc pl-5 mb-6 space-y-2">
+                            <li>Agile project management</li>
+                            <li>Needs analysis</li>
+                            <li>Stakeholder liaison</li>
+                            <li>Front end design/development</li>
+                        </ul>
+                        <a href="#" class="text-white font-bold hover:underline">View Details →</a>
                     </div>
                 </div>
             </div>
@@ -185,31 +522,6 @@
         </div>
     </section>
 
-    <!-- About Section -->
-    <section class="py-20 bg-gray-900">
-        <div class="container mx-auto px-6">
-            <div class="flex flex-col md:flex-row items-center">
-                <div class="md:w-1/2 mb-12 md:mb-0 md:pr-12">
-                    <h2 class="text-3xl md:text-5xl font-bold mb-8">We're Mouthwash</h2>
-                    <p class="text-xl mb-6">
-                        A collective of designers, developers, and strategists creating digital experiences that matter.
-                    </p>
-                    <p class="text-gray-400 mb-8">
-                        Founded in 2015, we've worked with startups and Fortune 500 companies alike to bring their digital visions to life. Our approach combines strategic thinking with exceptional execution.
-                    </p>
-                    <a href="#" class="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition">
-                        Learn More About Us
-                    </a>
-                </div>
-                <div class="md:w-1/2">
-                    <div class="relative">
-                        <div class="w-full h-80 md:h-96 bg-gradient-to-r from-purple-500 to-blue-500 rounded-3xl"></div>
-                        <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-gradient-to-r from-yellow-500 to-red-500 rounded-2xl"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Services Section -->
     <section class="py-20">
@@ -321,6 +633,26 @@
                 }
             });
         });
+        
+        // Timeline animation
+        const timelineItems = document.querySelectorAll('.timeline-item');
+        
+        function checkTimeline() {
+            const triggerBottom = window.innerHeight / 5 * 4;
+            
+            timelineItems.forEach(item => {
+                const itemTop = item.getBoundingClientRect().top;
+                
+                if (itemTop < triggerBottom) {
+                    item.classList.add('visible');
+                } else {
+                    item.classList.remove('visible');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', checkTimeline);
+        checkTimeline(); // Run once on load
         
         // Add scroll effect to navbar
         window.addEventListener('scroll', () => {
