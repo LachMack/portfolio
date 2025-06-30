@@ -1,48 +1,81 @@
 name: Mirror from Hugging Face Space to GitHub
 
 on:
-  workflow_dispatch:            # run manually from the Actions tab
+  workflow_dispatch:            # run it manually
   schedule:
-    - cron:  '*/30 * * * *'     # every 30 min (edit or delete as you like)
+    - cron: "*/30 * * * *"      # or comment-out to disable the timer
 
-# ---- this line gives the workflow permission to push ----
 permissions:
-  contents: write
+  contents: write               # allow pushes
+  actions:  write               # allow pushing workflow files
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
-      # 1 Check out the GitHub repo
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0           # need full history for fast-forward
+    # 1 ▸ Check out the current GitHub repo (full history)
+    - uses: actions/checkout@v4
+      with: { fetch-depth: 0 }
 
-      # 2 Set an identity for the commits the workflow might make
-      - name: Configure git identity
-        run: |
-          git config --global user.email "sync-bot@users.noreply.github.com"
-          git config --global user.name  "HF Sync Bot"
+    # 2 ▸ Set an identity for any commits we create
+    - name: Configure git identity
+      run: |
+        git config --global user.email "sync-bot@users.noreply.github.com"
+        git config --global user.name  "HF Sync Bot"
 
-      # 3 Add the Hugging Face Space as a remote (safe if it already exists)
-      - name: Add Hugging Face remote
-        run: |
-          git remote add hf https://huggingface.co/spaces/lachlanmack/portfolio || true
+    # 3 ▸ Stash the existing assets/ dir *and* this workflow file
+    - name: Save assets/ and workflow
+      run: |
+        if [ -d assets ]; then
+          echo "Saving assets/"
+          mv assets /tmp/__saved_assets
+        fi
+        if [ -f .github/workflows/hf-mirror.yml ]; then
+          echo "Saving current workflow"
+          mkdir -p /tmp/__saved_workflow
+          cp .github/workflows/hf-mirror.yml /tmp/__saved_workflow/
+        fi
 
-      # 4 Fetch HF → attempt fast-forward → if that fails, hard-reset & force-push
-      - name: Sync main with hf/main
-        run: |
-          set -e
-          git fetch hf main
-          git checkout main
+    # 4 ▸ Add the Hugging Face Space as a remote & fetch
+    - name: Fetch Hugging Face repo
+      run: |
+        git remote add hf https://huggingface.co/spaces/lachlanmack/portfolio || true
+        git fetch hf main
 
-          # Try a normal fast-forward first
-          if git merge --ff-only hf/main; then
-            echo "Fast-forward succeeded ⇒ pushing normally"
-            git push origin main
-          else
-            echo "Histories unrelated ⇒ hard-resetting to hf/main and force-pushing once"
-            git reset --hard hf/main
-            git push --force origin main
-          fi
+    # 5 ▸ Reset GitHub's main to exactly hf/main
+    - name: Hard-reset to hf/main
+      run: git checkout -B main hf/main
+
+    # 6 ▸ Restore the saved assets/ directory
+    - name: Restore assets/
+      run: |
+        if [ -d /tmp/__saved_assets ]; then
+          echo "Restoring assets/"
+          rm -rf assets
+          mv /tmp/__saved_assets assets
+          git add assets
+        fi
+
+    # 7 ▸ Restore the GitHub workflow file
+    - name: Restore mirror workflow
+      run: |
+        if [ -f /tmp/__saved_workflow/hf-mirror.yml ]; then
+          echo "Restoring hf-mirror.yml"
+          mkdir -p .github/workflows
+          cp /tmp/__saved_workflow/hf-mirror.yml .github/workflows/hf-mirror.yml
+          git add .github/workflows/hf-mirror.yml
+        fi
+
+    # 8 ▸ Commit only if anything changed (quiet exit code means no diff)
+    - name: Commit preserved items (if needed)
+      run: |
+        if ! git diff --cached --quiet; then
+          git commit -m "Preserve assets/ & workflow during HF mirror"
+        else
+          echo "No changes in preserved items"
+        fi
+
+    # 9 ▸ Push the mirror back to GitHub
+    - name: Push mirror to GitHub
+      run: git push --force origin main
