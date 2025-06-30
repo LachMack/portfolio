@@ -1,147 +1,64 @@
 <!DOCTYPE html>
-<html lang="en"               
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-<link rel="manifest" href="site.webmanifest">
-<meta name="theme-color" content="#ffffff">
->
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lachlan Mackenzie - Design Leader</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        .floating {
-            animation: float 6s ease-in-out infinite;
-        }
-        .text-outline {
-            -webkit-text-stroke: 1px white;
-            color: transparent;
-        }
-        .gradient-text {
-            background: linear-gradient(90deg, #FF4D4D 0%, #F9CB28 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .scroll-down {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .scroll-down::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 1px;
-            height: 50px;
-            background: white;
-            animation: scrollDown 2s infinite;
-        }
-        @keyframes scrollDown {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(20px); opacity: 0; }
-        }
-        .project-card {
-            transition: all 0.3s ease;
-        }
-        .project-card:hover {
-            transform: translateY(-10px);
-        }
-        .timeline-item {
-            position: relative;
-            padding: 40px 0;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 0.8s ease;
-        }
-        .timeline-item.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: 30px;
-            top: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(to bottom, #FF4D4D, #F9CB28);
-        }
-        .timeline-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            position: absolute;
-            left: 0;
-            top: 0;
-            z-index: 1;
-        }
-        .timeline-content {
-            width: calc(100% - 80px);
-            padding: 20px;
-            background: rgba(31, 41, 55, 0.8);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-left: 80px;
-        }
-        @media (min-width: 768px) {
-            .timeline-item::before {
-                left: 50%;
-                transform: translateX(-50%);
-            }
-            .timeline-icon {
-                left: 50%;
-                transform: translateX(-50%);
-            }
-            .timeline-content {
-                width: calc(50% - 60px);
-                margin-left: auto;
-            }
-            .timeline-item:nth-child(even) .timeline-content {
-                margin-right: auto;
-                margin-left: 0;
-            }
-        }
-        .timeline-date {
-            font-weight: bold;
-            color: #F9CB28;
-            margin-bottom: 10px;
-        }
-        .timeline-theme {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .skills-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 10px 0;
-        }
-        .skill-tag {
-            background: rgba(255,255,255,0.1);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-    </style>
-  
+  <!-- Favicons & PWA manifest -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="assets/site.webmanifest">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Page basics -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lachlan Mackenzie – Design Leader</title>
+
+  <!-- CSS / icon libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom styles -->
+  <style>
+    /* ——— utility animations / effects ——— */
+    @keyframes float   { 0%{transform:translateY(0)} 50%{transform:translateY(-10px)} 100%{transform:translateY(0)} }
+    .floating          { animation: float 6s ease-in-out infinite; }
+
+    .text-outline      { -webkit-text-stroke:1px #fff; color:transparent; }
+
+    .gradient-text     { background:linear-gradient(90deg,#FF4D4D 0%,#F9CB28 100%);
+                         -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+    .scroll-down       { position:absolute;bottom:30px;left:50%;transform:translateX(-50%); }
+    .scroll-down::after{ content:'';position:absolute;top:0;left:50%;width:1px;height:50px;background:#fff;
+                         animation:scrollDown 2s infinite; }
+    @keyframes scrollDown { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(20px);opacity:0} }
+
+    .project-card      { transition:all .3s ease; }
+    .project-card:hover{ transform:translateY(-10px); }
+
+    /* ——— timeline styles (unchanged) ——— */
+    .timeline-item     { position:relative;padding:40px 0;opacity:0;transform:translateY(50px);transition:all .8s ease; }
+    .timeline-item.visible{ opacity:1;transform:translateY(0); }
+    .timeline-item::before{ content:'';position:absolute;left:30px;top:0;width:4px;height:100%;
+                            background:linear-gradient(to bottom,#FF4D4D,#F9CB28); }
+    .timeline-icon     { width:60px;height:60px;border-radius:50%;display:flex;align-items:center;
+                         justify-content:center;font-size:24px;position:absolute;left:0;top:0;z-index:1; }
+    .timeline-content  { width:calc(100% - 80px);padding:20px;background:rgba(31,41,55,.8);
+                         border-radius:12px;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.2);
+                         margin-left:80px; }
+    @media (min-width:768px){
+      .timeline-item::before        { left:50%;transform:translateX(-50%); }
+      .timeline-icon                { left:50%;transform:translateX(-50%); }
+      .timeline-content             { width:calc(50% - 60px);margin-left:auto; }
+      .timeline-item:nth-child(even) .timeline-content { margin-right:auto;margin-left:0; }
+    }
+    .timeline-date   { font-weight:bold;color:#F9CB28;margin-bottom:10px; }
+    .timeline-theme  { font-size:1.5rem;font-weight:bold;margin-bottom:10px; }
+
+    .skills-list     { display:flex;flex-wrap:wrap;gap:8px;margin:10px 0; }
+    .skill-tag       { background:rgba(255,255,255,.1);padding:4px 12px;border-radius:20px;font-size:.8rem; }
+  </style>
 </head>
 <body class="bg-black text-white font-sans overflow-x-hidden">
     <!-- Navigation -->
@@ -220,39 +137,33 @@
                     </h2>
                     <div class="prose prose-invert text-lg space-y-6">
                         <div class="relative p-6 bg-gray-800 rounded-xl border-l-4 border-pink-500">
-                            <p class="text-xl italic">"I love good design. Whether in art, homes, print or digital experiences, I look for design which connects to people. This passion carries into my professional life, influencing and driving all that I do."</p>
+                            <p class="text-xl italic">"I love good design. Whether in art, homes, print or digital experiences, I look for design which connects to people."</p>
                         </div>
 
-                        <div class="space-y-6">
-                            <p>As a strategic design leader, I bring over two decades of experience spanning design, technology, and human-centred innovation. I began my journey in 2001 and have since evolved from a hands-on designer to a trusted leader shaping product and service strategy, scaling design thinking across organisations, and enabling high-performing teams.</p>
+                        <div class="space-y-4">
+                            <p>As a strategic design leader, I bring over two decades of experience spanning design, technology, and human-centred innovation. I began my journey in 2001 and have since evolved from a hands-on designer to a trusted leader shaping product and service strategy.</p>
                             
-                            <p>I lead with a people-first approach—balancing user needs, business goals, and technical constraints to drive impactful and innovative outcomes at scale. My goal is to create design ecosystems that not only solve problems but also unlock new possibilities. This is design in balance.</p>
-                            
-                            <p>I excel at abstracting complex challenges to their root causes, aligning cross-functional teams around clear priorities, and steering organisations toward transformative outcomes through design-led strategy. When the opportunity presents itself, I still relish the opportunity to get my hands dirty and explore the finer details of interaction design and research.</p>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                <div class="p-6 bg-gray-800 rounded-lg">
-                                    <h4 class="font-bold text-pink-500 mb-3">Leadership Approach</h4>
-                                    <p>I foster empowered, collaborative teams grounded in shared purpose and clarity. I lead by example, nurturing growth, ownership, and a culture of continuous improvement.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                <div class="p-4 bg-gray-800 rounded-lg">
+                                    <h4 class="font-bold text-pink-500 mb-2">Leadership Approach</h4>
+                                    <p>People-first philosophy balancing user needs, business goals, and technical constraints to drive innovative outcomes.</p>
                                 </div>
-                                <div class="p-6 bg-gray-800 rounded-lg">
-                                    <h4 class="font-bold text-blue-500 mb-3">Specialties</h4>
-                                    <p>Design Thinking (LUMA Certified), Agile/Scrum, SAFe, cross-functional team alignment, and design-led strategy. Comfortable in both leadership and supportive roles with strong communication skills.</p>
+                                <div class="p-4 bg-gray-800 rounded-lg">
+                                    <h4 class="font-bold text-blue-500 mb-2">Specialties</h4>
+                                    <p>Design Thinking (LUMA Certified), Agile/Scrum, SAFe, cross-functional team alignment, and design-led strategy.</p>
                                 </div>
                             </div>
-                            
-                            <p>Outside of work, I volunteer Human Centred Design workshops to schools and community groups, applying my professional skills to benefit others.</p>
                         </div>
 
-                        <h3 class="text-2xl font-bold mt-12 mb-6 text-yellow-400">PERSONAL INTERESTS</h3>
-                        <div class="flex flex-wrap gap-3">
-                            <span class="px-4 py-2 bg-gray-800 rounded-full">Mountain biking</span>
-                            <span class="px-4 py-2 bg-gray-800 rounded-full">Football</span>
-                            <span class="px-4 py-2 bg-gray-800 rounded-full">Singing</span>
-                            <span class="px-4 py-2 bg-gray-800 rounded-full">Snowboarding</span>
-                            <span class="px-4 py-2 bg-gray-800 rounded-full">Speculative fiction</span>
-                            <span class="px-4 py-2 bg-gray-800 rounded-full">Food & craft beer</span>
-                            <span class="px-4 py-2 bg-gray-800 rounded-full">Family time</span>
+                        <h3 class="text-2xl font-bold mt-8 mb-4 text-yellow-400">PERSONAL INTERESTS</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Mountain biking</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Football</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Singing</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Snowboarding</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Speculative fiction</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Food & craft beer</span>
+                            <span class="px-3 py-1 bg-gray-800 rounded-full">Family time</span>
                         </div>
             </div>
         </div>
