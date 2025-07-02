@@ -49,11 +49,19 @@
                          margin-left:80px; }
     @media (min-width:768px){
       .timeline-item::before        { left:50%;transform:translateX(-50%); }
-      .timeline-icon                { left:50%;transform:translateX(-50%) translateX(-50px); }
-      .timeline-content             { width:calc(50% - 30px);margin-left:auto; }
-      .timeline-item:nth-child(even) .timeline-content { margin-right:auto;margin-left:0; }
-      .timeline-item:nth-child(even) .timeline-icon { transform:translateX(-50%) translateX(50px); }
-    }
+  .timeline-icon {
+    left:50%;
+    transform:translateX(-50%);
+  }
+
+  .timeline-content {
+    width:calc(50% - 30px);
+    margin-left:auto;
+  }
+  .timeline-item:nth-child(even) .timeline-content {
+    margin-right:auto;
+    margin-left:0;
+  }    }
     .timeline-date   { font-weight:bold;color:#F9CB28;margin-bottom:10px; }
     .timeline-theme  { font-size:1.5rem;font-weight:bold;margin-bottom:10px; }
 
