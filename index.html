@@ -915,9 +915,6 @@
                 ${project.role.map(r => `<li>${r}</li>`).join('')}
             </ul>
             `;
-
-            const modalGradient = document.getElementById('modal-gradient');
-            modalGradient.className = `absolute inset-0 bg-gradient-to-r ${project.gradient}`;
             projectModal.classList.remove('hidden');
         } // <-- END OF if (project)
     });    // <-- END OF projectsContainer.addEventListener
