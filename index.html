@@ -493,34 +493,6 @@
     </div>
   
     <script>
-    // Dynamically create project cards
-    const projectsContainer = document.getElementById('projects-container');
-    projects.forEach(project => {
-    const card = document.createElement('div');
-    card.className = "project-card bg-gray-900 rounded-3xl overflow-hidden";
-    card.innerHTML = `
-        <div class="h-64 md:h-80 relative flex items-center justify-center overflow-hidden">
-        <img src="${project.image}" alt="${project.title}" class="absolute inset-0 w-full h-full object-cover work-img">
-        <div class="absolute inset-0 bg-gradient-to-r ${project.gradient}"></div>
-        <span class="text-4xl font-bold relative z-10">${project.title}</span>
-        </div>
-        <div class="p-8">
-        <h3 class="text-2xl font-bold mb-2">${project.headline}</h3>
-        <p class="text-gray-400 mb-4">${project.summary}</p>
-        <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
-        <ul class="list-disc pl-5 mb-4 space-y-2">
-            ${project.features.map(f => `<li>${f}</li>`).join('')}
-        </ul>
-        <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
-        <ul class="list-disc pl-5 mb-6 space-y-2">
-            ${project.role.map(r => `<li>${r}</li>`).join('')}
-        </ul>
-        <a href="#" class="text-white font-bold hover:underline" data-project="${project.id}">View Details →</a>
-        </div>
-    `;
-    projectsContainer.appendChild(card);
-    });
-   
     // Project Data Array
     const projects = [
         {
@@ -606,6 +578,35 @@
         ]
         }
     ];
+
+    // Dynamically create project cards
+    const projectsContainer = document.getElementById('projects-container');
+    projects.forEach(project => {
+    const card = document.createElement('div');
+    card.className = "project-card bg-gray-900 rounded-3xl overflow-hidden";
+    card.innerHTML = `
+        <div class="h-64 md:h-80 relative flex items-center justify-center overflow-hidden">
+        <img src="${project.image}" alt="${project.title}" class="absolute inset-0 w-full h-full object-cover work-img">
+        <div class="absolute inset-0 bg-gradient-to-r ${project.gradient}"></div>
+        <span class="text-4xl font-bold relative z-10">${project.title}</span>
+        </div>
+        <div class="p-8">
+        <h3 class="text-2xl font-bold mb-2">${project.headline}</h3>
+        <p class="text-gray-400 mb-4">${project.summary}</p>
+        <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
+        <ul class="list-disc pl-5 mb-4 space-y-2">
+            ${project.features.map(f => `<li>${f}</li>`).join('')}
+        </ul>
+        <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
+        <ul class="list-disc pl-5 mb-6 space-y-2">
+            ${project.role.map(r => `<li>${r}</li>`).join('')}
+        </ul>
+        <a href="#" class="text-white font-bold hover:underline" data-project="${project.id}">View Details →</a>
+        </div>
+    `;
+    projectsContainer.appendChild(card);
+    });
+   
     </script>
 
     <script>
