@@ -499,6 +499,10 @@
         id: "citizen-designer",
         title: "Teradata 'Citizen Designer'",
         image: "assets/TD-Reasearch2.png",
+        gallery: [
+        { src: "assets/TD-CitDes/TD-CitDes.png", caption: "" },
+        { src: "assets/TD-CitDes/TD-DataMovement.jpg", caption: "" }
+        ]
         gradient: "from-purple-500/70 to-pink-500/70",
         headline: "Certification Program",
         summary: "Interactive training to upskill staff with Human Centred Design skills.",
@@ -520,6 +524,20 @@
         id: "global-ux",
         title: "Teradata Global UX Research",
         image: "assets/TD-TokyoWS1.jpg",
+        gallery: [
+        { src: "assets/TD-Global-UX/TD-Reasearch2.png", caption: "" },
+        { src: "assets/TD-Global-UX/TD-Research.png", caption: "" },
+        { src: "assets/TD-Global-UX/TD-Research3.png", caption: "" },
+        { src: "assets/TD-Global-UX/TD-Research4.png", caption: "" },
+        { src: "assets/TD-Global-UX/TD-SC-WS.jpg", caption: "" },
+        { src: "assets/TD-Global-UX/TD-TokyoWS1.jpg", caption: "" },
+        { src: "assets/TD-Global-UX/TD-TokyoWS2.jpg", caption: "" },
+        { src: "assets/TD-Global-UX/TD-Universe.jpg", caption: "" },
+        { src: "assets/TD-Global-UX/vantage1.png", caption: "" },
+        { src: "assets/TD-Global-UX/vantage2.png", caption: "" },
+        { src: "assets/TD-Global-UX/vantage3.png", caption: "" },
+        { src: "assets/TD-Global-UX/vantage4.png", caption: "" }
+        ]
         gradient: "from-blue-500/70 to-teal-500/70",
         headline: "Discovery Research",
         summary: "Major product review shaping Teradata's future roadmap.",
@@ -540,6 +558,15 @@
         id: "actewagl",
         title: "ActewAGL",
         image: "assets/ActewScreen4.png",
+        gallery: [
+        { src: "assets/Actew/ActewScreen.png", caption: "" },
+        { src: "assets/Actew/ActewScreen2.png", caption: "" },
+        { src: "assets/Actew/ActewScreen3.png", caption: "" },
+        { src: "assets/Actew/ActewScreen4.png", caption: "" },
+        { src: "assets/Actew/ActewStakeholders.jpg", caption: "" },
+        { src: "assets/Actew/ActewWS1.jpg", caption: "" },
+        { src: "assets/Actew/ActewWS2.jpg", caption: "" }
+        ]
         gradient: "from-yellow-500/70 to-red-500/70",
         headline: "Self-Service Portal",
         summary: "Redesign of customer online engagement platform.",
@@ -560,6 +587,11 @@
         id: "redengine",
         title: "REDengine",
         image: "assets/SBTraining.png",
+        gallery: [
+        { src: "assets/RedEngine/Bonafide.jpg", caption: "" },
+        { src: "assets/RedEngine/SB.jpg", caption: "" },
+        { src: "assets/RedEngine/SBTraining.png", caption: "" }
+        ]
         gradient: "from-green-500/70 to-blue-500/70",
         headline: "Rapid eLearning Development",
         summary: "Web app for developing computer-based training content.",
@@ -576,12 +608,22 @@
             "Stakeholder liaison",
             "Front end design/development"
         ]
-        }
+        },
         {
         id: "lokdesign",
         title: "LOK Design",
         image: "assets/SBTraining.png",
-        gradient: "from-blue-500/70 to-teal-500/70",
+        gallery: [
+        { src: "assets/lok/CS00.png", caption: "" },
+        { src: "assets/lok/CS01.png", caption: "" },
+        { src: "assets/lok/JA1.png", caption: "" },
+        { src: "assets/lok/JA2.png", caption: "" },
+        { src: "assets/lok/JA3.png", caption: "" },
+        { src: "assets/lok/PK0.png", caption: "" },
+        { src: "assets/lok/PK1.png", caption: "" },
+        { src: "assets/lok/PK2.png", caption: "" }
+        ]
+        gradient: "from-purple-500/70 to-pink-500/70",
         headline: "Freelance Web Development",
         summary: "Collaborating, designing and developing websites for various clients.",
         features: [
@@ -780,6 +822,19 @@
         <ul class="list-disc pl-5 space-y-2">
             ${project.role.map(r => `<li>${r}</li>`).join('')}
         </ul>
+        ${
+            project.gallery && project.gallery.length > 0
+            ? `<div class="mt-6 space-y-4">
+                <h4 class="font-bold text-yellow-400 mb-2">Gallery</h4>
+                ${project.gallery.map(img =>
+                    `<figure>
+                    <img src="${img.src}" alt="${img.caption || ''}" class="rounded-xl shadow-lg mb-2">
+                    ${img.caption ? `<figcaption class="text-sm text-gray-400 text-center">${img.caption}</figcaption>` : ''}
+                    </figure>`
+                ).join('')}
+                </div>`
+            : ''
+        }
         `;
         // If you want modal gradient: modalGradient.className = `absolute inset-0 bg-gradient-to-r ${project.gradient}`;
         // If you want a modal gradient overlay, add this (see Step 5 for visual upgrade):
