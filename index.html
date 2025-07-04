@@ -841,97 +841,99 @@
     const modalContent = document.getElementById('modal-content');
 
     projectsContainer.addEventListener('click', function(e) {
-  
-    // Listen for any click on a "View Details" link inside projects container
-    const link = e.target.closest('a[data-project]');
-    if (!link) return;
 
-    e.preventDefault();
-    const projectId = link.getAttribute('data-project');
-    const project = projects.find(p => p.id === projectId);
-    if (project) {
-const modalGalleryContainer = document.getElementById('modal-gallery-container');
+        // Listen for any click on a "View Details" link inside projects container
+        const link = e.target.closest('a[data-project]');
+        if (!link) return;
 
-// Gallery logic
-let galleryHTML = '';
-if (project.gallery && project.gallery.length > 0) {
-    if (project.gallery.length === 1) {
-        galleryHTML = `
-            <div id="modal-gallery-carousel">
-                <img src="${project.gallery[0].src}" alt="${project.gallery[0].caption || ''}">
-                ${project.gallery[0].caption ? `<div id="modal-gallery-caption">${project.gallery[0].caption}</div>` : ''}
-            </div>
-        `;
-    } else {
-        // Multiple images: carousel!
-        galleryHTML = `
-            <div id="modal-gallery-carousel">
-                <button class="carousel-arrow left" id="gallery-prev" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>
-                <img id="gallery-img" src="${project.gallery[0].src}" alt="${project.gallery[0].caption || ''}">
-                <button class="carousel-arrow right" id="gallery-next" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>
-                <div id="modal-gallery-caption">${project.gallery[0].caption || ''}</div>
-            </div>
-        `;
-    }
-    modalGalleryContainer.innerHTML = galleryHTML;
-    modalGalleryContainer.style.display = "flex";
-} else {
-    // fallback: hide gallery area if no images
-    modalGalleryContainer.innerHTML = "";
-    modalGalleryContainer.style.display = "none";
-}
+        e.preventDefault();
+        const projectId = link.getAttribute('data-project');
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+            const modalGalleryContainer = document.getElementById('modal-gallery-container');
 
-// Carousel functionality
-if (project.gallery && project.gallery.length > 1) {
-    let current = 0;
-    const total = project.gallery.length;
-    const imgEl = document.getElementById('gallery-img');
-    const captionEl = document.getElementById('modal-gallery-caption');
-    document.getElementById('gallery-prev').onclick = () => {
-        current = (current - 1 + total) % total;
-        imgEl.src = project.gallery[current].src;
-        imgEl.alt = project.gallery[current].caption || "";
-        captionEl.textContent = project.gallery[current].caption || "";
-    };
-    document.getElementById('gallery-next').onclick = () => {
-        current = (current + 1) % total;
-        imgEl.src = project.gallery[current].src;
-        imgEl.alt = project.gallery[current].caption || "";
-        captionEl.textContent = project.gallery[current].caption || "";
-    };
-}
+            // Gallery logic
+            let galleryHTML = '';
+            if (project.gallery && project.gallery.length > 0) {
+                if (project.gallery.length === 1) {
+                    galleryHTML = `
+                        <div id="modal-gallery-carousel">
+                            <img src="${project.gallery[0].src}" alt="${project.gallery[0].caption || ''}">
+                            ${project.gallery[0].caption ? `<div id="modal-gallery-caption">${project.gallery[0].caption}</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    // Multiple images: carousel!
+                    galleryHTML = `
+                        <div id="modal-gallery-carousel">
+                            <button class="carousel-arrow left" id="gallery-prev" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>
+                            <img id="gallery-img" src="${project.gallery[0].src}" alt="${project.gallery[0].caption || ''}">
+                            <button class="carousel-arrow right" id="gallery-next" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>
+                            <div id="modal-gallery-caption">${project.gallery[0].caption || ''}</div>
+                        </div>
+                    `;
+                }
+                modalGalleryContainer.innerHTML = galleryHTML;
+                modalGalleryContainer.style.display = "flex";
+            } else {
+                // fallback: hide gallery area if no images
+                modalGalleryContainer.innerHTML = "";
+                modalGalleryContainer.style.display = "none";
+            }
 
-// Set modal title/content as usual
-modalTitle.textContent = project.title;
-modalContent.innerHTML = `
-  <h3 class="text-xl font-bold mb-2">${project.headline}</h3>
-  <p class="mb-4">${project.summary}</p>
-  <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
-  <ul class="list-disc pl-5 mb-4 space-y-2">
-    ${project.features.map(f => `<li>${f}</li>`).join('')}
-  </ul>
-  <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
-  <ul class="list-disc pl-5 space-y-2">
-    ${project.role.map(r => `<li>${r}</li>`).join('')}
-  </ul>
-`;
+            // Carousel functionality
+            if (project.gallery && project.gallery.length > 1) {
+                let current = 0;
+                const total = project.gallery.length;
+                const imgEl = document.getElementById('gallery-img');
+                const captionEl = document.getElementById('modal-gallery-caption');
+                document.getElementById('gallery-prev').onclick = () => {
+                    current = (current - 1 + total) % total;
+                    imgEl.src = project.gallery[current].src;
+                    imgEl.alt = project.gallery[current].caption || "";
+                    captionEl.textContent = project.gallery[current].caption || "";
+                };
+                document.getElementById('gallery-next').onclick = () => {
+                    current = (current + 1) % total;
+                    imgEl.src = project.gallery[current].src;
+                    imgEl.alt = project.gallery[current].caption || "";
+                    captionEl.textContent = project.gallery[current].caption || "";
+                };
+            }
 
-const modalGradient = document.getElementById('modal-gradient');
-modalGradient.className = `absolute inset-0 bg-gradient-to-r ${project.gradient}`;
-projectModal.classList.remove('hidden');
-    });
+            // Set modal title/content as usual
+            modalTitle.textContent = project.title;
+            modalContent.innerHTML = `
+            <h3 class="text-xl font-bold mb-2">${project.headline}</h3>
+            <p class="mb-4">${project.summary}</p>
+            <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
+            <ul class="list-disc pl-5 mb-4 space-y-2">
+                ${project.features.map(f => `<li>${f}</li>`).join('')}
+            </ul>
+            <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
+            <ul class="list-disc pl-5 space-y-2">
+                ${project.role.map(r => `<li>${r}</li>`).join('')}
+            </ul>
+            `;
+
+            const modalGradient = document.getElementById('modal-gradient');
+            modalGradient.className = `absolute inset-0 bg-gradient-to-r ${project.gradient}`;
+            projectModal.classList.remove('hidden');
+        } // <-- END OF if (project)
+    });    // <-- END OF projectsContainer.addEventListener
 
     // Close modal on X button
     closeProjectModal.addEventListener('click', () => {
-    projectModal.classList.add('hidden');
+        projectModal.classList.add('hidden');
     });
 
     // Close modal if clicking background outside modal content
     projectModal.addEventListener('click', (e) => {
-    if (e.target === projectModal) {
-        projectModal.classList.add('hidden');
-    }
+        if (e.target === projectModal) {
+            projectModal.classList.add('hidden');
+        }
     });
+
     </script>
 <p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=lachlanmack/portfolio" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
 </html>
