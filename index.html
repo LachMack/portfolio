@@ -73,6 +73,49 @@
     /* Hide DeepSite / Remix credit paragraph */
     a[href*="deepsite"] { display:none !important; }
     body > p:last-child { display:none !important; }
+    /* Simple modal gallery carousel styling */
+    #modal-gallery-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    }
+    #modal-gallery-carousel img {
+    width: 100%;
+    height: 24rem; /* h-96 */
+    object-fit: contain;
+    background: #111;
+    border-radius: 0.75rem;
+    }
+    .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(31,41,55,0.7);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    }
+    .carousel-arrow.left { left: 1rem; }
+    .carousel-arrow.right { right: 1rem; }
+    #modal-gallery-caption {
+    position: absolute;
+    bottom: 0.5rem;
+    width: 100%;
+    text-align: center;
+    color: #ccc;
+    background: rgba(0,0,0,0.3);
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    border-radius: 0 0 0.75rem 0.75rem;
+    }
+
   </style>
 </head>
 <body class="bg-black text-white font-sans overflow-x-hidden">
@@ -777,10 +820,9 @@
                 <i class="fas fa-times text-2xl"></i>
             </button>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="h-96 lg:h-full lg:sticky lg:top-0 relative">
-                    <img id="modal-image" src="" alt="" class="w-full h-full object-cover">
-                    <div id="modal-gradient" class="absolute inset-0"></div>
-                </div>
+            <div id="modal-gallery-container" class="h-96 w-full flex items-center justify-center relative bg-black rounded-t-2xl overflow-hidden">
+            <!-- Gallery images will be injected here -->
+            </div>
                 <div class="p-8">
                     <h2 id="modal-title" class="text-3xl font-bold mb-4"></h2>
                     <div id="modal-content" class="prose prose-invert"></div>
@@ -808,39 +850,75 @@
     const projectId = link.getAttribute('data-project');
     const project = projects.find(p => p.id === projectId);
     if (project) {
-        modalImage.src = project.image;
-        modalImage.alt = project.title;
-        modalTitle.textContent = project.title;
-        modalContent.innerHTML = `
-        <h3 class="text-xl font-bold mb-2">${project.headline}</h3>
-        <p class="mb-4">${project.summary}</p>
-        <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
-        <ul class="list-disc pl-5 mb-4 space-y-2">
-            ${project.features.map(f => `<li>${f}</li>`).join('')}
-        </ul>
-        <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
-        <ul class="list-disc pl-5 space-y-2">
-            ${project.role.map(r => `<li>${r}</li>`).join('')}
-        </ul>
-        ${
-            project.gallery && project.gallery.length > 0
-            ? `<div class="mt-6 space-y-4">
-                <h4 class="font-bold text-yellow-400 mb-2">Gallery</h4>
-                ${project.gallery.map(img =>
-                    `<figure>
-                    <img src="${img.src}" alt="${img.caption || ''}" class="rounded-xl shadow-lg mb-2">
-                    ${img.caption ? `<figcaption class="text-sm text-gray-400 text-center">${img.caption}</figcaption>` : ''}
-                    </figure>`
-                ).join('')}
-                </div>`
-            : ''
-        }
+const modalGalleryContainer = document.getElementById('modal-gallery-container');
+
+// Gallery logic
+let galleryHTML = '';
+if (project.gallery && project.gallery.length > 0) {
+    if (project.gallery.length === 1) {
+        galleryHTML = `
+            <div id="modal-gallery-carousel">
+                <img src="${project.gallery[0].src}" alt="${project.gallery[0].caption || ''}">
+                ${project.gallery[0].caption ? `<div id="modal-gallery-caption">${project.gallery[0].caption}</div>` : ''}
+            </div>
         `;
-        // If you want modal gradient: modalGradient.className = `absolute inset-0 bg-gradient-to-r ${project.gradient}`;
-        // If you want a modal gradient overlay, add this (see Step 5 for visual upgrade):
-        const modalGradient = document.getElementById('modal-gradient');
-       projectModal.classList.remove('hidden');
+    } else {
+        // Multiple images: carousel!
+        galleryHTML = `
+            <div id="modal-gallery-carousel">
+                <button class="carousel-arrow left" id="gallery-prev" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>
+                <img id="gallery-img" src="${project.gallery[0].src}" alt="${project.gallery[0].caption || ''}">
+                <button class="carousel-arrow right" id="gallery-next" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>
+                <div id="modal-gallery-caption">${project.gallery[0].caption || ''}</div>
+            </div>
+        `;
     }
+    modalGalleryContainer.innerHTML = galleryHTML;
+    modalGalleryContainer.style.display = "flex";
+} else {
+    // fallback: hide gallery area if no images
+    modalGalleryContainer.innerHTML = "";
+    modalGalleryContainer.style.display = "none";
+}
+
+// Carousel functionality
+if (project.gallery && project.gallery.length > 1) {
+    let current = 0;
+    const total = project.gallery.length;
+    const imgEl = document.getElementById('gallery-img');
+    const captionEl = document.getElementById('modal-gallery-caption');
+    document.getElementById('gallery-prev').onclick = () => {
+        current = (current - 1 + total) % total;
+        imgEl.src = project.gallery[current].src;
+        imgEl.alt = project.gallery[current].caption || "";
+        captionEl.textContent = project.gallery[current].caption || "";
+    };
+    document.getElementById('gallery-next').onclick = () => {
+        current = (current + 1) % total;
+        imgEl.src = project.gallery[current].src;
+        imgEl.alt = project.gallery[current].caption || "";
+        captionEl.textContent = project.gallery[current].caption || "";
+    };
+}
+
+// Set modal title/content as usual
+modalTitle.textContent = project.title;
+modalContent.innerHTML = `
+  <h3 class="text-xl font-bold mb-2">${project.headline}</h3>
+  <p class="mb-4">${project.summary}</p>
+  <h4 class="font-bold text-pink-400 mb-2">UX Features:</h4>
+  <ul class="list-disc pl-5 mb-4 space-y-2">
+    ${project.features.map(f => `<li>${f}</li>`).join('')}
+  </ul>
+  <h4 class="font-bold text-blue-400 mb-2">My Role:</h4>
+  <ul class="list-disc pl-5 space-y-2">
+    ${project.role.map(r => `<li>${r}</li>`).join('')}
+  </ul>
+`;
+
+const modalGradient = document.getElementById('modal-gradient');
+modalGradient.className = `absolute inset-0 bg-gradient-to-r ${project.gradient}`;
+projectModal.classList.remove('hidden');
     });
 
     // Close modal on X button
