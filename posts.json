@@ -1,0 +1,26 @@
+[
+  {
+    "id": "welcome",
+    "title": "Welcome to My Blog",
+    "date": "2025-08-04",
+    "tags": ["Introduction"],
+    "summary": "An introduction to my new blog where I share insights on design, leadership and personal projects.",
+    "content": "### Welcome to my blog\n\nI’m excited to launch this space to share my thoughts on design, leadership and the creative process. After more than two decades in the industry, there are many stories, insights and lessons that I believe will resonate with other designers and innovators.\n\nIn this first post I’ll outline what you can expect from the blog and how I plan to use it as a space for reflection and exploration.\n\nStay tuned — there’s a lot more to come!"
+  },
+  {
+    "id": "project-highlights",
+    "title": "Recent Project Highlights",
+    "date": "2025-07-28",
+    "tags": ["Projects", "Case Study"],
+    "summary": "A brief overview of some recent projects and the challenges tackled to deliver meaningful outcomes.",
+    "content": "### Recent Project Highlights\n\nOver the past year I’ve had the privilege to work on several exciting projects ranging from enterprise research to certification programs. Each project presented unique challenges that pushed me to grow as a leader and designer.\n\nHere are a few highlights:\n\n- **Global UX Research:** Leading a cross‑functional team to interview hundreds of users and synthesize insights that shaped an enterprise road map.\n- **Citizen Designer Program:** Developing an internal certification to upskill colleagues in human‑centred design through interactive workshops and digital content.\n- **Self‑Service Portal Redesign:** Collaborating with stakeholders to create an intuitive, accessible customer platform that balances business goals with user needs.\n\nIn future posts I’ll dive deeper into the process and outcomes of each of these initiatives."
+  },
+  {
+    "id": "design-thinking",
+    "title": "Applying Design Thinking to Everyday Problems",
+    "date": "2025-07-15",
+    "tags": ["Design", "Leadership"],
+    "summary": "How design thinking principles can be used to solve challenges beyond the workplace.",
+    "content": "### Applying Design Thinking to Everyday Problems\n\nDesign thinking isn’t just for building products — it’s a mindset that can be applied to any challenge. From organizing a community event to improving your morning routine, the core principles remain the same: empathize, define, ideate, prototype and test.\n\nIn this post I share a few examples of how adopting a design thinking approach has helped me overcome everyday hurdles and how you can incorporate the practice into your own life.\n\n> \"Design is not just what it looks like and feels like. Design is how it works.\" — *Steve Jobs*"
+  }
+]
