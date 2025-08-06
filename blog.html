@@ -30,6 +30,9 @@
     .post-card { transition: all .3s ease; }
     .post-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
     #post-modal { background: rgba(0,0,0,0.9); }
+    #modal-post-content ul { list-style: disc; margin-left: 1.5rem; }
+    #modal-post-content ol { list-style: decimal; margin-left: 1.5rem; }
+    #modal-post-content li { margin-bottom: .5rem; }
   </style>
 </head>
 <body class="bg-black text-white font-sans overflow-x-hidden">
@@ -141,7 +144,7 @@
     const modalDate     = document.getElementById('modal-post-date');
     const modalContent  = document.getElementById('modal-post-content');
 
-    fetch('assets/posts.json').then(resp => resp.json()).then(data => { posts = data; renderTags(); renderPosts(); });
+    fetch('../assets/posts.json').then(resp => resp.json()).then(data => { posts = data; renderTags(); renderPosts(); });
 
     function renderTags() {
       const tagSet = new Set();
