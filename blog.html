@@ -308,6 +308,23 @@
       }
       // Parse markdown content to HTML
       modalContent.innerHTML += marked.parse(post.content);
+      
+      // Share logic
+      const shareButton = document.createElement('button');
+      shareButton.className = "mt-6 px-4 py-2 bg-gradient-to-r from-yellow-400 to-pink-500 text-black font-bold rounded hover:opacity-80";
+      shareButton.textContent = "Copy Share Link";
+      shareButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(post.share)
+          .then(() => {
+            shareButton.textContent = "Link Copied!";
+            setTimeout(() => shareButton.textContent = "Copy Share Link", 2000);
+          })
+          .catch(err => {
+            shareButton.textContent = "Failed to Copy";
+          });
+      });
+      modalContent.appendChild(shareButton);
+    
       postModal.classList.remove('hidden');
       postModal.classList.add('flex');
       document.body.style.overflow = 'hidden';
