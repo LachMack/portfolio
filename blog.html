@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Lachlan Mackenzie – Blog</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <meta name="description" content="Thoughts on design, leadership and human‑centred work.">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Lachlan Mackenzie – Blog">
-  <meta property="og:description" content="Thoughts on design, leadership and human‑centred work.">
-  <meta property="og:image" content="https://lachlanmackenzie.me/assets/blog/header.png">
-  <meta property="og:url" content="https://lachlanmackenzie.me/blog.html">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="description" content="Thoughts on design, leadership and human‑centred work." />
+
+  <!-- Tailwind (with plugins for typography and line clamping) -->
+  <script src="https://cdn.tailwindcss.com?plugins=typography,line-clamp"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <!-- Social previews -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Lachlan Mackenzie – Blog" />
+  <meta property="og:description" content="Thoughts on design, leadership and human‑centred work." />
+  <meta property="og:image" content="https://lachlanmackenzie.me/assets/blog/header.png" />
+  <meta property="og:url" content="https://lachlanmackenzie.me/blog.html" />
+  <meta name="twitter:card" content="summary_large_image" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -24,21 +27,21 @@
     "publisher": {"@type": "Person", "name": "Lachlan Mackenzie"}
   }
   </script>
+
   <style>
-    .tag { @apply inline-flex items-center px-3 py-1 rounded-full bg-gray-800 text-sm cursor-pointer; }
-    .tag.active { @apply bg-pink-600; }
-    .card { @apply bg-gray-900 rounded-2xl overflow-hidden flex flex-col; }
-    .card img { @apply w-full h-48 object-cover; }
+    /* Only a couple of tiny helpers—everything else is Tailwind classes */
     .modal-open { overflow: hidden; }
-    .prose a { color: #60a5fa; text-decoration: underline; }
   </style>
 </head>
 <body class="bg-black text-white">
+  <!-- Header -->
   <header class="sticky top-0 z-40 backdrop-blur bg-black/70 border-b border-white/10">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="index.html" class="font-bold tracking-wide">← Home</a>
+      <a href="index.html" class="font-semibold tracking-wide hover:text-gray-300">← Home</a>
       <h1 class="text-xl md:text-2xl font-bold">Blog</h1>
-      <div></div>
+      <nav class="hidden md:block">
+        <a href="blog.html" class="text-sm text-gray-300 hover:text-white">All posts</a>
+      </nav>
     </div>
   </header>
 
@@ -47,8 +50,8 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
       <div class="relative w-full md:w-1/2">
         <input id="search" type="search" placeholder="Search posts…"
-          class="w-full rounded-xl bg-gray-900 border border-white/10 px-4 py-3 pr-10 focus:outline-none"
-          aria-label="Search posts">
+               class="w-full rounded-xl bg-gray-900 border border-white/10 px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-pink-500"
+               aria-label="Search posts">
         <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
       </div>
       <div id="tag-row" class="flex flex-wrap gap-2"></div>
@@ -63,8 +66,9 @@
 
   <!-- Modal -->
   <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4" aria-hidden="true">
-    <article class="bg-gray-900 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-auto relative">
-      <button id="close" class="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label="Close">
+    <article class="bg-gray-900 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-auto relative shadow-2xl">
+      <button id="close" class="absolute top-4 right-4 text-gray-400 hover:text-white focus:outline-none"
+              aria-label="Close">
         <i class="fas fa-times text-2xl"></i>
       </button>
       <img id="m-img" class="w-full h-60 object-cover rounded-t-2xl" alt="">
@@ -80,32 +84,28 @@
   </div>
 
   <script>
-  const state = {
-    all: [],
-    filtered: [],
-    activeTags: new Set(),
-    q: ""
-  };
+  // -------- State & element refs --------
+  const state = { all: [], filtered: [], activeTags: new Set(), q: "" };
 
   const els = {
-    grid: document.getElementById('grid'),
-    empty: document.getElementById('empty'),
+    grid:   document.getElementById('grid'),
+    empty:  document.getElementById('empty'),
     search: document.getElementById('search'),
-    tags: document.getElementById('tag-row'),
-    modal: document.getElementById('modal'),
-    close: document.getElementById('close'),
-    mImg: document.getElementById('m-img'),
+    tags:   document.getElementById('tag-row'),
+    modal:  document.getElementById('modal'),
+    close:  document.getElementById('close'),
+    mImg:   document.getElementById('m-img'),
     mTitle: document.getElementById('m-title'),
-    mDate: document.getElementById('m-date'),
-    mTags: document.getElementById('m-tags'),
+    mDate:  document.getElementById('m-date'),
+    mTags:  document.getElementById('m-tags'),
     mContent: document.getElementById('m-content')
   };
 
-  // Fetch posts
+  // -------- Fetch posts --------
   fetch('assets/posts.json')
     .then(r => r.json())
     .then(data => {
-      // pinned first, then by date desc
+      // Sort: pinned first, then by date desc
       data.sort((a, b) => {
         if ((b.pinned|0) - (a.pinned|0)) return (b.pinned|0) - (a.pinned|0);
         return (b.date || '').localeCompare(a.date || '');
@@ -117,42 +117,44 @@
     })
     .catch(err => {
       console.error(err);
-      els.empty.textContent = "Couldn’t load posts.json";
+      els.empty.textContent = "Couldn’t load assets/posts.json";
       els.empty.classList.remove('hidden');
     });
 
+  // -------- Tags rendering / toggling --------
   function renderTags() {
     const set = new Set();
-    state.all.forEach(p => (p.tags||[]).forEach(t => set.add(t)));
+    state.all.forEach(p => (p.tags || []).forEach(t => set.add(t)));
     els.tags.innerHTML = "";
     [...set].sort().forEach(tag => {
       const btn = document.createElement('button');
-      btn.className = 'tag';
+      btn.className = 'inline-flex items-center px-3 py-1 rounded-full bg-gray-800 text-sm cursor-pointer hover:bg-gray-700 transition';
       btn.textContent = tag;
       btn.setAttribute('aria-pressed', 'false');
-      btn.onclick = () => toggleTag(tag, btn);
+      btn.onclick = () => {
+        const active = btn.getAttribute('aria-pressed') === 'true';
+        if (active) {
+          state.activeTags.delete(tag);
+          btn.setAttribute('aria-pressed','false');
+          btn.classList.remove('bg-pink-600','text-white');
+        } else {
+          state.activeTags.add(tag);
+          btn.setAttribute('aria-pressed','true');
+          btn.classList.add('bg-pink-600','text-white');
+        }
+        applyFilters();
+      };
       els.tags.appendChild(btn);
     });
   }
 
-  function toggleTag(tag, btn) {
-    if (state.activeTags.has(tag)) {
-      state.activeTags.delete(tag);
-      btn.classList.remove('active');
-      btn.setAttribute('aria-pressed','false');
-    } else {
-      state.activeTags.add(tag);
-      btn.classList.add('active');
-      btn.setAttribute('aria-pressed','true');
-    }
-    applyFilters();
-  }
-
+  // -------- Search --------
   els.search.addEventListener('input', (e) => {
     state.q = e.target.value.toLowerCase();
     applyFilters();
   });
 
+  // -------- Filtering & grid render --------
   function applyFilters() {
     const tags = state.activeTags;
     const q = state.q;
@@ -165,9 +167,8 @@
     renderGrid();
   }
 
-  function html(strings, ...vals) {
-    return strings.map((s,i)=> s + (vals[i] ?? '')).join('');
-  }
+  function tagChip(t){ return `<span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-800 text-sm">${t}</span>`; }
+  function html(strings, ...vals) { return strings.map((s,i)=> s + (vals[i] ?? '')).join(''); }
 
   function renderGrid() {
     els.grid.innerHTML = "";
@@ -180,16 +181,16 @@
     state.filtered.forEach(p => {
       const img = p.image && p.image.trim() ? p.image : '../assets/blog/placeholder.jpg';
       const el = document.createElement('article');
-      el.className = 'card';
+      el.className = 'bg-gray-900 rounded-2xl overflow-hidden flex flex-col border border-white/5';
       el.innerHTML = html`
-        <img src="${img}" alt="${p.title}">
+        <img src="${img}" alt="${p.title}" class="w-full h-48 object-cover">
         <div class="p-5 flex-1 flex flex-col">
           <div class="text-xs text-gray-400 mb-2">${(p.date||'').replace(/-/g,'/')}</div>
           <h2 class="text-xl font-bold mb-2">${p.title}</h2>
           <p class="text-gray-300 mb-4 line-clamp-3">${p.summary||''}</p>
           <div class="mt-auto flex items-center justify-between">
             <div class="flex flex-wrap gap-2">
-              ${(p.tags||[]).slice(0,3).map(t => `<span class="tag">${t}</span>`).join('')}
+              ${(p.tags||[]).slice(0,3).map(tagChip).join('')}
             </div>
             <button class="text-pink-400 font-semibold hover:underline" aria-label="Read ${p.title}">
               Read →
@@ -202,14 +203,16 @@
     });
   }
 
+  // -------- Modal logic --------
   function openModal(p) {
     const img = p.image && p.image.trim() ? p.image : '../assets/blog/placeholder.jpg';
     els.mImg.src = img;
     els.mImg.alt = p.title;
     els.mTitle.textContent = p.title;
     els.mDate.textContent = (p.date||'').replace(/-/g,'/');
-    els.mTags.innerHTML = (p.tags||[]).map(t => `<span class="tag">${t}</span>`).join('');
-    els.mContent.innerHTML = markedToHtml(p.content||''); // basic markdown → HTML
+    els.mTags.innerHTML = (p.tags||[]).map(tagChip).join('');
+    els.mContent.classList.add('prose','prose-invert');
+    els.mContent.innerHTML = markedToHtml(p.content||'');
     els.modal.classList.remove('hidden');
     els.modal.classList.add('flex');
     document.body.classList.add('modal-open');
@@ -234,7 +237,7 @@
     if (p) openModal(p);
   }
 
-  // Tiny Markdown → HTML (headings, bold/italic, links, lists, paragraphs)
+  // -------- Tiny Markdown → HTML (headings, bold/italic, links, lists, paragraphs) --------
   function markedToHtml(md='') {
     let h = md
       .replace(/^### (.*)$/gm, '<h3 class="text-xl font-bold mt-6 mb-3">$1</h3>')
