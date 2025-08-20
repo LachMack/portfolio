@@ -1,0 +1,189 @@
+[
+  {
+    "id": "outputs-vs-outcomes",
+    "title": "Outputs vs Outcomes: Why Both Matter in Design Thinking",
+    "date": "2024-03-21",
+    "tags": ["Design Thinking","Strategy","Facilitation"],
+    "summary": "Design thinking isn’t a straight line to a polished deliverable. Outcomes—alignment, insight, ownership—carry strategic value long after the workshop ends.",
+    "image": "../assets/blog/OutputsOutcomes.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#outputs-vs-outcomes",
+    "pinned": false,
+    "content": "### Outputs vs Outcomes: Why Both Matter in Design Thinking\n\nDesign thinking doesn’t always wrap up with a neat solution. Sometimes a tested prototype takes us right back to the problem space. Other times, the solution *works* but isn’t pursued for business or logistical reasons.\n\nAnd that’s okay.\n\nBecause even when the tangible result doesn’t land, the **learning** never goes to waste.\n\nIn fact, it’s often the intangible shifts — in mindset, in alignment, in team confidence — that carry the biggest value forward.\n\n#### So what’s the difference?\n\n**Outputs** are the tangible things that come out of the process. They are:\n- Visible\n- Actionable\n- Testable\n\nThink of things like:\n- A journey map\n- A prototype\n- A service blueprint\n\nThese are powerful and inspiring — they give people something to work with in the short term.\n\nBut then there are **Outcomes** — the real magic behind the process. Less visible, but often more meaningful in the long run.\n\nTo remember them, I use **AEIOU**:\n- **Alignment** – shared understanding of issues and a sense of direction\n- **Engagement** – everyone has a voice and feels heard\n- **Insight** – new perspectives and fresh ways of thinking\n- **Ownership** – pride in the work and collaboration behind it\n- **Understanding** – empathy and recognition of others’ perspectives\n\n> “Outputs are tactical. Outcomes are strategic.”\n\n#### Why this matters\nOutputs help you *do* something right now. Outcomes help your *team* move better and more confidently for the long term.\n\nEven if the output isn’t adopted, those deeper outcomes create a stronger foundation for whatever comes next.\n\nIt’s why I never view a ‘failed’ prototype or rejected idea as wasted effort. Design thinking isn’t just about deliverables — it’s about progress in all its forms.\n\nWe deepen our understanding. We strengthen relationships. We grow our capacity to tackle the next challenge.\n\n**If you found this useful, you might like**: [Why I Keep Coming Back to the Double Diamond](#double-diamond-thinking) and [Facilitation Principles That Actually Work](#facilitation-principles)."
+  },
+  {
+    "id": "double-diamond-thinking",
+    "title": "Why I Keep Coming Back to the Double Diamond",
+    "date": "2023-11-21",
+    "tags": ["Design Thinking","Frameworks","Teaching"],
+    "summary": "The Double Diamond makes ambiguity workable: diverge, converge, then do it again — with a razor‑sharp problem definition at the pivot.",
+    "image": "../assets/blog/DD.png",
+    "share": "https://lachlanmackenzie.me/blog.html#double-diamond-thinking",
+    "pinned": false,
+    "content": "### Why I Keep Coming Back to the Double Diamond\n\nWhenever I’m teaching design thinking or helping a team kick off a new project, the **Double Diamond** is usually the first framework I pull out.\n\nOften, the biggest challenge when starting out with design thinking is the *intangible‑ness* of it. Where’s the clear path? Where’s the bouncing ball to follow? The Double Diamond gives people a starting point — something that both *structures* the process and stays flexible enough to adapt to real‑world messiness.\n\n#### What is the Double Diamond?\nAt its heart, the Double Diamond shows us that every challenge has two core parts:\n- The **Problem Space** — understanding what the real issue is\n- The **Solution Space** — exploring how we might respond to that problem\n\n> “Give me an hour to solve a problem and I’d spend the first two‑thirds defining what the problem is.”\n\n#### Why diamonds?\nThe shape of each diamond shows how we work:\n- **Diverge** — gather ideas, perspectives, and possibilities.\n- **Converge** — refine those into clear insights or choices.\n\n#### The pivot point\nRight at the centre is the most powerful move — **defining the problem**: who it affects, what’s influencing it, and why it matters. That definition becomes the launch pad for meaningful solutions.\n\n#### The 4 Ds\n1. **Discover** — Understand the context and people involved\n2. **Define** — Sharpen that understanding into a clear problem statement\n3. **Develop** — Generate and test ideas\n4. **Deliver** — Turn those ideas into real‑world outcomes\n\n**Next reads**: [Frame the Problem, Not Just the Solution](#problem-framing) and [Product Discovery](#product-discovery)."
+  },
+  {
+    "id": "product-discovery",
+    "title": "Product Discovery: Tackling Value, Usability, Feasibility & Viability Early",
+    "date": "2023-04-24",
+    "tags": ["Design","UX"],
+    "summary": "Validate value, usability, feasibility, and viability before you build. It’s not slower — it’s how you go fast in the right direction.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#product-discovery",
+    "pinned": false,
+    "content": "### Product Discovery: Tackling Value, Usability, Feasibility & Viability Early\n\nBefore we build anything, we need to know if it’s worth building. That’s what **product discovery** is for.\n\nI think of it as an early‑stage filter that helps us avoid wasting time and resources. It’s not about slowing down — it’s about going fast in the right direction.\n\n#### The four big questions:\n1. **Value** — Do users actually want this? Will it solve a real problem?\n2. **Usability** — Can they use it without frustration?\n3. **Feasibility** — Can we build it with the time, skills, and tech we have?\n4. **Viability** — Does it make sense for the business in the long run?\n\n> “If one of these is a hard ‘no’, you’ll save yourself a lot of pain by finding out now.”\n\n**Related**: [Ease of Use: What Users Want vs. What Designers Must Balance](#ease-of-use) and [Design Thinking for Everyone](#design-thinking-for-everyone)."
+  },
+  {
+    "id": "welcome",
+    "title": "Welcome to My Blog",
+    "date": "2024-08-04",
+    "tags": ["Introduction"],
+    "summary": "What to expect here: practical techniques, workshop methods you can borrow, and honest reflections from real projects.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#welcome",
+    "pinned": true,
+    "content": "### Welcome to my blog\n\nI’m excited to launch this space to share my thoughts on design, leadership, and the creative process. After more than two decades in the industry, I’ve collected plenty of stories, insights, and lessons that I think will resonate with other designers, innovators, and curious minds.\n\nThis blog is part reflection, part exploration — a place where I can unpack ideas I’ve learned the hard way, shine a light on tools that work, and maybe even share a few experiments in progress.\n\nYou can expect a mix of:\n- **Design techniques** I’ve seen succeed in real‑world projects\n- **Workshop methods** you can try with your own teams\n- **Personal reflections** on leadership, creativity, and collaboration\n\nIt’s not about being an expert with all the answers — it’s about sharing what’s worked for me (and what hasn’t) in the hope it helps someone else. Stay tuned — there’s a lot more to come!\n\n**Start here**: [Why I Keep Coming Back to the Double Diamond](#double-diamond-thinking) or [Facilitation Principles That Actually Work](#facilitation-principles)."
+  },
+  {
+    "id": "affinity-clustering",
+    "title": "Making Sense of Research: Affinity Clustering for Themes",
+    "date": "2024-07-02",
+    "tags": ["Design","UX"],
+    "summary": "Turn a wall of stickies into clarity. Group related notes until themes appear, then name them last.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#affinity-clustering",
+    "pinned": false,
+    "content": "### Making Sense of Research: Affinity Clustering for Themes\n\nAfter a research sprint or a big workshop, you often end up with a wall of sticky notes — hundreds of snippets of information, each valuable but overwhelming in isolation.\n\nThat’s where **affinity clustering** comes in. You group related notes until themes start to emerge. Simple — and transformative.\n\n#### Why it works\n- It forces you to slow down and really *see* the data.\n- It reveals patterns and connections you’d otherwise miss.\n- It turns chaos into clarity.\n\nI often run this right after **Rose, Thorn, Bud**. We mix everything together, then group into meaningful categories.\n\n**Tip**: Don’t name clusters too early. Let the patterns emerge.\n\n**Also try**: [Rose, Thorn, Bud](#rose-thorn-bud) and [The Persona Empathy Canvas](#persona-empathy)."
+  },
+  {
+    "id": "yes-and",
+    "title": "‘Yes, and…’ – Ground Rules for Creative Workshops",
+    "date": "2023-12-19",
+    "tags": ["Design","UX"],
+    "summary": "A few clear ground rules (be present, no judgment, ‘yes, and…’) unlock safer, more creative sessions.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#yes-and",
+    "pinned": false,
+    "content": "### ‘Yes, and…’ – Ground Rules for Creative Workshops\n\nA few simple ground rules can change the entire energy of a workshop.\n\n#### My favourites:\n- **Be present** — phones down, minds in the room.\n- **No judgment** — all ideas get airtime before we evaluate.\n- **‘Yes, and…’** — build on each other’s contributions rather than blocking them.\n\nThese might sound obvious, but the difference they make is huge. People share more openly, listen more closely, and take more creative risks.\n\n**Related**: [Facilitation Principles That Actually Work](#facilitation-principles)."
+  },
+  {
+    "id": "how-might-we",
+    "title": "From Problem Statements to ‘How Might We’ Questions",
+    "date": "2023-03-30",
+    "tags": ["Design","UX"],
+    "summary": "‘How might we…?’ invites possibility: assumes a way forward, leaves room for iteration, and signals shared ownership.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#how-might-we",
+    "pinned": false,
+    "content": "### From Problem Statements to ‘How Might We’ Questions\n\n‘How might we…?’ is one of my favourite prompts for opening up creative thinking.\n\n#### Why it works:\n- **How** — Assumes there’s a way forward.\n- **Might** — Leaves room for experimentation.\n- **We** — Signals collaboration and shared ownership.\n\nExample: instead of *“We need to reduce maintenance costs”*, try *“How might we design products that maintain themselves?”*\n\n> “The right question can unlock more innovation than a week of brainstorming.”\n\n**Next**: [Problem Framing](#problem-framing) and [Outputs vs Outcomes](#outputs-vs-outcomes)."
+  },
+  {
+    "id": "user-feedback",
+    "title": "‘No Right or Wrong Answers’: Setting the Stage for Honest User Feedback",
+    "date": "2024-09-01",
+    "tags": ["Design","UX"],
+    "summary": "You’re testing the product, not the person. Lower the pressure, get better insights.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#user-feedback",
+    "pinned": false,
+    "content": "### ‘No Right or Wrong Answers’: Setting the Stage for Honest User Feedback\n\nWhen I run usability sessions, the first thing I say is: *“You can’t get this wrong.”* We’re testing the product, not the person.\n\n#### How I set the tone:\n- Explain what we’re trying to learn.\n- Emphasise there’s no score or judgement.\n- Invite them to **think aloud**.\n\n**Try next**: [Ease of Use](#ease-of-use) and [Design Thinking for Everyone](#design-thinking-for-everyone)."
+  },
+  {
+    "id": "rose-thorn-bud",
+    "title": "Rose, Thorn, Bud: A Quick Method to Evaluate Experiences",
+    "date": "2024-08-11",
+    "tags": ["Design","UX"],
+    "summary": "Roses are positives, Thorns are problems, Buds are opportunities — a fast, visual reflection you can run anywhere.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#rose-thorn-bud",
+    "pinned": false,
+    "content": "### Rose, Thorn, Bud: A Quick Method to Evaluate Experiences\n\nIf you’ve ever finished a project or workshop and thought, *“I wish we had a simple way to capture what went well and what didn’t”*, **Rose, Thorn, Bud** might be your new favourite tool.\n\n#### The basics\n- **Rose** 🌹 — Working well, a highlight, a clear strength.\n- **Thorn** 🗡 — A pain point, frustration, or blocker.\n- **Bud** 🌱 — Something with potential.\n\nRun it fast (10 minutes) or slow (1 hour), then segue into [Affinity Clustering](#affinity-clustering) to find themes."
+  },
+  {
+    "id": "project-highlights",
+    "title": "Recent Project Highlights",
+    "date": "2024-05-18",
+    "tags": ["Projects","Case Study"],
+    "summary": "A snapshot of recent work — global UX research, a ‘Citizen Designer’ program, and a high‑impact self‑service portal redesign.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#project-highlights",
+    "pinned": false,
+    "content": "### Recent Project Highlights\n\nOver the past year, I’ve worked on projects ranging from enterprise research to certification programs. A few highlights:\n\n- **Global UX Research:** Leading a cross‑functional team to interview hundreds of users and synthesise insights that shaped an enterprise road map.\n- **Citizen Designer Program:** An internal certification to build human‑centred design skills through interactive workshops and digital content.\n- **Self‑Service Portal Redesign:** An intuitive, accessible customer platform balancing business goals with user needs.\n\n**Deep dives coming soon. In the meantime, see**: [Teradata Global UX Research](#global-ux) on my portfolio."
+  },
+  {
+    "id": "persona-empathy",
+    "title": "The Persona Empathy Canvas: Keeping Personas Simple and Useful",
+    "date": "2023-12-26",
+    "tags": ["Design","UX Tools"],
+    "image": "../assets/blog/PersonaEmpathy.jpg",
+    "summary": "A lightweight canvas that teams actually use — fast to create, easy to update, and perfect for side‑by‑side comparison.",
+    "share": "https://lachlanmackenzie.me/blog.html#persona-empathy",
+    "pinned": false,
+    "content": "### The Persona Empathy Canvas: Keeping Personas Simple and Useful\n\nHeavy personas often get ignored. I wanted something lighter — a **Persona Empathy Canvas** that stays alive throughout a project.\n\n#### Why it works\n- **Quick** to create in minutes\n- **Easy** to change as you learn\n- **Flexible** for comparison and prioritisation\n- **Used** because it’s simple and visible\n\nIt borrows the spirit of Cooper’s personas but keeps only the essentials.\n\n**Related**: [How Might We](#how-might-we) and [Affinity Clustering](#affinity-clustering)."
+  },
+  {
+    "id": "ease-of-use",
+    "title": "Ease of Use: What Users Want vs. What Designers Must Balance",
+    "date": "2024-04-18",
+    "tags": ["Design","UX"],
+    "summary": "Ease isn’t always simple. Designers juggle desirability, feasibility, and viability to make the right things easy.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#ease-of-use",
+    "pinned": false,
+    "content": "### Ease of Use: What Users Want vs. What Designers Must Balance\n\nEveryone says they want things to be *easy to use*. And we want that too — but ease isn’t always simple.\n\n#### The balance\n- **Desirability** — Will people want it?\n- **Feasibility** — Can we realistically build it?\n- **Viability** — Does it make business sense?\n\nThe sweet spot is where all three overlap. Sometimes that means making tough trade‑offs or pushing for backend changes that make the front‑end simpler.\n\n**You might also like**: [Product Discovery](#product-discovery) and [‘No Right or Wrong Answers’](#user-feedback)."
+  },
+  {
+    "id": "problem-framing",
+    "title": "Frame the Problem, Not Just the Solution",
+    "date": "2023-11-17",
+    "tags": ["Design","UX"],
+    "summary": "If you only have time for one thing, reframe the challenge. The question you ask shapes the answers you get.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#problem-framing",
+    "pinned": false,
+    "content": "### Frame the Problem, Not Just the Solution\n\nAsk for a ‘better chair’ and you’ll get tweaks. Ask for a ‘better way to sit’ and you unlock new possibilities.\n\n#### Why I spend time here\n- Avoids jumping to the first ‘obvious’ answer\n- Pushes thinking beyond the status quo\n- Often solves multiple problems at once\n\n**Pair with**: [How Might We](#how-might-we) and [Double Diamond](#double-diamond-thinking)."
+  },
+  {
+    "id": "design-thinking-discipline",
+    "title": "Design Thinking: Developing Solutions in Service of People",
+    "date": "2024-11-06",
+    "tags": ["Design","UX"],
+    "summary": "Design thinking is a mindset and a method: empathise, iterate, learn — and keep the work in service of people.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#design-thinking-discipline",
+    "pinned": false,
+    "content": "### Design Thinking: Developing Solutions in Service of People\n\nDesign thinking is about solving the right problem for the right people. It’s a mindset as much as a method — one that values empathy, iteration, and learning.\n\nI’ve seen it unlock everything from large‑scale organisational shifts to small tweaks that make a single user’s day easier.\n\n> “If you’re not designing in service of people, you’re just decorating.”\n\n**Follow‑ups**: [Applying Design Thinking to Everyday Problems](#design-thinking) and [Outputs vs Outcomes](#outputs-vs-outcomes)."
+  },
+  {
+    "id": "design-thinking",
+    "title": "Applying Design Thinking to Everyday Problems",
+    "date": "2024-09-25",
+    "tags": ["Design","Leadership"],
+    "summary": "Bring the toolkit home: empathise, define, ideate, prototype, test — for family trips, home offices, even community projects.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#design-thinking",
+    "pinned": false,
+    "content": "### Applying Design Thinking to Everyday Problems\n\nDesign thinking isn’t just for products — it’s a lens you can use on nearly any challenge. From planning family holidays (involve everyone early!) to improving your home office flow.\n\n> “Design is not just what it looks like and feels like. Design is how it works.” — *Steve Jobs*\n\n**Keep exploring**: [Design Thinking: Developing Solutions in Service of People](#design-thinking-discipline) and [Design Thinking for Everyone](#design-thinking-for-everyone)."
+  },
+  {
+    "id": "facilitation-principles",
+    "title": "Facilitation Principles That Actually Work",
+    "date": "2024-02-06",
+    "tags": ["Design","Workshops","Facilitation"],
+    "summary": "Build trust fast, plan for surprises, transfer ownership, avoid ‘comment tennis’, and match timing to thinking mode.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#facilitation-principles",
+    "pinned": false,
+    "content": "### Facilitation Principles That Actually Work\n\nFacilitation isn’t just about running a meeting — it’s about creating the conditions where people feel safe, energised, and able to contribute.\n\n#### Some of my favourites\n- **Build trust fast** — psychological safety first.\n- **Plan for surprises** — treat the unexpected as an opportunity.\n- **Transfer ownership** — it’s *their* session.\n- **Avoid ‘comment tennis’** — keep it inclusive.\n- **Match timing to thinking mode** — explore, create, decide.\n\n**Companion reads**: [‘Yes, and…’ Ground Rules](#yes-and) and [Outputs vs Outcomes](#outputs-vs-outcomes)."
+  },
+  {
+    "id": "design-thinking-for-everyone",
+    "title": "Design Thinking for Everyone: Becoming a Design Advocate",
+    "date": "2023-04-22",
+    "tags": ["Design","UX"],
+    "summary": "Great ideas come from everywhere. When non‑design roles join the process, the work gets sharper and faster.",
+    "image": "../assets/blog/placeholder.jpg",
+    "share": "https://lachlanmackenzie.me/blog.html#design-thinking-for-everyone",
+    "pinned": false,
+    "content": "### Design Thinking for Everyone: Becoming a Design Advocate\n\nYou don’t have to be a designer to use design thinking. Some of the best ideas I’ve seen came from finance, HR, operations — even legal.\n\nWhen the whole team shares a human‑centred mindset, it’s easier to:\n- Make better decisions faster\n- Stay focused on user value\n- Build cross‑functional trust\n\n**Next**: [Applying Design Thinking to Everyday Problems](#design-thinking) and [How Might We](#how-might-we)."
+  }
+]

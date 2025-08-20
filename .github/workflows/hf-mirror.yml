@@ -1,48 +1,60 @@
 name: Mirror from Hugging Face Space to GitHub
 
 on:
-  workflow_dispatch:            # run manually from the Actions tab
-  schedule:
-    - cron:  '*/30 * * * *'     # every 30 min (edit or delete as you like)
+  workflow_dispatch:
 
-# ---- this line gives the workflow permission to push ----
+
 permissions:
   contents: write
+  actions:  write
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-
     steps:
-      # 1 Check out the GitHub repo
+      # 1 ▸ checkout GitHub repo
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0           # need full history for fast-forward
+        with: { fetch-depth: 0 }
 
-      # 2 Set an identity for the commits the workflow might make
+      # 2 ▸ git identity
       - name: Configure git identity
         run: |
           git config --global user.email "sync-bot@users.noreply.github.com"
           git config --global user.name  "HF Sync Bot"
 
-      # 3 Add the Hugging Face Space as a remote (safe if it already exists)
-      - name: Add Hugging Face remote
+      # 3 ▸ stash assets/, workflow, .gitattributes
+      - name: Stash preserved items
+        run: |
+          mkdir -p /tmp/preserve/.github/workflows
+          [ -d assets ]                          && mv assets /tmp/preserve/
+          [ -f .gitattributes ]                  && cp .gitattributes /tmp/preserve/
+          [ -f .github/workflows/hf-mirror.yml ] && cp .github/workflows/hf-mirror.yml /tmp/preserve/.github/workflows/
+
+      # 4 ▸ fetch HF repo
+      - name: Fetch Hugging Face repo
         run: |
           git remote add hf https://huggingface.co/spaces/lachlanmack/portfolio || true
-
-      # 4 Fetch HF → attempt fast-forward → if that fails, hard-reset & force-push
-      - name: Sync main with hf/main
-        run: |
-          set -e
           git fetch hf main
-          git checkout main
 
-          # Try a normal fast-forward first
-          if git merge --ff-only hf/main; then
-            echo "Fast-forward succeeded ⇒ pushing normally"
-            git push origin main
+      # 5 ▸ hard-reset main to hf/main
+      - name: Reset to hf/main
+        run: git checkout -B main hf/main
+
+      # 6 ▸ restore preserved items (rsync handles dot-files)
+      - name: Restore preserved items
+        run: |
+          rsync -a /tmp/preserve/ ./
+          git add assets .gitattributes .github/workflows/hf-mirror.yml 2>/dev/null || true
+
+      # 7 ▸ commit if needed
+      - name: Commit restore (if needed)
+        run: |
+          if ! git diff --cached --quiet; then
+            git commit -m "Preserve assets/, workflow & .gitattributes during HF mirror"
           else
-            echo "Histories unrelated ⇒ hard-resetting to hf/main and force-pushing once"
-            git reset --hard hf/main
-            git push --force origin main
+            echo "Nothing to commit"
           fi
+
+      # 8 ▸ push
+      - name: Push mirror to GitHub
+        run: git push --force origin main
