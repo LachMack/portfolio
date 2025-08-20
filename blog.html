@@ -1,36 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Favicons (reuse site assets) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Meta -->
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Lachlan Mackenzie – Blog</title>
   <meta name="description" content="Thoughts on design, leadership and human‑centred work." />
-
-  <!-- Tailwind (with plugins for typography and line clamping) -->
-  <script src="https://cdn.tailwindcss.com?plugins=typography,line-clamp"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
   <!-- Social previews -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Lachlan Mackenzie – Blog" />
   <meta property="og:description" content="Thoughts on design, leadership and human‑centred work." />
-  <meta property="og:image" content="https://lachlanmackenzie.me/assets/blog/header.png" />
+  <meta property="og:image" content="assets/blog/header.png" />
   <meta property="og:url" content="https://lachlanmackenzie.me/blog.html" />
   <meta name="twitter:card" content="summary_large_image" />
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    "name": "Lachlan Mackenzie – Blog",
-    "url": "https://lachlanmackenzie.me/blog.html",
-    "description": "Insights on design, leadership and human-centred work.",
-    "publisher": {"@type": "Person", "name": "Lachlan Mackenzie"}
-  }
-  </script>
+
+  <!-- Tailwind + Icons -->
+  <script src="https://cdn.tailwindcss.com?plugins=typography,line-clamp"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
 
   <style>
-    /* Only a couple of tiny helpers—everything else is Tailwind classes */
-    .modal-open { overflow: hidden; }
+    .modal-open { overflow:hidden; }
+    .gradient-text { background:linear-gradient(90deg,#FF4D4D 0%,#F9CB28 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    a[href*="deepsite"], body > p:last-child { display:none !important; } /* hide injected credit if present */
   </style>
 </head>
 <body class="bg-black text-white">
@@ -44,6 +42,17 @@
       </nav>
     </div>
   </header>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <img src="assets/blog/header.png" alt="" class="w-full h-56 md:h-72 object-cover opacity-60">
+    <div class="absolute inset-0 grid place-items-center">
+      <div class="text-center px-6">
+        <h2 class="text-4xl md:text-6xl font-bold mb-2"><span class="gradient-text">Insights & Stories</span></h2>
+        <p class="text-gray-300">A collection of thoughts on design, leadership and the craft of human‑centred work.</p>
+      </div>
+    </div>
+  </section>
 
   <main class="max-w-6xl mx-auto px-6 py-10">
     <!-- Controls -->
@@ -67,8 +76,7 @@
   <!-- Modal -->
   <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4" aria-hidden="true">
     <article class="bg-gray-900 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-auto relative shadow-2xl">
-      <button id="close" class="absolute top-4 right-4 text-gray-400 hover:text-white focus:outline-none"
-              aria-label="Close">
+      <button id="close" class="absolute top-4 right-4 text-gray-400 hover:text-white focus:outline-none" aria-label="Close">
         <i class="fas fa-times text-2xl"></i>
       </button>
       <img id="m-img" class="w-full h-60 object-cover rounded-t-2xl" alt="">
@@ -84,173 +92,172 @@
   </div>
 
   <script>
-  // -------- State & element refs --------
-  const state = { all: [], filtered: [], activeTags: new Set(), q: "" };
+    // ---- State ----
+    const state = { all: [], filtered: [], tags: new Set(), active: new Set(), q: "" };
 
-  const els = {
-    grid:   document.getElementById('grid'),
-    empty:  document.getElementById('empty'),
-    search: document.getElementById('search'),
-    tags:   document.getElementById('tag-row'),
-    modal:  document.getElementById('modal'),
-    close:  document.getElementById('close'),
-    mImg:   document.getElementById('m-img'),
-    mTitle: document.getElementById('m-title'),
-    mDate:  document.getElementById('m-date'),
-    mTags:  document.getElementById('m-tags'),
-    mContent: document.getElementById('m-content')
-  };
+    // ---- Elements ----
+    const els = {
+      grid: document.getElementById('grid'),
+      empty: document.getElementById('empty'),
+      search: document.getElementById('search'),
+      tags: document.getElementById('tag-row'),
+      modal: document.getElementById('modal'),
+      close: document.getElementById('close'),
+      mImg: document.getElementById('m-img'),
+      mTitle: document.getElementById('m-title'),
+      mDate: document.getElementById('m-date'),
+      mTags: document.getElementById('m-tags'),
+      mContent: document.getElementById('m-content')
+    };
 
-  // -------- Fetch posts --------
-  fetch('assets/posts.json')
-    .then(r => r.json())
-    .then(data => {
-      // Sort: pinned first, then by date desc
-      data.sort((a, b) => {
-        if ((b.pinned|0) - (a.pinned|0)) return (b.pinned|0) - (a.pinned|0);
-        return (b.date || '').localeCompare(a.date || '');
+    // ---- Load posts ----
+    fetch('assets/posts.json')
+      .then(r => r.json())
+      .then(data => {
+        // sort: pinned first then by date desc
+        data.sort((a, b) => {
+          const pin = (b.pinned|0) - (a.pinned|0);
+          if (pin) return pin;
+          return new Date(b.date || 0) - new Date(a.date || 0);
+        });
+        state.all = data;
+        buildTagSet();
+        renderTags();
+        apply();
+        openFromHash();
+      })
+      .catch(() => {
+        els.empty.textContent = "Couldn’t load assets/posts.json";
+        els.empty.classList.remove('hidden');
       });
-      state.all = data;
-      renderTags();
-      applyFilters();
-      restoreFromHash();
-    })
-    .catch(err => {
-      console.error(err);
-      els.empty.textContent = "Couldn’t load assets/posts.json";
-      els.empty.classList.remove('hidden');
-    });
 
-  // -------- Tags rendering / toggling --------
-  function renderTags() {
-    const set = new Set();
-    state.all.forEach(p => (p.tags || []).forEach(t => set.add(t)));
-    els.tags.innerHTML = "";
-    [...set].sort().forEach(tag => {
-      const btn = document.createElement('button');
-      btn.className = 'inline-flex items-center px-3 py-1 rounded-full bg-gray-800 text-sm cursor-pointer hover:bg-gray-700 transition';
-      btn.textContent = tag;
-      btn.setAttribute('aria-pressed', 'false');
-      btn.onclick = () => {
-        const active = btn.getAttribute('aria-pressed') === 'true';
-        if (active) {
-          state.activeTags.delete(tag);
-          btn.setAttribute('aria-pressed','false');
-          btn.classList.remove('bg-pink-600','text-white');
-        } else {
-          state.activeTags.add(tag);
-          btn.setAttribute('aria-pressed','true');
-          btn.classList.add('bg-pink-600','text-white');
-        }
-        applyFilters();
-      };
-      els.tags.appendChild(btn);
-    });
-  }
-
-  // -------- Search --------
-  els.search.addEventListener('input', (e) => {
-    state.q = e.target.value.toLowerCase();
-    applyFilters();
-  });
-
-  // -------- Filtering & grid render --------
-  function applyFilters() {
-    const tags = state.activeTags;
-    const q = state.q;
-    state.filtered = state.all.filter(p => {
-      const matchesTags = tags.size === 0 || (p.tags||[]).some(t => tags.has(t));
-      const hay = (p.title + ' ' + (p.summary||'') + ' ' + (p.content||'')).toLowerCase();
-      const matchesQ = !q || hay.includes(q);
-      return matchesTags && matchesQ;
-    });
-    renderGrid();
-  }
-
-  function tagChip(t){ return `<span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-800 text-sm">${t}</span>`; }
-  function html(strings, ...vals) { return strings.map((s,i)=> s + (vals[i] ?? '')).join(''); }
-
-  function renderGrid() {
-    els.grid.innerHTML = "";
-    if (state.filtered.length === 0) {
-      els.empty.classList.remove('hidden');
-      return;
+    // ---- Tags ----
+    function buildTagSet(){
+      state.tags = new Set();
+      state.all.forEach(p => (p.tags||[]).forEach(t => state.tags.add(t)));
     }
-    els.empty.classList.add('hidden');
 
-    state.filtered.forEach(p => {
-      const img = p.image && p.image.trim() ? p.image : '../assets/blog/placeholder.jpg';
-      const el = document.createElement('article');
-      el.className = 'bg-gray-900 rounded-2xl overflow-hidden flex flex-col border border-white/5';
-      el.innerHTML = html`
-        <img src="${img}" alt="${p.title}" class="w-full h-48 object-cover">
-        <div class="p-5 flex-1 flex flex-col">
-          <div class="text-xs text-gray-400 mb-2">${(p.date||'').replace(/-/g,'/')}</div>
-          <h2 class="text-xl font-bold mb-2">${p.title}</h2>
-          <p class="text-gray-300 mb-4 line-clamp-3">${p.summary||''}</p>
-          <div class="mt-auto flex items-center justify-between">
-            <div class="flex flex-wrap gap-2">
-              ${(p.tags||[]).slice(0,3).map(tagChip).join('')}
-            </div>
-            <button class="text-pink-400 font-semibold hover:underline" aria-label="Read ${p.title}">
-              Read →
-            </button>
-          </div>
-        </div>
-      `;
-      el.querySelector('button').onclick = () => openModal(p);
-      els.grid.appendChild(el);
+    function renderTags(){
+      els.tags.innerHTML = '';
+      [...state.tags].sort().forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'px-3 py-1 rounded-full bg-gray-800 text-sm hover:bg-gray-700 transition';
+        btn.textContent = tag;
+        btn.dataset.tag = tag;
+        btn.onclick = () => { toggleTag(tag, btn); };
+        els.tags.appendChild(btn);
+      });
+    }
+
+    function toggleTag(tag, btn){
+      if (state.active.has(tag)) {
+        state.active.delete(tag);
+        btn.classList.remove('bg-pink-600','text-white');
+      } else {
+        state.active.add(tag);
+        btn.classList.add('bg-pink-600','text-white');
+      }
+      apply();
+    }
+
+    // ---- Search ----
+    els.search.addEventListener('input', (e) => {
+      state.q = e.target.value.toLowerCase().trim();
+      apply();
     });
-  }
 
-  // -------- Modal logic --------
-  function openModal(p) {
-    const img = p.image && p.image.trim() ? p.image : '../assets/blog/placeholder.jpg';
-    els.mImg.src = img;
-    els.mImg.alt = p.title;
-    els.mTitle.textContent = p.title;
-    els.mDate.textContent = (p.date||'').replace(/-/g,'/');
-    els.mTags.innerHTML = (p.tags||[]).map(tagChip).join('');
-    els.mContent.classList.add('prose','prose-invert');
-    els.mContent.innerHTML = markedToHtml(p.content||'');
-    els.modal.classList.remove('hidden');
-    els.modal.classList.add('flex');
-    document.body.classList.add('modal-open');
-    location.hash = p.id || '';
-  }
+    // ---- Filter + render ----
+    function apply(){
+      const q = state.q;
+      const active = state.active;
+      state.filtered = state.all.filter(p => {
+        const matchTags = active.size === 0 || (p.tags||[]).some(t => active.has(t));
+        const hay = (p.title + ' ' + (p.summary||'') + ' ' + (p.content||'')).toLowerCase();
+        const matchQ = !q || hay.includes(q);
+        return matchTags && matchQ;
+      });
+      renderGrid();
+    }
 
-  function closeModal() {
-    els.modal.classList.add('hidden');
-    els.modal.classList.remove('flex');
-    document.body.classList.remove('modal-open');
-    if (location.hash) history.pushState("", document.title, window.location.pathname + window.location.search);
-  }
+    function chip(t){ return `<span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-800 text-sm">${t}</span>`; }
+    function html(strings,...vals){ return strings.map((s,i)=>s+(vals[i]??'')).join(''); }
 
-  els.close.addEventListener('click', closeModal);
-  els.modal.addEventListener('click', (e)=>{ if(e.target===els.modal) closeModal(); });
-  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+    function renderGrid(){
+      els.grid.innerHTML = '';
+      if (!state.filtered.length){ els.empty.classList.remove('hidden'); return; }
+      els.empty.classList.add('hidden');
 
-  function restoreFromHash() {
-    const id = location.hash.replace('#','').trim();
-    if (!id) return;
-    const p = state.all.find(x => (x.id||'') === id);
-    if (p) openModal(p);
-  }
+      state.filtered.forEach(p => {
+        const el = document.createElement('article');
+        el.className = 'bg-gray-900 rounded-2xl overflow-hidden flex flex-col border border-white/5';
+        const img = p.image && p.image.trim() ? p.image : 'assets/blog/placeholder.jpg';
+        el.innerHTML = html`
+          <img src="${img}" alt="${p.title}" class="w-full h-48 object-cover">
+          <div class="p-5 flex-1 flex flex-col">
+            <div class="text-xs text-gray-400 mb-2">${formatDate(p.date)}</div>
+            <h2 class="text-xl font-bold mb-2">${p.title}</h2>
+            <p class="text-gray-300 mb-4 line-clamp-3">${p.summary||''}</p>
+            <div class="mt-auto flex items-center justify-between">
+              <div class="flex flex-wrap gap-2">${(p.tags||[]).slice(0,3).map(chip).join('')}</div>
+              <button class="text-pink-400 font-semibold hover:underline">Read →</button>
+            </div>
+          </div>`;
+        el.querySelector('button').onclick = () => openModal(p);
+        els.grid.appendChild(el);
+      });
+    }
 
-  // -------- Tiny Markdown → HTML (headings, bold/italic, links, lists, paragraphs) --------
-  function markedToHtml(md='') {
-    let h = md
-      .replace(/^### (.*)$/gm, '<h3 class="text-xl font-bold mt-6 mb-3">$1</h3>')
-      .replace(/^## (.*)$/gm, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>')
-      .replace(/^# (.*)$/gm, '<h1 class="text-3xl font-bold mt-6 mb-3">$1</h1>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-    h = h.replace(/(^|\n)- (.*)/g, '$1<li>$2</li>');
-    h = h.replace(/(<li>.*<\/li>)(\s*(<li>.*<\/li>))+/gs, m => `<ul class="list-disc pl-5 space-y-1">${m}</ul>`);
-    h = h.replace(/^(?!<h\d|<ul|<li|<p|<blockquote|<\/)(.+)$/gm, '<p>$1</p>');
-    return h;
-  }
+    function formatDate(d){
+      if (!d) return '';
+      try {
+        return new Date(d).toLocaleDateString('en-AU', {year:'numeric', month:'short', day:'numeric'});
+      } catch { return d.replace(/-/g,'/'); }
+    }
+
+    // ---- Modal ----
+    function openModal(p){
+      const img = p.image && p.image.trim() ? p.image : 'assets/blog/placeholder.jpg';
+      els.mImg.src = img; els.mImg.alt = p.title;
+      els.mTitle.textContent = p.title;
+      els.mDate.textContent = formatDate(p.date);
+      els.mTags.innerHTML = (p.tags||[]).map(chip).join('');
+      els.mContent.innerHTML = mdToHtml(p.content || '');
+      els.modal.classList.remove('hidden'); els.modal.classList.add('flex');
+      document.body.classList.add('modal-open');
+      if (p.id) location.hash = p.id;
+    }
+    function closeModal(){
+      els.modal.classList.add('hidden'); els.modal.classList.remove('flex');
+      document.body.classList.remove('modal-open');
+      if (location.hash) history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
+    els.close.addEventListener('click', closeModal);
+    els.modal.addEventListener('click', e => { if (e.target === els.modal) closeModal(); });
+    addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    function openFromHash(){
+      const id = location.hash.slice(1);
+      if (!id) return;
+      const p = state.all.find(x => (x.id||'') === id);
+      if (p) openModal(p);
+    }
+
+    // ---- Lightweight Markdown -> HTML (headings, bold/italic, links, lists, paras) ----
+    function mdToHtml(md=''){
+      let h = md
+        .replace(/^### (.*)$/gm, '<h3 class="text-xl font-bold mt-6 mb-3">$1</h3>')
+        .replace(/^## (.*)$/gm, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>')
+        .replace(/^# (.*)$/gm, '<h1 class="text-3xl font-bold mt-6 mb-3">$1</h1>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      // simple lists
+      h = h.replace(/(^|\n)- (.*)/g, '$1<li>$2</li>');
+      h = h.replace(/(<li>.*<\/li>)(\s*(<li>.*<\/li>))+/gs, m => `<ul class="list-disc pl-5 space-y-1">${m}</ul>`);
+      // paragraphs
+      h = h.replace(/^(?!<h\d|<ul|<li|<p|<blockquote|<\/)(.+)$/gm, '<p>$1</p>');
+      return h;
+    }
   </script>
 </body>
 </html>
