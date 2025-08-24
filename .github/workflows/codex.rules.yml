@@ -1,0 +1,14 @@
+allow:
+  - "*.html"
+  - "assets/**/*.json"
+  - "assets/**/*.md"
+deny:
+  - ".github/**"
+  - "assets/me/**"
+style:
+  - "Keep Australian spelling."
+  - "Tone: friendly, collaborative, informed."
+  - "Preserve existing Tailwind classes and structure unless asked."
+tests:
+  - "No broken relative links."
+  - "Valid JSON for assets/posts.json."
