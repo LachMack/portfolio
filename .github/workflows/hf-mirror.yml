@@ -1,60 +1,39 @@
-name: Mirror from Hugging Face Space to GitHub
-
+name: Import from Hugging Face (manual)
 on:
   workflow_dispatch:
-
-
-permissions:
-  contents: write
-  actions:  write
+    inputs:
+      url:
+        description: "Public URL to fetch (e.g. resolved blog.html)"
+        required: true
+      path:
+        description: "Repo file path to overwrite (e.g. blog.html)"
+        required: true
 
 jobs:
-  sync:
+  pull-hf:
     runs-on: ubuntu-latest
     steps:
-      # 1 ▸ checkout GitHub repo
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
 
-      # 2 ▸ git identity
-      - name: Configure git identity
+      - name: Download file
         run: |
-          git config --global user.email "sync-bot@users.noreply.github.com"
-          git config --global user.name  "HF Sync Bot"
+          curl -L "${{ inputs.url }}" -o _import.tmp
 
-      # 3 ▸ stash assets/, workflow, .gitattributes
-      - name: Stash preserved items
+      - name: Commit to staging
         run: |
-          mkdir -p /tmp/preserve/.github/workflows
-          [ -d assets ]                          && mv assets /tmp/preserve/
-          [ -f .gitattributes ]                  && cp .gitattributes /tmp/preserve/
-          [ -f .github/workflows/hf-mirror.yml ] && cp .github/workflows/hf-mirror.yml /tmp/preserve/.github/workflows/
+          git checkout -B staging
+          mv _import.tmp "${{ inputs.path }}"
+          git config user.name "actions-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add "${{ inputs.path }}"
+          git commit -m "Import from HF: ${{ inputs.path }}"
+          git push -f origin staging
 
-      # 4 ▸ fetch HF repo
-      - name: Fetch Hugging Face repo
-        run: |
-          git remote add hf https://huggingface.co/spaces/lachlanmack/portfolio || true
-          git fetch hf main
-
-      # 5 ▸ hard-reset main to hf/main
-      - name: Reset to hf/main
-        run: git checkout -B main hf/main
-
-      # 6 ▸ restore preserved items (rsync handles dot-files)
-      - name: Restore preserved items
-        run: |
-          rsync -a /tmp/preserve/ ./
-          git add assets .gitattributes .github/workflows/hf-mirror.yml 2>/dev/null || true
-
-      # 7 ▸ commit if needed
-      - name: Commit restore (if needed)
-        run: |
-          if ! git diff --cached --quiet; then
-            git commit -m "Preserve assets/, workflow & .gitattributes during HF mirror"
-          else
-            echo "Nothing to commit"
-          fi
-
-      # 8 ▸ push
-      - name: Push mirror to GitHub
-        run: git push --force origin main
+      - name: Open PR from staging to main
+        uses: peter-evans/create-pull-request@v6
+        with:
+          base: main
+          branch: staging
+          title: "Import from HF → ${{ inputs.path }}"
+          body: "Manually imported from Hugging Face. Review diffs & preview before merge."
+          commit-message: "Import from HF"
