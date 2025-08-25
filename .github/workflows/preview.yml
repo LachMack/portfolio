@@ -20,10 +20,14 @@ jobs:
 
       # If you add a build later, output to _site/
       - name: Prepare static site
+        shell: bash
         run: |
           mkdir -p _site
-          shopt -s dotglob
-          cp -R * _site
+          # enable extended globs so we can exclude folders
+          shopt -s dotglob extglob
+          # copy everything EXCEPT _site, .git and .github into _site/
+          cp -R !( _site|.git|.github ) _site/
+
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
