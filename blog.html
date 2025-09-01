@@ -28,6 +28,7 @@
   <style>
     .modal-open { overflow:hidden; }
     .gradient-text { background:linear-gradient(90deg,#FF4D4D 0%,#F9CB28 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .text-outline { -webkit-text-stroke:1px #fff; color:transparent; }
     a[href*="deepsite"], body > p:last-child { display:none !important; } /* hide injected credit if present */
   </style>
 </head>
@@ -80,6 +81,9 @@
         <i class="fas fa-times text-2xl"></i>
       </button>
       <img id="m-img" class="w-full h-60 object-cover rounded-t-2xl" alt="">
+      <div id="m-placeholder" class="w-full h-60 flex items-center justify-center bg-gray-900 rounded-t-2xl hidden">
+        <div class="text-outline text-8xl font-bold opacity-10">LM</div>
+      </div>
       <div class="p-6">
         <header class="mb-4">
           <h2 id="m-title" class="text-2xl font-bold"></h2>
@@ -104,6 +108,7 @@
       modal: document.getElementById('modal'),
       close: document.getElementById('close'),
       mImg: document.getElementById('m-img'),
+      mPlaceholder: document.getElementById('m-placeholder'),
       mTitle: document.getElementById('m-title'),
       mDate: document.getElementById('m-date'),
       mTags: document.getElementById('m-tags'),
@@ -190,9 +195,12 @@
       state.filtered.forEach(p => {
         const el = document.createElement('article');
         el.className = 'bg-gray-900 rounded-2xl overflow-hidden flex flex-col border border-white/5';
-        const img = p.image && p.image.trim() ? p.image : 'assets/blog/placeholder.jpg';
+        const hasImg = p.image && p.image.trim();
+        const media = hasImg
+          ? `<img src="${p.image}" alt="${p.title}" class="w-full h-48 object-cover">`
+          : `<div class="w-full h-48 flex items-center justify-center bg-gray-900"><div class="text-outline text-6xl font-bold opacity-10">LM</div></div>`;
         el.innerHTML = html`
-          <img src="${img}" alt="${p.title}" class="w-full h-48 object-cover">
+          ${media}
           <div class="p-5 flex-1 flex flex-col">
             <div class="text-xs text-gray-400 mb-2">${formatDate(p.date)}</div>
             <h2 class="text-xl font-bold mb-2">${p.title}</h2>
@@ -216,8 +224,14 @@
 
     // ---- Modal ----
     function openModal(p){
-      const img = p.image && p.image.trim() ? p.image : 'assets/blog/placeholder.jpg';
-      els.mImg.src = img; els.mImg.alt = p.title;
+      if (p.image && p.image.trim()) {
+        els.mImg.src = p.image; els.mImg.alt = p.title;
+        els.mImg.classList.remove('hidden');
+        els.mPlaceholder.classList.add('hidden');
+      } else {
+        els.mImg.classList.add('hidden');
+        els.mPlaceholder.classList.remove('hidden');
+      }
       els.mTitle.textContent = p.title;
       els.mDate.textContent = formatDate(p.date);
       els.mTags.innerHTML = (p.tags||[]).map(chip).join('');
