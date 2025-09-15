@@ -16,7 +16,381 @@
   <!-- Social previews -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Lachlan Mackenzie – Blog" />
+  <meta property="og:description" content="Thoughts on design, leadership and human-centred work." /><!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Meta -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Lachlan Mackenzie – Blog</title>
+  <meta name="description" content="Thoughts on design, leadership and human-centred work." />
+
+  <!-- Social previews -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Lachlan Mackenzie – Blog" />
   <meta property="og:description" content="Thoughts on design, leadership and human-centred work." />
+  <meta property="og:image" content="assets/blog/header.png" />
+  <meta property="og:url" content="https://lachlanmackenzie.me/blog.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Tailwind + Icons -->
+  <script src="https://cdn.tailwindcss.com?plugins=typography,line-clamp"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
+
+  <style>
+    :root { --hero-font: inherit; }
+    .modal-open { overflow:hidden; }
+    .gradient-text { background:linear-gradient(90deg,#FF4D4D 0%,#F9CB28 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    a[href*="deepsite"], body > p:last-child { display:none !important; } /* hide injected credit if present */
+
+    /* Watermark font via --hero-font (inherited from hero heading) */
+    .lm-watermark { font-family: var(--hero-font); letter-spacing: -0.04em; user-select:none; pointer-events:none; }
+
+    /* Subtle texture over hero (optional) */
+    .grain:before{
+      content:""; position:absolute; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 0 0.04 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay; opacity:.35;
+    }
+
+    /* Image fallback container */
+    .img-fallback{
+      background: radial-gradient(120% 100% at 50% 0%, #101010 0%, #050505 70%);
+      display:grid; place-items:center;
+    }
+
+    /* Scroll indicator (shared) */
+    @keyframes scrollNudge {
+      0%, 20%   { transform: translateY(0); opacity:.9; }
+      100%      { transform: translateY(10px); opacity:.1; }
+    }
+    .scroll-indicator .wheel {
+      animation: scrollNudge 1.4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-black text-white">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 backdrop-blur bg-black/70 border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="font-semibold tracking-wide hover:text-gray-300">← Home</a>
+      <h1 class="text-xl md:text-2xl font-bold">Blog</h1>
+      <nav class="hidden md:block">
+        <a href="blog.html" class="text-sm text-gray-300 hover:text-white">All posts</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden grain">
+    <div class="relative w-full h-56 md:h-72">
+      <img id="hero-img" src="assets/blog/header.png" alt="" class="w-full h-full object-cover opacity-60">
+      <!-- Outline LM sits underneath copy; shown if image fails (and okay if it loads) -->
+      <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <svg class="w-[80vw] max-w-[1100px]" viewBox="0 0 100 30" aria-hidden="true">
+          <!-- Outline “LM” centred -->
+          <text x="50" y="20"
+                text-anchor="middle"
+                dominant-baseline="middle"
+                class="lm-watermark"
+                style="fill:none; stroke:rgba(255,255,255,.25); stroke-width:.6;">
+            LM
+          </text>
+        </svg>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="absolute inset-x-0 bottom-3 flex justify-center">
+        <div class="scroll-indicator opacity-80">
+          <!-- Mouse outline + animated wheel -->
+          <div class="w-6 h-9 rounded-full border border-white/50 flex items-start justify-center mx-auto">
+            <div class="wheel w-1 h-2 bg-white/80 rounded-full mt-1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="absolute inset-0 grid place-items-center">
+      <div class="text-center px-6">
+        <h2 id="hero-heading" class="text-4xl md:text-6xl font-bold mb-2">
+          <span class="gradient-text">Insights & Stories</span>
+        </h2>
+        <p class="text-gray-300">A collection of thoughts on design, leadership and the craft of human-centred work.</p>
+      </div>
+    </div>
+  </section>
+
+  <main class="max-w-6xl mx-auto px-6 py-10">
+    <!-- Controls -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div class="relative w-full md:w-1/2">
+        <input id="search" type="search" placeholder="Search posts…"
+               class="w-full rounded-xl bg-gray-900 border border-white/10 px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-pink-500"
+               aria-label="Search posts">
+        <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+      <div id="tag-row" class="flex flex-wrap gap-2"></div>
+    </div>
+
+    <!-- Grid -->
+    <section id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></section>
+
+    <!-- Empty state -->
+    <div id="empty" class="hidden text-center py-20 text-gray-400">No posts match that search.</div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4" aria-hidden="true">
+    <article class="bg-gray-900 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-auto relative shadow-2xl">
+      <button id="close" class="absolute top-4 right-4 text-gray-400 hover:text-white focus:outline-none" aria-label="Close">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+      <div class="w-full h-60 overflow-hidden relative">
+        <img id="m-img" class="w-full h-60 object-cover" alt="" loading="eager" decoding="async">
+      </div>
+      <div class="p-6">
+        <header class="mb-4">
+          <h2 id="m-title" class="text-2xl font-bold"></h2>
+          <time id="m-date" class="text-sm text-gray-400"></time>
+          <div id="m-tags" class="mt-3 flex flex-wrap gap-2"></div>
+        </header>
+        <div id="m-content" class="prose prose-invert max-w-none"></div>
+      </div>
+    </article>
+  </div>
+
+  <script>
+    // ---- State ----
+    const state = { all: [], filtered: [], tags: new Set(), active: new Set(), q: "" };
+
+    // ---- Elements ----
+    const els = {
+      grid: document.getElementById('grid'),
+      empty: document.getElementById('empty'),
+      search: document.getElementById('search'),
+      tags: document.getElementById('tag-row'),
+      modal: document.getElementById('modal'),
+      close: document.getElementById('close'),
+      mImg: document.getElementById('m-img'),
+      mTitle: document.getElementById('m-title'),
+      mDate: document.getElementById('m-date'),
+      mTags: document.getElementById('m-tags'),
+      mContent: document.getElementById('m-content'),
+      heroImg: document.getElementById('hero-img'),
+      heroHeading: document.getElementById('hero-heading')
+    };
+
+    // ---- Outline SVG placeholder (stroke only, matches hero font) ----
+    function lmOutlineSVG({w=1200,h=720,text='LM', stroke='rgba(255,255,255,0.28)', sw=10}={}){
+      const g1 = '%23101010', g2 = '%23050505';
+      const ff = getComputedStyle(document.documentElement).getPropertyValue('--hero-font').trim().replace(/['"]/g,'').replace(/ /g,'%20') || 'inherit';
+      // Note: use stroke only, no fill
+      return `data:image/svg+xml;utf8,` +
+        `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'>` +
+        `<defs><linearGradient id='g' x1='0' x2='0' y1='0' y2='1'><stop offset='0%' stop-color='${g1}'/><stop offset='100%' stop-color='${g2}'/></linearGradient></defs>` +
+        `<rect width='100%' height='100%' fill='url(%23g)'/>` +
+        `<g font-family='${ff}' font-weight='900' text-anchor='middle' dominant-baseline='middle'>` +
+        `<text x='50%' y='52%' font-size='${Math.min(w,h)*0.6}' fill='none' stroke='${stroke.replace('#','%23')}' stroke-width='${sw}' paint-order='stroke'>${text}</text>` +
+        `</g></svg>`;
+    }
+    const FALLBACK = () => lmOutlineSVG({});
+
+    // ---- Attach a one-shot image fallback to an <img> ----
+    function attachImgFallback(img){
+      if (!img) return;
+      img.loading = img.loading || 'lazy';
+      img.decoding = img.decoding || 'async';
+      img.addEventListener('error', function onErr(){
+        img.removeEventListener('error', onErr);
+        img.src = FALLBACK();
+        img.alt = img.alt || 'Placeholder';
+        const wrap = img.parentElement;
+        if (wrap){
+          wrap.classList.add('img-fallback');
+        }
+      }, { once: true });
+    }
+    // Safe image resolver when the post is missing or blank
+    function safePostImage(p){ return (p && p.image && String(p.image).trim()) ? p.image : FALLBACK(); }
+
+    // ---- Inherit hero font from the live page ----
+    function setHeroFontFromComputed(){
+      const probe = els.heroHeading || document.querySelector('h1, h2') || document.body;
+      const fam = getComputedStyle(probe).fontFamily;
+      if (fam) document.documentElement.style.setProperty('--hero-font', fam);
+    }
+
+    // ---- Load posts ----
+    fetch('assets/posts.json')
+      .then(r => r.json())
+      .then(data => {
+        data.sort((a, b) => {
+          const pin = (b.pinned|0) - (a.pinned|0);
+          if (pin) return pin;
+          return new Date(b.date || 0) - new Date(a.date || 0);
+        });
+        state.all = data;
+        buildTagSet();
+        renderTags();
+        apply();
+        openFromHash();
+      })
+      .catch(() => {
+        els.empty.textContent = "Couldn’t load assets/posts.json";
+        els.empty.classList.remove('hidden');
+      });
+
+    // ---- Tags ----
+    function buildTagSet(){ state.tags = new Set(); state.all.forEach(p => (p.tags||[]).forEach(t => state.tags.add(t))); }
+    function renderTags(){
+      els.tags.innerHTML = '';
+      [...state.tags].sort().forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'px-3 py-1 rounded-full bg-gray-800 text-sm hover:bg-gray-700 transition';
+        btn.textContent = tag;
+        btn.dataset.tag = tag;
+        btn.onclick = () => { toggleTag(tag, btn); };
+        els.tags.appendChild(btn);
+      });
+    }
+    function toggleTag(tag, btn){
+      if (state.active.has(tag)) {
+        state.active.delete(tag);
+        btn.classList.remove('bg-pink-600','text-white');
+      } else {
+        state.active.add(tag);
+        btn.classList.add('bg-pink-600','text-white');
+      }
+      apply();
+    }
+
+    // ---- Search ----
+    els.search.addEventListener('input', (e) => { state.q = e.target.value.toLowerCase().trim(); apply(); });
+
+    // ---- Filter + render ----
+    function apply(){
+      const q = state.q, active = state.active;
+      state.filtered = state.all.filter(p => {
+        const matchTags = active.size === 0 || (p.tags||[]).some(t => active.has(t));
+        const hay = (p.title + ' ' + (p.summary||'') + ' ' + (p.content||'')).toLowerCase();
+        const matchQ = !q || hay.includes(q);
+        return matchTags && matchQ;
+      });
+      renderGrid();
+    }
+
+    function chip(t){ return `<span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-800 text-sm">${t}</span>`; }
+    function html(strings,...vals){ return strings.map((s,i)=>s+(vals[i]??'')).join(''); }
+
+    function renderGrid(){
+      els.grid.innerHTML = '';
+      if (!state.filtered.length){ els.empty.classList.remove('hidden'); return; }
+      els.empty.classList.add('hidden');
+
+      state.filtered.forEach(p => {
+        const el = document.createElement('article');
+        el.className = 'bg-gray-900 rounded-2xl overflow-hidden flex flex-col border border-white/5';
+        const imgSrc = safePostImage(p);
+
+        el.innerHTML = html`
+          <div class="relative w-full h-48 overflow-hidden">
+            <img src="${imgSrc}" alt="${p.title}" class="w-full h-48 object-cover" loading="lazy" decoding="async">
+            <!-- Outline fallback sits inside image if it errors; handled in attachImgFallback -->
+          </div>
+          <div class="p-5 flex-1 flex flex-col">
+            <div class="text-xs text-gray-400 mb-2">${formatDate(p.date)}</div>
+            <h2 class="text-xl font-bold mb-2">${p.title}</h2>
+            <p class="text-gray-300 mb-4 line-clamp-3">${p.summary||''}</p>
+            <div class="mt-auto flex items-center justify-between">
+              <div class="flex flex-wrap gap-2">${(p.tags||[]).slice(0,3).map(chip).join('')}</div>
+              <button class="text-pink-400 font-semibold hover:underline">Read →</button>
+            </div>
+          </div>`;
+
+        attachImgFallback(el.querySelector('img'));
+        el.querySelector('button').onclick = () => openModal(p);
+        els.grid.appendChild(el);
+      });
+    }
+
+    function formatDate(d){
+      if (!d) return '';
+      try { return new Date(d).toLocaleDateString('en-AU', {year:'numeric', month:'short', day:'numeric'}); }
+      catch { return String(d).replace(/-/g,'/'); }
+    }
+
+    // ---- Modal ----
+    function openModal(p){
+      const imgSrc = safePostImage(p);
+      els.mImg.src = imgSrc;
+      els.mImg.alt = p.title;
+      attachImgFallback(els.mImg);
+
+      els.mTitle.textContent = p.title;
+      els.mDate.textContent = formatDate(p.date);
+      els.mTags.innerHTML = (p.tags||[]).map(chip).join('');
+      els.mContent.innerHTML = mdToHtml(p.content || '');
+      els.modal.classList.remove('hidden'); els.modal.classList.add('flex');
+      document.body.classList.add('modal-open');
+      if (p.id) location.hash = p.id;
+    }
+    function closeModal(){
+      els.modal.classList.add('hidden'); els.modal.classList.remove('flex');
+      document.body.classList.remove('modal-open');
+      if (location.hash) history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
+    els.close.addEventListener('click', closeModal);
+    els.modal.addEventListener('click', e => { if (e.target === els.modal) closeModal(); });
+    addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    function openFromHash(){
+      const id = location.hash.slice(1);
+      if (!id) return;
+      const p = state.all.find(x => (x.id||'') === id);
+      if (p) openModal(p);
+    }
+
+    // ---- Markdown → HTML (incl. outline fallback on images) ----
+    function mdToHtml(md=''){
+      md = md.replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
+        const safe = (src && src.trim()) ? src : FALLBACK();
+        const fb = FALLBACK().replace(/'/g,'&#39;');
+        return `<div class="my-4 overflow-hidden rounded-xl border border-white/10 relative">
+                  <img src="${safe}" alt="${alt||''}" class="w-full h-auto" loading="lazy" decoding="async"
+                       onerror="this.onerror=null;this.src='${fb}';this.closest('div').classList.add('img-fallback');">
+                </div>`;
+      });
+
+      let h = md
+        .replace(/^### (.*)$/gm, '<h3 class="text-xl font-bold mt-6 mb-3">$1</h3>')
+        .replace(/^## (.*)$/gm, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>')
+        .replace(/^# (.*)$/gm, '<h1 class="text-3xl font-bold mt-6 mb-3">$1</h1>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      // simple lists
+      h = h.replace(/(^|\n)- (.*)/g, '$1<li>$2</li>');
+      h = h.replace(/(<li>.*<\/li>)(\s*(<li>.*<\/li>))+/gs, m => `<ul class="list-disc pl-5 space-y-1">${m}</ul>`);
+      // paragraphs
+      h = h.replace(/^(?!<h\d|<ul|<li|<p|<blockquote|<img|<\/)(.+)$/gm, '<p>$1</p>');
+      return h;
+    }
+
+    // ---- Init ----
+    document.addEventListener('DOMContentLoaded', () => {
+      setHeroFontFromComputed();
+      attachImgFallback(els.heroImg); // in case hero banner 404s
+    });
+  </script>
+</body>
+</html>
+
   <meta property="og:image" content="assets/blog/header.png" />
   <meta property="og:url" content="https://lachlanmackenzie.me/blog.html" />
   <meta name="twitter:card" content="summary_large_image" />
