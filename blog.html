@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Favicons (reuse site assets) -->
+  <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
@@ -26,41 +26,24 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
 
   <style>
-    :root{
-      /* If your home page uses a specific hero font, set it here to match */
-      --hero-font: inherit; /* e.g., 'Clash Display', 'General Sans', etc. */
-    }
-    .modal-open { overflow: hidden; }
+    :root{ --hero-font: inherit; }
+    .modal-open { overflow:hidden; }
     .gradient-text { background:linear-gradient(90deg,#FF4D4D 0%,#F9CB28 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
     a[href*="deepsite"], body > p:last-child { display:none !important; } /* hide injected credit if present */
 
-    /* Watermark text used in hero & fallbacks */
-    .lm-watermark {
-      font-family: var(--hero-font);
-      letter-spacing: -0.04em;
-      user-select: none;
-      pointer-events: none;
-    }
-    /* Subtle animated grain over hero for a bit of depth (optional) */
+    /* Watermark font matches home page via --hero-font */
+    .lm-watermark { font-family: var(--hero-font); letter-spacing: -0.04em; user-select:none; pointer-events:none; }
+
+    /* Subtle texture over hero (optional) */
     .grain:before{
-      content:"";
-      position:absolute; inset:0;
+      content:""; position:absolute; inset:0;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 0 0.04 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      mix-blend-mode: overlay;
-      opacity:.45;
+      mix-blend-mode: overlay; opacity:.45;
     }
 
-    /* Utility class applied when an <img> has fallen back */
-    .img-fallback{
-      background: radial-gradient(120% 100% at 50% 0%, #1b1b1b 0%, #0d0d0d 70%);
-      display: grid; place-items: center;
-    }
-    .img-fallback .wm{
-      opacity:.08;
-      font-weight: 900;
-      font-family: var(--hero-font);
-      line-height: .9;
-    }
+    /* Image fallback container */
+    .img-fallback{ background: radial-gradient(120% 100% at 50% 0%, #1b1b1b 0%, #0d0d0d 70%); display:grid; place-items:center; }
+    .img-fallback .wm{ opacity:.08; font-weight:900; font-family:var(--hero-font); line-height:.9; }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -77,16 +60,19 @@
 
   <!-- Hero -->
   <section class="relative overflow-hidden grain">
-    <img src="assets/blog/header.png" alt="" class="w-full h-56 md:h-72 object-cover opacity-60" onerror="this.style.display='none'">
-    <!-- Faint LM watermark -->
-    <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
-      <div class="lm-watermark text-white/10 select-none" style="font-size: clamp(6rem, 16vw, 18rem); transform: translateY(-.25em);">
-        <span style="text-shadow: 0 2px 24px rgba(0,0,0,.35);">LM</span>
+    <div class="relative w-full h-56 md:h-72">
+      <img id="hero-img" src="assets/blog/header.png" alt="" class="w-full h-full object-cover opacity-60">
+      <!-- Faint LM watermark always present -->
+      <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div class="lm-watermark text-white/10 select-none" style="font-size: clamp(6rem, 16vw, 18rem); transform: translateY(-.25em);">
+          <span style="text-shadow:0 2px 24px rgba(0,0,0,.35);">LM</span>
+        </div>
       </div>
+      <!-- Fallback overlay gets added here if the image errors -->
     </div>
     <div class="absolute inset-0 grid place-items-center">
       <div class="text-center px-6">
-        <h2 class="text-4xl md:text-6xl font-bold mb-2"><span class="gradient-text">Insights & Stories</span></h2>
+        <h2 id="hero-heading" class="text-4xl md:text-6xl font-bold mb-2"><span class="gradient-text">Insights & Stories</span></h2>
         <p class="text-gray-300">A collection of thoughts on design, leadership and the craft of human-centred work.</p>
       </div>
     </div>
@@ -117,8 +103,7 @@
       <button id="close" class="absolute top-4 right-4 text-gray-400 hover:text-white focus:outline-none" aria-label="Close">
         <i class="fas fa-times text-2xl"></i>
       </button>
-      <!-- Modal image / fallback container -->
-      <div class="w-full h-60 overflow-hidden">
+      <div class="w-full h-60 overflow-hidden relative">
         <img id="m-img" class="w-full h-60 object-cover" alt="" loading="eager" decoding="async">
       </div>
       <div class="p-6">
@@ -148,66 +133,59 @@
       mTitle: document.getElementById('m-title'),
       mDate: document.getElementById('m-date'),
       mTags: document.getElementById('m-tags'),
-      mContent: document.getElementById('m-content')
+      mContent: document.getElementById('m-content'),
+      heroImg: document.getElementById('hero-img'),
+      heroHeading: document.getElementById('hero-heading')
     };
 
-    // ---- Reusable: inline SVG fallback with faint LM ----
-    function lmPlaceholderSVG({w=1200,h=800,text='LM'}={}){
-      const bg1 = '%231b1b1b', bg2 = '%230d0d0d'; // dark gradient
-      const fill = '%23ffffff';
-      const opacity = '0.09';
-      const font = (getComputedStyle(document.documentElement).getPropertyValue('--hero-font') || 'inherit').trim().replace(/ /g,'%20');
-      return `data:image/svg+xml;utf8,
-<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'>
-  <defs>
-    <linearGradient id='g' x1='0' x2='0' y1='0' y2='1'>
-      <stop offset='0%' stop-color='${bg1}'/><stop offset='100%' stop-color='${bg2}'/>
-    </linearGradient>
-  </defs>
-  <rect width='100%' height='100%' fill='url(%23g)'/>
-  <g fill='${fill}' opacity='${opacity}' font-family='${font}' font-weight='900' text-anchor='middle' dominant-baseline='middle'>
-    <text x='50%' y='52%' font-size='${Math.min(w,h)*0.6}'>${text}</text>
-  </g>
-</svg>`.replace(/\n/g,'');
+    // ---- Inline SVG fallback (uses hero font via CSS var) ----
+    function lmPlaceholderSVG({w=1200,h=720,text='LM'}={}){
+      const bg1 = '%231b1b1b', bg2 = '%230d0d0d';
+      const fill = '%23ffffff', opacity = '0.09';
+      // use CSS var (set at runtime) so the watermark matches the home page font
+      const font = getComputedStyle(document.documentElement).getPropertyValue('--hero-font').trim().replace(/['"]/g,'').replace(/ /g,'%20') || 'inherit';
+      return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'><defs><linearGradient id='g' x1='0' x2='0' y1='0' y2='1'><stop offset='0%' stop-color='${bg1}'/><stop offset='100%' stop-color='${bg2}'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g)'/><g fill='${fill}' opacity='${opacity}' font-family='${font}' font-weight='900' text-anchor='middle' dominant-baseline='middle'><text x='50%' y='52%' font-size='${Math.min(w,h)*0.6}'>${text}</text></g></svg>`;
     }
+    const FALLBACK_SRC = lmPlaceholderSVG({});
 
-    const FALLBACK_SRC = lmPlaceholderSVG({w:1200,h:720,text:'LM'});
-
-    // Ensures an <img> swaps to our fallback (once) if it errors
     function attachImgFallback(img){
       if (!img) return;
       img.loading = img.loading || 'lazy';
       img.decoding = img.decoding || 'async';
       img.addEventListener('error', function onErr(){
-        // Prevent loops
         img.removeEventListener('error', onErr);
-        img.src = FALLBACK_SRC;
+        // Set a data-URI fallback, keep the element visible
+        img.src = lmPlaceholderSVG({});
         img.alt = img.alt || 'Placeholder';
-        // Add a watermark overlay feel using a wrapper div
         const wrap = img.parentElement;
         if (wrap){
           wrap.classList.add('img-fallback');
-          // Optional overlay text (extra subtle)
-          const overlay = document.createElement('div');
-          overlay.className = 'wm absolute inset-0 grid place-items-center';
-          overlay.innerHTML = `<span class="wm lm-watermark" style="font-size: clamp(4rem, 14vw, 12rem);">LM</span>`;
-          wrap.style.position = 'relative';
-          wrap.appendChild(overlay);
+          if (!wrap.querySelector('.wm')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'wm absolute inset-0 grid place-items-center';
+            overlay.innerHTML = `<span class="wm lm-watermark" style="font-size: clamp(4rem, 14vw, 12rem);">LM</span>`;
+            wrap.style.position = 'relative';
+            wrap.appendChild(overlay);
+          }
         }
       }, { once: true });
     }
 
-    // Returns a safe src for post image (handles missing/blank)
     function safePostImage(p){
-      const has = p && p.image && String(p.image).trim().length > 0;
-      return has ? p.image : FALLBACK_SRC;
+      return (p && p.image && String(p.image).trim().length) ? p.image : lmPlaceholderSVG({});
+    }
+
+    // ---- Inherit hero font from live page ----
+    function setHeroFontFromComputed(){
+      const probe = els.heroHeading || document.querySelector('h1, h2');
+      const fam = probe ? getComputedStyle(probe).fontFamily : getComputedStyle(document.body).fontFamily;
+      if (fam) document.documentElement.style.setProperty('--hero-font', fam);
     }
 
     // ---- Load posts ----
     fetch('assets/posts.json')
       .then(r => r.json())
       .then(data => {
-        // sort: pinned first then by date desc
         data.sort((a, b) => {
           const pin = (b.pinned|0) - (a.pinned|0);
           if (pin) return pin;
@@ -299,8 +277,7 @@
             </div>
           </div>`;
 
-        const img = el.querySelector('img');
-        attachImgFallback(img); // handle 404s gracefully
+        attachImgFallback(el.querySelector('img'));
         el.querySelector('button').onclick = () => openModal(p);
         els.grid.appendChild(el);
       });
@@ -318,7 +295,6 @@
       const imgSrc = safePostImage(p);
       els.mImg.src = imgSrc;
       els.mImg.alt = p.title;
-      // ensure wrapper styled if we end up on fallback
       attachImgFallback(els.mImg);
 
       els.mTitle.textContent = p.title;
@@ -345,12 +321,14 @@
       if (p) openModal(p);
     }
 
-    // ---- Lightweight Markdown -> HTML (+ images with fallback) ----
+    // ---- Markdown → HTML (incl. image fallback) ----
     function mdToHtml(md=''){
-      // images: ![alt](url)  -> <img ... onerror fallback>
       md = md.replace(/!\[(.*?)\]\((.*?)\)/g, (m, alt, src) => {
-        const safe = (src && src.trim()) ? src : FALLBACK_SRC;
-        return `<div class="my-4 overflow-hidden rounded-xl border border-white/10"><img src="${safe}" alt="${alt||''}" class="w-full h-auto" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${FALLBACK_SRC}';this.closest('div').classList.add('img-fallback');"></div>`;
+        const safe = (src && src.trim()) ? src : lmPlaceholderSVG({});
+        return `<div class="my-4 overflow-hidden rounded-xl border border-white/10 relative">
+                  <img src="${safe}" alt="${alt||''}" class="w-full h-auto" loading="lazy" decoding="async"
+                       onerror="this.onerror=null;this.src='${lmPlaceholderSVG({}).replace(/'/g, '&#39;')}';this.closest('div').classList.add('img-fallback');">
+                </div>`;
       });
 
       let h = md
@@ -360,16 +338,20 @@
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-
-      // simple lists
       h = h.replace(/(^|\n)- (.*)/g, '$1<li>$2</li>');
       h = h.replace(/(<li>.*<\/li>)(\s*(<li>.*<\/li>))+/gs, m => `<ul class="list-disc pl-5 space-y-1">${m}</ul>`);
-
-      // paragraphs
       h = h.replace(/^(?!<h\d|<ul|<li|<p|<blockquote|<img|<\/)(.+)$/gm, '<p>$1</p>');
-
       return h;
     }
+
+    // ---- Init ----
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1) Match hero font from the live page
+      setHeroFontFromComputed();
+
+      // 2) Ensure hero banner never disappears on error
+      attachImgFallback(els.heroImg);
+    });
   </script>
 </body>
 </html>
