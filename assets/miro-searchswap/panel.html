@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Miro Find & Replace — Panel</title>
+    <script src="https://miro.com/app/static/sdk/v2/miro.js"></script>
+    <script defer src="panel.js"></script>
+    <style>
+      :root{--bg:#0f172a;--muted:#94a3b8;--surface:#0b1220;--surface2:#111827;--border:#334155;--text:#e2e8f0;}
+      html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;}
+      .container{padding:16px;display:flex;flex-direction:column;gap:12px;}
+      .row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;}
+      input[type="text"], textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);}
+      textarea{min-height:72px;}
+      .options{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);}
+      .options label{display:flex;gap:8px;align-items:center;cursor:pointer;}
+      .btns{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;}
+      button{padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--surface2);color:var(--text);cursor:pointer;}
+      button.primary{background:#2563eb;border-color:#1e3a8a;}
+      .results{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--surface2);max-height:260px;overflow:auto;}
+      .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted);margin-left:8px;}
+      .small{font-size:12px;color:var(--muted);}
+      .item{border-bottom:1px dashed var(--border);padding:8px 0;}
+      .item:last-child{border-bottom:none;}
+      .counter{font-variant-numeric:tabular-nums;}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <label for="find">Find</label>
+        <input id="find" type="text" placeholder="text or /regex/"/>
+      </div>
+      <div class="row">
+        <label for="replace">Replace</label>
+        <input id="replace" type="text" placeholder="replacement"/>
+      </div>
+      <div class="options">
+        <label><input id="opt-selection" type="checkbox" /> Only within current selection</label>
+        <label><input id="opt-case" type="checkbox" /> Case sensitive</label>
+        <label><input id="opt-whole" type="checkbox" /> Whole word</label>
+        <label><input id="opt-regex" type="checkbox" /> Use regex</label>
+        <label><input id="opt-html" type="checkbox" checked /> Preserve HTML markup</label>
+      </div>
+      <div class="btns">
+        <button id="preview">Preview</button>
+        <button id="replace-all" class="primary">Replace All</button>
+      </div>
+      <div class="small">
+        Supported items: Text, Sticky notes, Shapes (content), Cards (title & description). Others are ignored.
+      </div>
+      <div class="results" id="results">
+        <div class="small">Run a preview to see matches…</div>
+      </div>
+    </div>
+  </body>
+</html>

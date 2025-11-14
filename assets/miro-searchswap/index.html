@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Miro Find & Replace — Launcher</title>
+    <!-- Miro Web SDK v2 -->
+    <script src="https://miro.com/app/static/sdk/v2/miro.js"></script>
+    <script defer src="index.js"></script>
+    <style>
+      html,body{margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; background:#0f172a; color:#e2e8f0;}
+      .wrap{padding:16px;max-width:640px;margin:0 auto;}
+      .card{background:#111827;border:1px solid #374151;border-radius:12px;padding:16px;}
+      h1{font-size:18px;margin:0 0 12px 0;}
+      p{margin:0 0 6px 0;opacity:.9;}
+      code{background:#0b1220;padding:2px 6px;border-radius:6px;}
+      a{color:#7dd3fc;}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Find &amp; Replace — App Launcher</h1>
+        <p>
+          Click the app icon on the Miro toolbar to open the panel.<br/>
+          If nothing opens, ensure the app icon has the <code>icon:click</code> handler and that
+          the app URL is reachable.
+        </p>
+        <p style="margin-top:10px;">This page only wires up the icon click.</p>
+      </div>
+    </div>
+  </body>
+</html>
