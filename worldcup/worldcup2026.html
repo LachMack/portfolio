@@ -277,7 +277,6 @@ const DEFAULT_CFG={
   pot3:['Saudi Arabia','Cape Verde','Paraguay','Algeria','Jordan','Uzbekistan','Haiti','South Africa','New Zealand','Curaçao','Qatar','UEFA Path A','UEFA Path B','UEFA Path C','UEFA Path D','Iceland'],
   allocations:{},
   prizes:{champion:50,runner:25,third:15,groupAdvance:5},
-  githubToken:''
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -308,18 +307,16 @@ async function loadFromGitHub(){
     if(!CFG.allocations)CFG.allocations={};
     if(!CFG.prizes)CFG.prizes={...DEFAULT_CFG.prizes};
     if(!CFG.familyBuys)CFG.familyBuys={...DEFAULT_CFG.familyBuys};
+    delete CFG.githubToken; // token never stored in remote config
     setStatus('ok','✓ Synced with GitHub','#00d4aa');
   }catch(e){
-    // Keep using DEFAULT_CFG (already rendered), just restore any local token
-    try{const t=localStorage.getItem('wc26_token');if(t)CFG.githubToken=t;}catch(e2){}
     setStatus('warn','Local mode — set token in ⚙ Admin to enable sync ('+e.message+')','#fbbf24');
   }
   render();
 }
 
 async function pushToGitHub(cfg){
-  var savedToken='';try{savedToken=localStorage.getItem('wc26_token')||'';}catch(e){}
-  var token=cfg.githubToken||savedToken;
+  var token='';try{token=localStorage.getItem('wc26_token')||'';}catch(e){}
   if(!token){
     alert('No GitHub token set. Go to ⚙ Admin tab and enter your token first.');
     return false;
@@ -839,6 +836,20 @@ function renderAdmin(){
     <textarea id="pot${p}-input" style="width:100%;height:180px;padding:10px 12px;background:#1a2235;border:1px solid #ffffff14;border-radius:6px;color:#e8eeff;font-size:12px;resize:vertical;line-height:1.8">${CFG['pot'+p].join('\n')}</textarea>
   </div>`).join('')}
 
+  <!-- Token status indicator -->
+  <script>
+  (function(){
+    var ts=document.getElementById('token-status');
+    if(!ts)return;
+    var t='';try{t=localStorage.getItem('wc26_token')||'';}catch(e){}
+    if(t){
+      ts.innerHTML='<span style="color:#00d4aa">✓ Token is set in this browser</span> — you can push changes. <span style="cursor:pointer;color:#ff4757;text-decoration:underline" onclick="localStorage.removeItem('wc26_token');renderAdmin()">Clear token</span>';
+    }else{
+      ts.innerHTML='<span style="color:#fbbf24">⚠ No token set</span> — you can view but not save changes from this device.';
+    }
+  })();
+  </script>
+
   <!-- Save -->
   <div style="display:flex;gap:10px">
     <button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button>
@@ -850,11 +861,23 @@ function renderAdmin(){
 }
 
 function saveToken(){
-  const t=document.getElementById('token-input')?.value?.trim()||'';
-  CFG.githubToken=t;
+  var t='';
+  var el=document.getElementById('token-input');
+  if(el)t=el.value.trim();
+  if(!t){
+    document.getElementById('admin-msg').innerHTML='<div style="padding:10px 14px;background:#ff475714;border:1px solid #ff475730;border-radius:6px;color:#ff4757;font-size:13px;margin-top:8px">⚠ Please enter a token</div>';
+    return;
+  }
   try{localStorage.setItem('wc26_token',t);}catch(e){}
-  pushToGitHub(CFG).then(ok=>{
-    if(ok)document.getElementById('admin-msg').innerHTML=`<div style="padding:10px 14px;background:#00d4aa14;border:1px solid #00d4aa30;border-radius:6px;color:#00d4aa;font-size:13px;margin-top:8px">✓ Token saved and pushed to GitHub</div>`;
+  // Verify it works by doing a test push of current CFG
+  pushToGitHub(CFG).then(function(ok){
+    var msg=document.getElementById('admin-msg');
+    if(!msg)return;
+    if(ok){
+      msg.innerHTML='<div style="padding:10px 14px;background:#00d4aa14;border:1px solid #00d4aa30;border-radius:6px;color:#00d4aa;font-size:13px;margin-top:8px">✓ Token saved to your browser — working correctly</div>';
+    }else{
+      msg.innerHTML='<div style="padding:10px 14px;background:#ff475714;border:1px solid #ff475730;border-radius:6px;color:#ff4757;font-size:13px;margin-top:8px">⚠ Token saved but push failed — check permissions</div>';
+    }
   });
 }
 
@@ -865,7 +888,6 @@ async function saveAdmin(){
   CFG.prizes.runner=+(document.getElementById('prize-runner')?.value||25);
   CFG.prizes.third=+(document.getElementById('prize-third')?.value||15);
   CFG.prizes.groupAdvance=+(document.getElementById('prize-groupAdvance')?.value||5);
-  CFG.githubToken=document.getElementById('token-input')?.value?.trim()||CFG.githubToken;
   CFG.families.forEach(fam=>{
     CFG.familyBuys[fam.id]={
       primaries:+(document.getElementById('buys-'+fam.id+'-p')?.value||0),
