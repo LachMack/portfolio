@@ -836,19 +836,7 @@ function renderAdmin(){
     <textarea id="pot${p}-input" style="width:100%;height:180px;padding:10px 12px;background:#1a2235;border:1px solid #ffffff14;border-radius:6px;color:#e8eeff;font-size:12px;resize:vertical;line-height:1.8">${CFG['pot'+p].join('\n')}</textarea>
   </div>`).join('')}
 
-  <!-- Token status indicator -->
-  <script>
-  (function(){
-    var ts=document.getElementById('token-status');
-    if(!ts)return;
-    var t='';try{t=localStorage.getItem('wc26_token')||'';}catch(e){}
-    if(t){
-      ts.innerHTML='<span style="color:#00d4aa">✓ Token is set in this browser</span> — you can push changes. <span style="cursor:pointer;color:#ff4757;text-decoration:underline" onclick="localStorage.removeItem('wc26_token');renderAdmin()">Clear token</span>';
-    }else{
-      ts.innerHTML='<span style="color:#fbbf24">⚠ No token set</span> — you can view but not save changes from this device.';
-    }
-  })();
-  </script>
+  <div id="token-status-placeholder"></div>
 
   <!-- Save -->
   <div style="display:flex;gap:10px">
@@ -858,6 +846,20 @@ function renderAdmin(){
   <div id="admin-msg"></div>
   </div>`;
   document.getElementById('tab-admin').innerHTML=out;
+  // Update token status (must happen after innerHTML is set)
+  updateTokenStatus();
+}
+
+function updateTokenStatus(){
+  var ts=document.getElementById('token-status-placeholder');
+  if(!ts)return;
+  var t='';
+  try{t=localStorage.getItem('wc26_token')||'';}catch(e){}
+  if(t){
+    ts.innerHTML='<div style="font-size:11px;color:#00d4aa;margin-top:8px">✓ Token is set in this browser — you can push changes. <span style="cursor:pointer;color:#ff4757;text-decoration:underline" onclick="try{localStorage.removeItem(\'wc26_token\');}catch(e){}renderAdmin()">Clear token</span></div>';
+  }else{
+    ts.innerHTML='<div style="font-size:11px;color:#fbbf24;margin-top:8px">⚠ No token set on this device — you can view but not save changes.</div>';
+  }
 }
 
 function saveToken(){
@@ -878,6 +880,7 @@ function saveToken(){
     }else{
       msg.innerHTML='<div style="padding:10px 14px;background:#ff475714;border:1px solid #ff475730;border-radius:6px;color:#ff4757;font-size:13px;margin-top:8px">⚠ Token saved but push failed — check permissions</div>';
     }
+    updateTokenStatus();
   });
 }
 
