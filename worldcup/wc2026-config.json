@@ -118,20 +118,20 @@
   ],
   "familyBuys": {
     "mackenzie": {
-      "primaries": 3,
-      "secondaries": 3
+      "primaries": 4,
+      "secondaries": 4
     },
     "mackenzie2": {
       "primaries": 4,
       "secondaries": 4
     },
     "thomas": {
-      "primaries": 5,
+      "primaries": 4,
       "secondaries": 4
     },
     "harris": {
       "primaries": 4,
-      "secondaries": 5
+      "secondaries": 4
     }
   },
   "pot1": [
@@ -190,10 +190,18 @@
   ],
   "allocations": {},
   "prizes": {
-    "champion": 80,
-    "runner": 50,
-    "third": 30,
-    "groupAdvance": 5
+    "champion": 50,
+    "runner": 20,
+    "third": 10,
+    "groupAdvance": 5,
+    "goldenBoot": 0,
+    "bestGD": 0,
+    "worstGD": 0,
+    "mostYellow": 0,
+    "mostRed": 0,
+    "firstGoal": 0,
+    "mostCleanSheets": 0,
+    "topFamily": 0
   },
   "cycleOrder": [
     "mackenzie",
