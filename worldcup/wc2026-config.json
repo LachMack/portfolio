@@ -188,16 +188,7 @@
     "UEFA Path C",
     "UEFA Path D"
   ],
-  "allocations": {
-    "lachlan": [
-      "Germany",
-      "England",
-      "Japan"
-    ],
-    "leia": [
-      "Spain"
-    ]
-  },
+  "allocations": {},
   "prizes": {
     "champion": 80,
     "runner": 50,
