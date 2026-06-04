@@ -143,7 +143,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:1}
 // ═══════════════════════════════════════════════════════════
 const GH_USER='LachMack',GH_REPO='portfolio',GH_PATH='worldcup/wc2026-config.json';
 const GH_API=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_PATH}`;
-const CONFIG_URL=`https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/main/${GH_PATH}`;
+const CONFIG_URL='https://raw.githubusercontent.com/LachMack/portfolio/main/worldcup/wc2026-config.json';
 
 const FLAGS={Argentina:'🇦🇷',France:'🇫🇷',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Brazil:'🇧🇷',Spain:'🇪🇸',Portugal:'🇵🇹',Germany:'🇩🇪',Netherlands:'🇳🇱',Belgium:'🇧🇪',Uruguay:'🇺🇾',USA:'🇺🇸',Mexico:'🇲🇽',Colombia:'🇨🇴',Morocco:'🇲🇦',Japan:'🇯🇵',Croatia:'🇭🇷',Senegal:'🇸🇳',Switzerland:'🇨🇭',Denmark:'🇩🇰','South Korea':'🇰🇷',Ecuador:'🇪🇨',Canada:'🇨🇦',Australia:'🇦🇺',Austria:'🇦🇹','Ivory Coast':'🇨🇮',Norway:'🇳🇴',Iran:'🇮🇷',Tunisia:'🇹🇳',Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',Ghana:'🇬🇭',Egypt:'🇪🇬',Panama:'🇵🇦','Saudi Arabia':'🇸🇦','Cape Verde':'🇨🇻',Paraguay:'🇵🇾',Algeria:'🇩🇿',Jordan:'🇯🇴',Uzbekistan:'🇺🇿',Haiti:'🇭🇹','South Africa':'🇿🇦','New Zealand':'🇳🇿','Curaçao':'🇨🇼',Qatar:'🇶🇦'};
 const f=n=>FLAGS[n]||'🏳️';
@@ -318,7 +318,8 @@ async function loadFromGitHub(){
 }
 
 async function pushToGitHub(cfg){
-  const token=cfg.githubToken||(()=>{try{return localStorage.getItem('wc26_token')||'';}catch(e){return '';}}());
+  var savedToken='';try{savedToken=localStorage.getItem('wc26_token')||'';}catch(e){}
+  var token=cfg.githubToken||savedToken;
   if(!token){
     alert('No GitHub token set. Go to ⚙ Admin tab and enter your token first.');
     return false;
@@ -743,7 +744,7 @@ function renderScores(){
 
   out+=`</div>`;
   document.getElementById('tab-scores').innerHTML=out;
-  if(editScoreKey)setTimeout(()=>{const el=document.getElementById('s1in');if(el)el.focus();},50);
+  if(editScoreKey)setTimeout(function(){var el=document.getElementById('s1in');if(el)el.focus();},50);
 }
 
 function editScore(key){editScoreKey=key;renderScores();}
