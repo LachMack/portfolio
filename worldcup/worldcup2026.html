@@ -152,6 +152,7 @@ const GC={A:'#a78bfa',B:'#34d399',C:'#fb923c',D:'#60a5fa',E:'#fbbf24',F:'#f472b6
 const POT={1:{label:'Pot 1',color:'#fbbf24',cls:'pot1',desc:'Elite (Ranked 1–16)'},2:{label:'Pot 2',color:'#60a5fa',cls:'pot2',desc:'Mid-tier (17–32)'},3:{label:'Pot 3',color:'#a78bfa',cls:'pot3',desc:'Underdogs (33–48)'}};
 
 const isKnown=n=>n&&!n.match(/^[12WL]/)&&!n.includes('Path')&&!n.includes('Best')&&!n.includes('winner')&&!n.includes('/');
+function isPot1Elite(team){return CFG.pot1.indexOf(team)<8 && CFG.pot1.indexOf(team)>=0;}
 const fmtDate=d=>{if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('en-AU',{month:'short',day:'numeric'});};
 const shuffle=a=>{const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;};
 const h=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -453,6 +454,19 @@ function renderSweep(){
   lb.forEach(p=>{if(famTotals[p.famId])famTotals[p.famId].pts+=p.pts;});
 
   let out=`
+  <!-- Tier legend -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:10px 14px;background:#111827;border:1px solid #ffffff10;border-radius:8px;font-size:12px">
+    <span style="color:#5a6a88;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Draw order</span>
+    <span style="color:#fbbf24">★ Pot 1 Elite (ranked 1–8)</span>
+    <span style="color:#5a6a88">&mdash;</span>
+    <span style="color:#e8eeff">Pot 1 Standard (9–16)</span>
+    <span style="color:#5a6a88">&mdash;</span>
+    <span style="color:#60a5fa">Pot 2 (17–32)</span>
+    <span style="color:#5a6a88">&mdash;</span>
+    <span style="color:#a78bfa">Pot 3 random (33–48)</span>
+    <span style="color:#5a6a88;margin-left:6px;font-style:italic">First 8 Pot 1 spins should draw from elite tier</span>
+  </div>
+
   <!-- Stats row -->
   <div class="grid-stats" style="margin-bottom:18px">
     <div class="card-pad">
@@ -493,16 +507,20 @@ function renderSweep(){
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
               <span style="font-weight:600;font-size:13px">${h(mem.name)}${mem.type==='child'?' <span style="font-size:10px;padding:1px 5px;background:#ffffff10;color:#5a6a88;border-radius:3px">child</span>':''}</span>
               <div style="display:flex;gap:5px">
-                ${needP1?`<button class="btn pot1" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',1)">+ P1</button>`:''}
-                ${needP2?`<button class="btn pot2" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',2)">+ P2</button>`:''}
-                ${needP3?`<button class="btn pot3" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',3)">+ P3</button>`:''}
+                ${needP1?`<button class="btn pot1" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',1)">+ P1</button>`:(buys.primaries>0?`<button class="btn" style="opacity:.3;cursor:default;color:#fbbf24;border-color:#fbbf2430" disabled>P1 ✓</button>`:'')}
+                ${needP2?`<button class="btn pot2" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',2)">+ P2</button>`:(buys.secondaries>0?`<button class="btn" style="opacity:.3;cursor:default;color:#60a5fa;border-color:#60a5fa30" disabled>P2 ✓</button>`:'')}
+                ${needP3?`<button class="btn pot3" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',3)">+ P3</button>`:(buys.primaries>0?`<button class="btn" style="opacity:.3;cursor:default;color:#a78bfa;border-color:#a78bfa30" disabled>P3 ✓</button>`:'')}
               </div>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:5px">
               ${[...p1t.map(t=>[t,1]),...p2t.map(t=>[t,2]),...p3t.map(t=>[t,3])].map(([t,p])=>{
                 const r=getTeamResult(t,matches,sm);
                 const tc=tagClass(r);
-                return `<span class="tag ${tc}"><span style="font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:${POT[p].color}">P${p}</span>${f(t)} ${h(t)}<span onclick="removeTeam('${mem.id}','${h(t)}')" style="cursor:pointer;opacity:.4;font-size:10px;margin-left:2px">×</span></span>`;
+                var isElite=p===1&&CFG.pot1.indexOf(t)>=0&&CFG.pot1.indexOf(t)<8;
+                var potCol=isElite?'#fbbf24':POT[p].color;
+                var potLbl=isElite?'P1★':'P'+p;
+                var eliteBorder=isElite?';border-color:#fbbf2450':'';
+                return '<span class="tag '+tc+'" style="'+eliteBorder+'"><span style="font-size:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;color:'+potCol+'">'+potLbl+'</span> '+f(t)+' '+h(t)+'<span onclick="removeTeam(\''+mem.id+'\',\''+h(t)+'\')" style="cursor:pointer;opacity:.4;font-size:10px;margin-left:2px">×</span></span>';
               }).join('')}
               ${[...p1t,...p2t,...p3t].length===0?'<span style="font-size:12px;color:#5a6a88;font-style:italic">No teams yet</span>':''}
             </div>
@@ -938,39 +956,50 @@ function startSpin(memberId,memberName,famColor,pot){
 }
 
 function renderSpinner(){
-  const p=POT[spinPot];
-  document.getElementById('spin-header').innerHTML=`
-    <div class="font-display" style="font-weight:800;font-size:22px;color:${spinFamColor}">${h(spinMemberName)}</div>
-    <div style="font-size:12px;color:#5a6a88;margin-top:4px">Drawing from <span style="color:${p.color};font-weight:600">${p.label}</span> — ${p.desc}</div>`;
+  var p=POT[spinPot];
+  var pot1Elite=spinPot===1?CFG.pot1.slice(0,8):[];
+  var eliteNote=spinPot===1?'<div style="display:inline-block;margin-top:6px;font-size:11px;background:#fbbf2414;border:1px solid #fbbf2430;border-radius:4px;padding:2px 10px;color:#fbbf24">★ Top 8 shown in gold — draw these first</div>':'';
+  document.getElementById('spin-header').innerHTML=
+    '<div class="font-display" style="font-weight:800;font-size:22px;color:'+spinFamColor+'">'+h(spinMemberName)+'</div>'+
+    '<div style="font-size:12px;color:#5a6a88;margin-top:4px">Drawing from <span style="color:'+p.color+';font-weight:600">'+p.label+'</span> — '+p.desc+'</div>'+
+    eliteNote;
 
-  document.getElementById('spin-reel').innerHTML=spinTeams.map((t,i)=>
-    `<div class="spin-item" data-idx="${i}">${f(t)} ${h(t)}</div>`
-  ).join('');
+  document.getElementById('spin-reel').innerHTML=spinTeams.map(function(t,i){
+    var isElite=pot1Elite.indexOf(t)>=0;
+    var star=isElite?'<span style="color:#fbbf24;font-size:14px;margin-right:3px">★</span>':'';
+    var col=isElite?'color:#fbbf24':'color:#e8eeff';
+    return '<div class="spin-item" data-idx="'+i+'" style="'+col+'">'+star+f(t)+' '+h(t)+'</div>';
+  }).join('');
 
   if(spinPhase==='ready'){
     document.getElementById('spin-reel').style.transform='translateY(0)';
-    document.getElementById('spin-controls').innerHTML=`
-      <button class="btn btn-accent btn-lg" style="width:100%" onclick="doSpin()">🎰 SPIN</button>
-      <button class="btn" style="width:100%;margin-top:8px;padding:8px" onclick="closeSpin()">Cancel</button>`;
+    document.getElementById('spin-controls').innerHTML=
+      '<button class="btn btn-accent btn-lg" style="width:100%" onclick="doSpin()">🎰 SPIN</button>'+
+      '<button class="btn" style="width:100%;margin-top:8px;padding:8px" onclick="closeSpin()">Cancel</button>';
   }else if(spinPhase==='spinning'){
-    document.getElementById('spin-controls').innerHTML=`<div class="font-display pulse" style="font-size:16px;color:#5a6a88;padding:14px;text-align:center;letter-spacing:.1em;text-transform:uppercase">Drawing…</div>`;
+    document.getElementById('spin-controls').innerHTML='<div class="font-display pulse" style="font-size:16px;color:#5a6a88;padding:14px;text-align:center;letter-spacing:.1em;text-transform:uppercase">Drawing…</div>';
   }else if(spinPhase==='result'){
-    document.getElementById('spin-controls').innerHTML=`
-      <div class="font-display glow" style="font-weight:800;font-size:26px;text-align:center;margin:8px 0;letter-spacing:.05em">${f(spinWinner)} ${h(spinWinner)}!</div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button class="btn btn-accent" style="flex:1;padding:12px;font-size:15px" onclick="confirmSpin()">✓ CONFIRM</button>
-        <button class="btn" style="padding:12px 14px" onclick="spinPhase='ready';spinWinner=null;renderSpinner()">Respin</button>
-        <button class="btn" style="padding:12px 14px" onclick="closeSpin()">×</button>
-      </div>`;
+    var isEliteWinner=spinPot===1&&CFG.pot1.indexOf(spinWinner)>=0&&CFG.pot1.indexOf(spinWinner)<8;
+    var eliteBadge=isEliteWinner?'<div style="display:inline-block;background:#fbbf2420;border:1px solid #fbbf2440;border-radius:4px;padding:3px 10px;font-size:11px;color:#fbbf24;letter-spacing:.06em;margin-bottom:6px">★ ELITE PICK — TOP 8</div><br>':'';
+    var winCol=isEliteWinner?'color:#fbbf24':'color:#00d4aa';
+    document.getElementById('spin-controls').innerHTML=
+      '<div style="text-align:center;margin:8px 0">'+eliteBadge+
+      '<div class="font-display glow" style="font-weight:800;font-size:26px;letter-spacing:.05em;'+winCol+'">'+f(spinWinner)+' '+h(spinWinner)+'!</div></div>'+
+      '<div style="display:flex;gap:8px;margin-top:4px">'+
+      '<button class="btn btn-accent" style="flex:1;padding:12px;font-size:15px" onclick="confirmSpin()">✓ CONFIRM</button>'+
+      '<button class="btn" style="padding:12px 14px" onclick="doRespin()">Respin</button>'+
+      '<button class="btn" style="padding:12px 14px" onclick="closeSpin()">×</button>'+
+      '</div>';
   }
 }
 
+function doRespin(){spinPhase='ready';spinWinner=null;renderSpinner();}
 function doSpin(){
   spinPhase='spinning';
   renderSpinner();
-  const itemH=40,duration=2800+Math.random()*800;
+  const itemH=36,duration=2800+Math.random()*800;
   const winIdx=Math.floor(Math.random()*12)+10;
-  const finalY=-(winIdx*itemH)+(80/2)-(itemH/2);
+  const finalY=-(winIdx*itemH)+((80-itemH)/2);
   const start=Date.now();
   function ease(t){return 1-Math.pow(1-t,4);}
   function step(){
