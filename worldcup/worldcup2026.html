@@ -558,11 +558,11 @@ function renderSweep(){
     {k:'bestGD',icon:'📈',label:'Best Goal Difference (team)'},
     {k:'worstGD',icon:'📉',label:'Wooden Spoon (worst GD)'},
     {k:'mostYellow',icon:'🟨',label:'Most Yellow Cards (team)'},
-    {k:'mostRed',icon:'🟥',label:'Most Red Cards (yellows as tiebreak)'},
-    {k:'firstGoal',icon:'💥',label:'First Goal Scorer (of tournament)'},
+    {k:'mostRed',icon:'🟥',label:'Most Red Cards (yellows tiebreak)'},
+    {k:'firstGoal',icon:'💥',label:'First Goal Scorer of tournament'},
     {k:'mostCleanSheets',icon:'🧤',label:'Most Clean Sheets (team)'},
     {k:'topFamily',icon:'👨‍👩‍👧',label:'Top Family Bonus'},
-  ];
+  ].filter(function(pd){return (prz[pd.k]||0)>0;});  // hide $0 prizes
 
   var out='';
 
@@ -980,91 +980,164 @@ function clearScore(key){
 
 // ── ADMIN TAB ─────────────────────────────────────────────
 function renderAdmin(){
-  const buys=CFG.familyBuys;
-  let out=`
-  <div style="display:flex;flex-direction:column;gap:14px;max-width:700px">
+  var buys=CFG.familyBuys;
+  var totalP=Object.values(buys).reduce(function(s,b){return s+(b.primaries||0);},0);
+  var totalS=Object.values(buys).reduce(function(s,b){return s+(b.secondaries||0);},0);
+  var pool=(totalP*CFG.primaryCost)+(totalS*CFG.secondaryCost);
 
-  <!-- TOKEN SECTION - prominently at top -->
-  <div class="card-pad" style="border-color:#00d4aa30">
-    <div class="font-display" style="font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:#00d4aa;margin-bottom:8px">⚡ GitHub Token (Required for saving)</div>
-    <div style="font-size:13px;color:#8b9ab8;margin-bottom:12px;line-height:1.6">
-      This is how changes you make here get saved back to GitHub so everyone sees them.<br>
-      <strong style="color:#f0f4ff">One-time setup:</strong> go to
-      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:#60a5fa">github.com → Settings → Developer settings → Fine-grained tokens</a>,
-      create a token with <strong style="color:#f0f4ff">Contents: Read &amp; Write</strong> on the <strong style="color:#f0f4ff">portfolio</strong> repo, then paste it below.
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <input type="password" id="token-input" value="${h(CFG.githubToken||'')}" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1;font-size:13px">
-      <button class="btn btn-accent" style="padding:8px 16px;font-size:13px" onclick="saveToken()">Save Token</button>
-    </div>
-    <div style="font-size:11px;color:#5a6a88;margin-top:8px">Token is stored in the config file on GitHub. It's used server-side to push updates — keep this page private or use a fine-grained read/write only token.</div>
-  </div>
+  var PRIZE_DEFS=[
+    {k:'champion',       icon:'🏆', label:'Champion'},
+    {k:'runner',         icon:'🥈', label:'Runner-up'},
+    {k:'third',          icon:'🥉', label:'3rd Place'},
+    {k:'groupAdvance',   icon:'✓',  label:'Group Stage Advance (per team)'},
+    {k:'goldenBoot',     icon:'⚽', label:'Golden Boot (top scorer)'},
+    {k:'bestGD',         icon:'📈', label:'Best Goal Difference (team)'},
+    {k:'worstGD',        icon:'📉', label:'Wooden Spoon (worst GD)'},
+    {k:'mostYellow',     icon:'🟨', label:'Most Yellow Cards (team)'},
+    {k:'mostRed',        icon:'🟥', label:'Most Red Cards (yellows tiebreak)'},
+    {k:'firstGoal',      icon:'💥', label:'First Goal Scorer of tournament'},
+    {k:'mostCleanSheets',icon:'🧤', label:'Most Clean Sheets (team)'},
+    {k:'topFamily',      icon:'👨‍👩‍👧', label:'Top Family Bonus'},
+  ];
 
-  <!-- Buy-in costs -->
-  <div class="card-pad">
-    <div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Buy-in Costs</div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap">
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px">
-        <span style="color:#8b9ab8">Primary (P1+P3) $</span>
-        <input type="number" id="cost-primary" value="${CFG.primaryCost}" min="0" style="width:60px;text-align:center">
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px">
-        <span style="color:#8b9ab8">Secondary (P2) $</span>
-        <input type="number" id="cost-secondary" value="${CFG.secondaryCost}" min="0" style="width:60px;text-align:center">
-      </label>
-    </div>
-  </div>
+  var prz=CFG.prizes||{};
+  var prizeTotal=PRIZE_DEFS.reduce(function(s,pd){return s+(+prz[pd.k]||0);},0);
+  var prizeColor=prizeTotal===pool?'#00d4aa':prizeTotal<pool?'#fbbf24':'#ff4757';
+  var prizeStatus=prizeTotal===pool?'✓ Balanced':prizeTotal<pool?'$'+(pool-prizeTotal)+' unallocated':'$'+(prizeTotal-pool)+' over budget';
+  var barPct=pool>0?Math.min(100,Math.round(prizeTotal/pool*100)):0;
 
-  <!-- Family buys -->
-  <div class="card-pad">
-    <div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Family Buy-ins</div>
-    <table>
-      <thead><tr><th class="left">Family</th><th>Primaries</th><th>Secondaries</th><th>Total</th></tr></thead>
-      <tbody>
-      ${CFG.families.map(fam=>{
-        const b=buys[fam.id]||{primaries:0,secondaries:0};
-        return`<tr>
-          <td class="left" style="font-weight:600;color:${fam.color}">${h(fam.name)}</td>
-          <td><input type="number" id="buys-${fam.id}-p" value="${b.primaries}" min="0" style="width:50px;text-align:center"></td>
-          <td><input type="number" id="buys-${fam.id}-s" value="${b.secondaries}" min="0" style="width:50px;text-align:center"></td>
-          <td class="font-display" style="font-weight:700" id="buys-${fam.id}-total">$${(b.primaries*CFG.primaryCost)+(b.secondaries*CFG.secondaryCost)}</td>
-        </tr>`;
-      }).join('')}
-      </tbody>
-    </table>
-  </div>
+  var famRows=CFG.families.map(function(fam){
+    var b=buys[fam.id]||{primaries:0,secondaries:0};
+    var famTotal=(b.primaries*CFG.primaryCost)+(b.secondaries*CFG.secondaryCost);
+    return '<tr>'+
+      '<td class="left" style="font-weight:600;color:'+fam.color+'">'+h(fam.name)+'</td>'+
+      '<td><input type="number" id="buys-'+fam.id+'-p" value="'+b.primaries+'" min="0" oninput="updatePoolTotal()" style="width:50px;text-align:center"></td>'+
+      '<td><input type="number" id="buys-'+fam.id+'-s" value="'+b.secondaries+'" min="0" oninput="updatePoolTotal()" style="width:50px;text-align:center"></td>'+
+      '<td class="font-display" style="font-weight:700;color:'+fam.color+'" id="buys-'+fam.id+'-total">$'+famTotal+'</td>'+
+      '</tr>';
+  }).join('');
 
-  <!-- Prize structure -->
-  <div class="card-pad">
-    <div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Prize Structure</div>
-    <div style="display:flex;gap:14px;flex-wrap:wrap">
-      ${[['champion','🏆 Champion'],['runner','🥈 Runner-up'],['third','🥉 3rd'],['groupAdvance','✓ Advance']].map(([k,label])=>`
-      <label style="display:flex;align-items:center;gap:6px;font-size:13px">
-        <span style="color:#8b9ab8">${label} $</span>
-        <input type="number" id="prize-${k}" value="${CFG.prizes[k]||0}" min="0" style="width:60px;text-align:center">
-      </label>`).join('')}
-    </div>
-  </div>
+  var prizeInputs=PRIZE_DEFS.map(function(pd){
+    var val=prz[pd.k]||0;
+    return '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#ffffff05;border-radius:6px;border:1px solid #ffffff08;font-size:12px">'+
+      '<span style="color:#8b9ab8;flex:1">'+pd.icon+' '+pd.label+'</span>'+
+      '<span style="color:#5a6a88;flex-shrink:0">$</span>'+
+      '<input type="number" id="prize-'+pd.k+'" value="'+val+'" min="0" oninput="updatePrizeTotals()" style="width:56px;text-align:center;padding:4px 6px">'+
+      '</label>';
+  }).join('');
 
-  <!-- Pot editor -->
-  ${[1,2,3].map(p=>`
-  <div class="card-pad" style="border-color:${POT[p].color}25">
-    <div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:${POT[p].color};margin-bottom:4px">${POT[p].label} — ${POT[p].desc}</div>
-    <div style="font-size:11px;color:#5a6a88;margin-bottom:8px">One team per line (${CFG['pot'+p].length}/16 currently)</div>
-    <textarea id="pot${p}-input" style="width:100%;height:180px;padding:10px 12px;background:#1a2235;border:1px solid #ffffff14;border-radius:6px;color:#e8eeff;font-size:12px;resize:vertical;line-height:1.8">${CFG['pot'+p].join('\n')}</textarea>
-  </div>`).join('')}
+  var potEditors=[1,2,3].map(function(p){
+    return '<div class="card-pad" style="border-color:'+POT[p].color+'25">'+
+      '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:'+POT[p].color+';margin-bottom:4px">'+POT[p].label+' — '+POT[p].desc+'</div>'+
+      '<div style="font-size:11px;color:#5a6a88;margin-bottom:8px">One team per line ('+CFG['pot'+p].length+'/16)</div>'+
+      '<textarea id="pot'+p+'-input" style="width:100%;height:180px;padding:10px 12px;background:#1a2235;border:1px solid #ffffff14;border-radius:6px;color:#e8eeff;font-size:12px;resize:vertical;line-height:1.8">'+CFG['pot'+p].join('\n')+'</textarea>'+
+      '</div>';
+  }).join('');
 
-  <div id="token-status-placeholder"></div>
+  var out='<div style="display:flex;flex-direction:column;gap:14px;max-width:700px">';
 
-  <!-- Save -->
-  <div style="display:flex;gap:10px">
-    <button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button>
-    <button class="btn btn-lg" style="color:#ff4757;border-color:#ff475730;padding:12px 20px" onclick="resetDraws()">RESET DRAWS</button>
-  </div>
-  <div id="admin-msg"></div>
-  </div>`;
+  // ── GitHub Token ──────────────────────────────────────────
+  out+='<div class="card-pad" style="border-color:#00d4aa30">'+
+    '<div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#00d4aa;margin-bottom:8px">⚡ GitHub Token</div>'+
+    '<div style="font-size:13px;color:#8b9ab8;margin-bottom:4px;line-height:1.6">'+
+      'Stored in <strong style="color:#f0f4ff">your browser only</strong> — never saved to GitHub or visible to anyone else. '+
+      'Required to push changes back to GitHub so everyone sees them.'+
+    '</div>'+
+    '<div style="font-size:12px;color:#5a6a88;margin-bottom:12px;padding:8px 10px;background:#ffffff06;border-radius:6px;line-height:1.7">'+
+      'One-time setup: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:#60a5fa">github.com → Settings → Developer settings → Fine-grained tokens</a>'+
+      ' → give it <strong style="color:#e8eeff">Contents: Read &amp; Write</strong> on the <strong style="color:#e8eeff">portfolio</strong> repo only.'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;align-items:center">'+
+      '<input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1;font-size:13px">'+
+      '<button class="btn btn-accent" style="padding:8px 16px;font-size:13px" onclick="saveToken()">Save to browser</button>'+
+    '</div>'+
+    '<div id="token-status-placeholder"></div>'+
+    '</div>';
+
+  // ── Buy-in costs + family buys (side by side on wider screens) ────
+  out+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+
+  // Buy-in cost card
+  out+='<div class="card-pad">'+
+    '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Buy-in Costs</div>'+
+    '<div style="display:flex;flex-direction:column;gap:10px">'+
+      '<label style="display:flex;align-items:center;gap:8px;font-size:13px">'+
+        '<span style="color:#8b9ab8;flex:1">Primary buy (P1 + P3)</span>'+
+        '<span style="color:#5a6a88">$</span>'+
+        '<input type="number" id="cost-primary" value="'+CFG.primaryCost+'" min="0" oninput="updatePoolTotal()" style="width:60px;text-align:center">'+
+      '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;font-size:13px">'+
+        '<span style="color:#8b9ab8;flex:1">Secondary buy (P2 only)</span>'+
+        '<span style="color:#5a6a88">$</span>'+
+        '<input type="number" id="cost-secondary" value="'+CFG.secondaryCost+'" min="0" oninput="updatePoolTotal()" style="width:60px;text-align:center">'+
+      '</label>'+
+    '</div>'+
+    '<div style="margin-top:14px;padding-top:12px;border-top:1px solid #ffffff0a">'+
+      '<div style="font-size:11px;color:#5a6a88;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Total prize pool</div>'+
+      '<div class="font-display" id="admin-pool-total" style="font-weight:800;font-size:28px;color:#00d4aa">$'+pool+'</div>'+
+      '<div id="admin-pool-breakdown" style="font-size:11px;color:#5a6a88;margin-top:2px">'+totalP+'× primary + '+totalS+'× secondary</div>'+
+    '</div>'+
+    '</div>';
+
+  // Family buys card
+  out+='<div class="card-pad">'+
+    '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Family Buy-ins</div>'+
+    '<table><thead><tr>'+
+      '<th class="left">Family</th><th>Primary</th><th>Secondary</th><th>Total</th>'+
+    '</tr></thead><tbody>'+famRows+'</tbody></table>'+
+    '</div>';
+
+  out+='</div>'; // end 2-col
+
+  // ── Prize structure ───────────────────────────────────────
+  out+='<div class="card-pad">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'+
+      '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">Prize Structure</div>'+
+      '<div style="display:flex;align-items:center;gap:10px">'+
+        '<span style="font-size:11px;color:#5a6a88">Prize total vs pool:</span>'+
+        '<span class="font-display" id="prize-total-badge" style="font-weight:800;font-size:18px;color:'+prizeColor+'">$'+prizeTotal+'</span>'+
+        '<span id="prize-status-badge" style="font-size:11px;padding:2px 8px;border-radius:4px;background:'+prizeColor+'18;color:'+prizeColor+';border:1px solid '+prizeColor+'30">'+prizeStatus+'</span>'+
+      '</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px">'+prizeInputs+'</div>'+
+    '<div style="margin-top:12px;height:4px;background:#ffffff10;border-radius:2px;overflow:hidden">'+
+      '<div id="prize-bar" style="height:100%;width:'+barPct+'%;background:'+prizeColor+';border-radius:2px;transition:width .3s"></div>'+
+    '</div>'+
+    '<div id="prize-bar-label" style="font-size:10px;margin-top:4px;text-align:right;color:'+prizeColor+'">'+barPct+'% of pool allocated as prizes</div>'+
+    '</div>';
+
+  // ── Pot editors ───────────────────────────────────────────
+  out+=potEditors;
+
+  // ── Save / Reset ──────────────────────────────────────────
+  out+='<div style="display:flex;gap:10px">'+
+    '<button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button>'+
+    '<button class="btn btn-lg" style="color:#ff4757;border-color:#ff475730;padding:12px 20px" onclick="resetDraws()">RESET DRAWS</button>'+
+    '</div>';
+  out+='<div id="admin-msg"></div>';
+  out+='</div>';
+
   document.getElementById('tab-admin').innerHTML=out;
   updateTokenStatus();
+  updatePrizeTotals();
+}
+
+function updatePoolTotal(){
+  var cp=+(document.getElementById('cost-primary')||{value:CFG.primaryCost}).value;
+  var cs=+(document.getElementById('cost-secondary')||{value:CFG.secondaryCost}).value;
+  var totalP=0,totalS=0;
+  CFG.families.forEach(function(fam){
+    var p=+(document.getElementById('buys-'+fam.id+'-p')||{value:0}).value;
+    var s=+(document.getElementById('buys-'+fam.id+'-s')||{value:0}).value;
+    totalP+=p; totalS+=s;
+    var el=document.getElementById('buys-'+fam.id+'-total');
+    if(el)el.textContent='$'+((p*cp)+(s*cs));
+  });
+  var pool=(totalP*cp)+(totalS*cs);
+  var el=document.getElementById('admin-pool-total');
+  if(el)el.textContent='$'+pool;
+  var bd=document.getElementById('admin-pool-breakdown');
+  if(bd)bd.textContent=totalP+'× primary + '+totalS+'× secondary';
   updatePrizeTotals();
 }
 
@@ -1105,17 +1178,26 @@ function saveToken(){
 function updatePrizeTotals(){
   var prizeKeys=['champion','runner','third','groupAdvance','goldenBoot','bestGD','worstGD','mostYellow','mostRed','firstGoal','mostCleanSheets','topFamily'];
   var total=prizeKeys.reduce(function(s,k){var el=document.getElementById('prize-'+k);return s+(el?+(el.value)||0:0);},0);
-  var totalP=Object.values(CFG.familyBuys).reduce(function(s,b){return s+(b.primaries||0);},0);
-  var totalS=Object.values(CFG.familyBuys).reduce(function(s,b){return s+(b.secondaries||0);},0);
-  var pool=(totalP*(+(document.getElementById('cost-primary')||{value:CFG.primaryCost}).value))+(totalS*(+(document.getElementById('cost-secondary')||{value:CFG.secondaryCost}).value));
+  // Get pool from current admin inputs if available, else from CFG
+  var cp=+(document.getElementById('cost-primary')||{value:CFG.primaryCost}).value||CFG.primaryCost;
+  var cs=+(document.getElementById('cost-secondary')||{value:CFG.secondaryCost}).value||CFG.secondaryCost;
+  var totalP=0,totalS=0;
+  CFG.families.forEach(function(fam){
+    var p=+(document.getElementById('buys-'+fam.id+'-p')||{value:CFG.familyBuys[fam.id]&&CFG.familyBuys[fam.id].primaries||0}).value;
+    var s=+(document.getElementById('buys-'+fam.id+'-s')||{value:CFG.familyBuys[fam.id]&&CFG.familyBuys[fam.id].secondaries||0}).value;
+    totalP+=p; totalS+=s;
+  });
+  var pool=(totalP*cp)+(totalS*cs);
   var color=total===pool?'#00d4aa':total<pool?'#fbbf24':'#ff4757';
-  var status=total===pool?'✓ Balanced':total<pool?'$'+(pool-total)+' under':'$'+(total-pool)+' over';
+  var status=total===pool?'✓ Balanced':total<pool?'$'+(pool-total)+' unallocated':'$'+(total-pool)+' over budget';
   var badge=document.getElementById('prize-total-badge');
   if(badge){badge.textContent='$'+total;badge.style.color=color;}
+  var statusBadge=document.getElementById('prize-status-badge');
+  if(statusBadge){statusBadge.textContent=status;statusBadge.style.color=color;statusBadge.style.background=color+'18';statusBadge.style.borderColor=color+'30';}
   var bar=document.getElementById('prize-bar');
   if(bar){bar.style.width=pool>0?Math.min(100,Math.round(total/pool*100))+'%':'0%';bar.style.background=color;}
   var lbl=document.getElementById('prize-bar-label');
-  if(lbl){lbl.textContent=status;lbl.style.color=color;}
+  if(lbl){lbl.textContent=Math.round(total/Math.max(pool,1)*100)+'% of pool allocated · '+status;lbl.style.color=color;}
 }
 
 async function saveAdmin(){
