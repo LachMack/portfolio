@@ -145,7 +145,20 @@ const GH_USER='LachMack',GH_REPO='portfolio',GH_PATH='worldcup/wc2026-config.jso
 const GH_API=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_PATH}`;
 const CONFIG_URL='https://raw.githubusercontent.com/LachMack/portfolio/main/worldcup/wc2026-config.json';
 
-const FLAGS={Argentina:'🇦🇷',France:'🇫🇷',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Brazil:'🇧🇷',Spain:'🇪🇸',Portugal:'🇵🇹',Germany:'🇩🇪',Netherlands:'🇳🇱',Belgium:'🇧🇪',Uruguay:'🇺🇾',USA:'🇺🇸',Mexico:'🇲🇽',Colombia:'🇨🇴',Morocco:'🇲🇦',Japan:'🇯🇵',Croatia:'🇭🇷',Senegal:'🇸🇳',Switzerland:'🇨🇭',Denmark:'🇩🇰','South Korea':'🇰🇷',Ecuador:'🇪🇨',Canada:'🇨🇦',Australia:'🇦🇺',Austria:'🇦🇹','Ivory Coast':'🇨🇮',Norway:'🇳🇴',Iran:'🇮🇷',Tunisia:'🇹🇳',Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',Ghana:'🇬🇭',Egypt:'🇪🇬',Panama:'🇵🇦','Saudi Arabia':'🇸🇦','Cape Verde':'🇨🇻',Paraguay:'🇵🇾',Algeria:'🇩🇿',Jordan:'🇯🇴',Uzbekistan:'🇺🇿',Haiti:'🇭🇹','South Africa':'🇿🇦','New Zealand':'🇳🇿','Curaçao':'🇨🇼',Qatar:'🇶🇦'};
+const FLAGS={
+  'Argentina':'🇦🇷','France':'🇫🇷','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Brazil':'🇧🇷',
+  'Spain':'🇪🇸','Portugal':'🇵🇹','Germany':'🇩🇪','Netherlands':'🇳🇱',
+  'Belgium':'🇧🇪','Croatia':'🇭🇷','Colombia':'🇨🇴','Senegal':'🇸🇳',
+  'Morocco':'🇲🇦','Mexico':'🇲🇽','USA':'🇺🇸','Uruguay':'🇺🇾',
+  'Japan':'🇯🇵','Switzerland':'🇨🇭','Iran':'🇮🇷','Austria':'🇦🇹',
+  'Ecuador':'🇪🇨','Australia':'🇦🇺','South Korea':'🇰🇷','Egypt':'🇪🇬',
+  'Canada':'🇨🇦','Ivory Coast':'🇨🇮','Qatar':'🇶🇦','Algeria':'🇩🇿',
+  'Sweden':'🇸🇪','Tunisia':'🇹🇳','Czechia':'🇨🇿','Türkiye':'🇹🇷',
+  'Norway':'🇳🇴','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','DR Congo':'🇨🇩','Bosnia & Herzegovina':'🇧🇦',
+  'Panama':'🇵🇦','Saudi Arabia':'🇸🇦','South Africa':'🇿🇦','Iraq':'🇮🇶',
+  'Uzbekistan':'🇺🇿','Paraguay':'🇵🇾','Ghana':'🇬🇭','Jordan':'🇯🇴',
+  'Cape Verde':'🇨🇻','Curaçao':'🇨🇼','Haiti':'🇭🇹','New Zealand':'🇳🇿'
+};
 const f=n=>FLAGS[n]||'🏳️';
 
 const GC={A:'#a78bfa',B:'#34d399',C:'#fb923c',D:'#60a5fa',E:'#fbbf24',F:'#f472b6',G:'#86efac',H:'#f87171',I:'#818cf8',J:'#2dd4bf',K:'#fb7185',L:'#38bdf8'};
@@ -159,17 +172,17 @@ const h=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').rep
 
 const MATCHES=[
   {r:'Matchday 1',d:'2026-06-11',t1:'Mexico',t2:'South Africa',g:'Group A',gr:'Mexico City'},
-  {r:'Matchday 1',d:'2026-06-11',t1:'South Korea',t2:'UEFA Path D',g:'Group A',gr:'Guadalajara'},
-  {r:'Matchday 8',d:'2026-06-18',t1:'UEFA Path D',t2:'South Africa',g:'Group A',gr:'Atlanta'},
+  {r:'Matchday 1',d:'2026-06-11',t1:'South Korea',t2:'Czechia',g:'Group A',gr:'Guadalajara'},
+  {r:'Matchday 8',d:'2026-06-18',t1:'Czechia',t2:'South Africa',g:'Group A',gr:'Atlanta'},
   {r:'Matchday 8',d:'2026-06-18',t1:'Mexico',t2:'South Korea',g:'Group A',gr:'Guadalajara'},
-  {r:'Matchday 14',d:'2026-06-24',t1:'UEFA Path D',t2:'Mexico',g:'Group A',gr:'Mexico City'},
+  {r:'Matchday 14',d:'2026-06-24',t1:'Czechia',t2:'Mexico',g:'Group A',gr:'Mexico City'},
   {r:'Matchday 14',d:'2026-06-24',t1:'South Africa',t2:'South Korea',g:'Group A',gr:'Monterrey'},
-  {r:'Matchday 2',d:'2026-06-12',t1:'Canada',t2:'UEFA Path A',g:'Group B',gr:'Toronto'},
+  {r:'Matchday 2',d:'2026-06-12',t1:'Canada',t2:'Bosnia & Herzegovina',g:'Group B',gr:'Toronto'},
   {r:'Matchday 3',d:'2026-06-13',t1:'Qatar',t2:'Switzerland',g:'Group B',gr:'San Francisco'},
-  {r:'Matchday 8',d:'2026-06-18',t1:'Switzerland',t2:'UEFA Path A',g:'Group B',gr:'Los Angeles'},
+  {r:'Matchday 8',d:'2026-06-18',t1:'Switzerland',t2:'Bosnia & Herzegovina',g:'Group B',gr:'Los Angeles'},
   {r:'Matchday 8',d:'2026-06-18',t1:'Canada',t2:'Qatar',g:'Group B',gr:'Vancouver'},
   {r:'Matchday 14',d:'2026-06-24',t1:'Switzerland',t2:'Canada',g:'Group B',gr:'Vancouver'},
-  {r:'Matchday 14',d:'2026-06-24',t1:'UEFA Path A',t2:'Qatar',g:'Group B',gr:'Seattle'},
+  {r:'Matchday 14',d:'2026-06-24',t1:'Bosnia & Herzegovina',t2:'Qatar',g:'Group B',gr:'Seattle'},
   {r:'Matchday 3',d:'2026-06-13',t1:'Brazil',t2:'Morocco',g:'Group C',gr:'New York/NJ'},
   {r:'Matchday 3',d:'2026-06-13',t1:'Haiti',t2:'Scotland',g:'Group C',gr:'Boston'},
   {r:'Matchday 9',d:'2026-06-19',t1:'Scotland',t2:'Morocco',g:'Group C',gr:'Boston'},
@@ -177,10 +190,10 @@ const MATCHES=[
   {r:'Matchday 14',d:'2026-06-24',t1:'Scotland',t2:'Brazil',g:'Group C',gr:'Miami'},
   {r:'Matchday 14',d:'2026-06-24',t1:'Morocco',t2:'Haiti',g:'Group C',gr:'Atlanta'},
   {r:'Matchday 2',d:'2026-06-12',t1:'USA',t2:'Paraguay',g:'Group D',gr:'Los Angeles'},
-  {r:'Matchday 3',d:'2026-06-13',t1:'Australia',t2:'UEFA Path C',g:'Group D',gr:'Vancouver'},
+  {r:'Matchday 3',d:'2026-06-13',t1:'Australia',t2:'Türkiye',g:'Group D',gr:'Vancouver'},
   {r:'Matchday 9',d:'2026-06-19',t1:'USA',t2:'Australia',g:'Group D',gr:'Seattle'},
-  {r:'Matchday 9',d:'2026-06-19',t1:'UEFA Path C',t2:'Paraguay',g:'Group D',gr:'San Francisco'},
-  {r:'Matchday 15',d:'2026-06-25',t1:'UEFA Path C',t2:'USA',g:'Group D',gr:'Los Angeles'},
+  {r:'Matchday 9',d:'2026-06-19',t1:'Türkiye',t2:'Paraguay',g:'Group D',gr:'San Francisco'},
+  {r:'Matchday 15',d:'2026-06-25',t1:'Türkiye',t2:'USA',g:'Group D',gr:'Los Angeles'},
   {r:'Matchday 15',d:'2026-06-25',t1:'Paraguay',t2:'Australia',g:'Group D',gr:'San Francisco'},
   {r:'Matchday 4',d:'2026-06-14',t1:'Germany',t2:'Curaçao',g:'Group E',gr:'Houston'},
   {r:'Matchday 4',d:'2026-06-14',t1:'Ivory Coast',t2:'Ecuador',g:'Group E',gr:'Philadelphia'},
@@ -189,10 +202,10 @@ const MATCHES=[
   {r:'Matchday 15',d:'2026-06-25',t1:'Curaçao',t2:'Ivory Coast',g:'Group E',gr:'Philadelphia'},
   {r:'Matchday 15',d:'2026-06-25',t1:'Ecuador',t2:'Germany',g:'Group E',gr:'New York/NJ'},
   {r:'Matchday 4',d:'2026-06-14',t1:'Netherlands',t2:'Japan',g:'Group F',gr:'Dallas'},
-  {r:'Matchday 4',d:'2026-06-14',t1:'UEFA Path B',t2:'Tunisia',g:'Group F',gr:'Monterrey'},
-  {r:'Matchday 10',d:'2026-06-20',t1:'Netherlands',t2:'UEFA Path B',g:'Group F',gr:'Houston'},
+  {r:'Matchday 4',d:'2026-06-14',t1:'Sweden',t2:'Tunisia',g:'Group F',gr:'Monterrey'},
+  {r:'Matchday 10',d:'2026-06-20',t1:'Netherlands',t2:'Sweden',g:'Group F',gr:'Houston'},
   {r:'Matchday 10',d:'2026-06-20',t1:'Tunisia',t2:'Japan',g:'Group F',gr:'Monterrey'},
-  {r:'Matchday 15',d:'2026-06-25',t1:'Japan',t2:'UEFA Path B',g:'Group F',gr:'Dallas'},
+  {r:'Matchday 15',d:'2026-06-25',t1:'Japan',t2:'Sweden',g:'Group F',gr:'Dallas'},
   {r:'Matchday 15',d:'2026-06-25',t1:'Tunisia',t2:'Netherlands',g:'Group F',gr:'Kansas City'},
   {r:'Matchday 5',d:'2026-06-15',t1:'Belgium',t2:'Egypt',g:'Group G',gr:'Seattle'},
   {r:'Matchday 5',d:'2026-06-15',t1:'Iran',t2:'New Zealand',g:'Group G',gr:'Los Angeles'},
@@ -207,23 +220,23 @@ const MATCHES=[
   {r:'Matchday 16',d:'2026-06-26',t1:'Cape Verde',t2:'Saudi Arabia',g:'Group H',gr:'Houston'},
   {r:'Matchday 16',d:'2026-06-26',t1:'Uruguay',t2:'Spain',g:'Group H',gr:'Guadalajara'},
   {r:'Matchday 6',d:'2026-06-16',t1:'France',t2:'Senegal',g:'Group I',gr:'New York/NJ'},
-  {r:'Matchday 6',d:'2026-06-16',t1:'IC Path 2',t2:'Norway',g:'Group I',gr:'Boston'},
-  {r:'Matchday 12',d:'2026-06-22',t1:'France',t2:'IC Path 2',g:'Group I',gr:'Philadelphia'},
+  {r:'Matchday 6',d:'2026-06-16',t1:'Iraq',t2:'Norway',g:'Group I',gr:'Boston'},
+  {r:'Matchday 12',d:'2026-06-22',t1:'France',t2:'Iraq',g:'Group I',gr:'Philadelphia'},
   {r:'Matchday 12',d:'2026-06-22',t1:'Norway',t2:'Senegal',g:'Group I',gr:'New York/NJ'},
   {r:'Matchday 16',d:'2026-06-26',t1:'Norway',t2:'France',g:'Group I',gr:'Boston'},
-  {r:'Matchday 16',d:'2026-06-26',t1:'Senegal',t2:'IC Path 2',g:'Group I',gr:'Toronto'},
+  {r:'Matchday 16',d:'2026-06-26',t1:'Senegal',t2:'Iraq',g:'Group I',gr:'Toronto'},
   {r:'Matchday 6',d:'2026-06-16',t1:'Argentina',t2:'Algeria',g:'Group J',gr:'Kansas City'},
   {r:'Matchday 6',d:'2026-06-16',t1:'Austria',t2:'Jordan',g:'Group J',gr:'San Francisco'},
   {r:'Matchday 12',d:'2026-06-22',t1:'Argentina',t2:'Austria',g:'Group J',gr:'Dallas'},
   {r:'Matchday 12',d:'2026-06-22',t1:'Jordan',t2:'Algeria',g:'Group J',gr:'San Francisco'},
   {r:'Matchday 17',d:'2026-06-27',t1:'Algeria',t2:'Austria',g:'Group J',gr:'Kansas City'},
   {r:'Matchday 17',d:'2026-06-27',t1:'Jordan',t2:'Argentina',g:'Group J',gr:'Dallas'},
-  {r:'Matchday 7',d:'2026-06-17',t1:'Portugal',t2:'IC Path 1',g:'Group K',gr:'Houston'},
+  {r:'Matchday 7',d:'2026-06-17',t1:'Portugal',t2:'DR Congo',g:'Group K',gr:'Houston'},
   {r:'Matchday 7',d:'2026-06-17',t1:'Uzbekistan',t2:'Colombia',g:'Group K',gr:'Mexico City'},
   {r:'Matchday 13',d:'2026-06-23',t1:'Portugal',t2:'Uzbekistan',g:'Group K',gr:'Houston'},
-  {r:'Matchday 13',d:'2026-06-23',t1:'Colombia',t2:'IC Path 1',g:'Group K',gr:'Guadalajara'},
+  {r:'Matchday 13',d:'2026-06-23',t1:'Colombia',t2:'DR Congo',g:'Group K',gr:'Guadalajara'},
   {r:'Matchday 17',d:'2026-06-27',t1:'Colombia',t2:'Portugal',g:'Group K',gr:'Miami'},
-  {r:'Matchday 17',d:'2026-06-27',t1:'IC Path 1',t2:'Uzbekistan',g:'Group K',gr:'Atlanta'},
+  {r:'Matchday 17',d:'2026-06-27',t1:'DR Congo',t2:'Uzbekistan',g:'Group K',gr:'Atlanta'},
   {r:'Matchday 7',d:'2026-06-17',t1:'England',t2:'Croatia',g:'Group L',gr:'Dallas'},
   {r:'Matchday 7',d:'2026-06-17',t1:'Ghana',t2:'Panama',g:'Group L',gr:'Toronto'},
   {r:'Matchday 13',d:'2026-06-23',t1:'England',t2:'Ghana',g:'Group L',gr:'Boston'},
@@ -273,11 +286,16 @@ const DEFAULT_CFG={
     {id:'harris',name:'Harris',color:'#fbbf24',members:[{id:'davina',name:'Davina Harris',type:'adult'},{id:'craig',name:'Craig Harris',type:'adult'},{id:'jasper',name:'Jasper Harris',type:'adult'},{id:'livia',name:'Livia Harris',type:'child'},{id:'maggie',name:'Maggie Harris',type:'child'}]},
   ],
   familyBuys:{mackenzie:{primaries:4,secondaries:4},mackenzie2:{primaries:4,secondaries:4},thomas:{primaries:4,secondaries:4},harris:{primaries:4,secondaries:4}},
-  pot1:['Argentina','France','England','Brazil','Spain','Portugal','Germany','Netherlands','Belgium','Uruguay','USA','Mexico','Colombia','Morocco','Japan','Croatia'],
-  pot2:['Senegal','Switzerland','Denmark','South Korea','Ecuador','Canada','Australia','Austria','Ivory Coast','Norway','Iran','Tunisia','Scotland','Ghana','Egypt','Panama'],
-  pot3:['Saudi Arabia','Cape Verde','Paraguay','Algeria','Jordan','Uzbekistan','Haiti','South Africa','New Zealand','Curaçao','Qatar','UEFA Path A','UEFA Path B','UEFA Path C','UEFA Path D','Iceland'],
+  pot1:['France','Spain','Argentina','England','Portugal','Brazil','Netherlands','Morocco','Belgium','Germany','Croatia','Colombia','Senegal','Mexico','USA','Uruguay'],
+  pot2:['Japan','Switzerland','Iran','Austria','Ecuador','Australia','South Korea','Egypt','Canada','Ivory Coast','Qatar','Algeria','Sweden','Tunisia','Czechia','Türkiye'],
+  pot3:['Norway','Scotland','DR Congo','Bosnia & Herzegovina','Panama','Saudi Arabia','South Africa','Iraq','Uzbekistan','Paraguay','Ghana','Jordan','Cape Verde','Curaçao','Haiti','New Zealand'],
   allocations:{},
-  prizes:{champion:50,runner:25,third:15,groupAdvance:5},
+  prizes:{
+    champion:50,runner:25,third:15,groupAdvance:5,
+    goldenBoot:20,bestGD:10,worstGD:10,
+    mostYellow:10,mostRed:10,firstGoal:5,
+    mostCleanSheets:10,topFamily:0
+  },
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -292,14 +310,14 @@ let activeTab='sweep';
 
 // Name mapping: openfootball → our names
 const OFB_NAMES={
-  'Czech Republic':'UEFA Path D',  // placeholder until confirmed
-  'Czechia':'UEFA Path D',
+  'Czech Republic':'Czechia',  // placeholder until confirmed
+  'Czechia':'Czechia',
   'Turkey':'Turkey',
-  'Iraq':'IC Path 2',
-  'DR Congo':'IC Path 1',
-  'Sweden':'UEFA Path B',
-  'Bosnia & Herzegovina':'UEFA Path A',
-  'Bosnia and Herzegovina':'UEFA Path A',
+  'Iraq':'Iraq',
+  'DR Congo':'DR Congo',
+  'Sweden':'Sweden',
+  'Bosnia & Herzegovina':'Bosnia & Herzegovina',
+  'Bosnia and Herzegovina':'Bosnia & Herzegovina',
   'USA':'USA',
   'United States':'USA',
 };
@@ -489,170 +507,230 @@ function showTab(id){
 
 // ── SWEEP TAB ─────────────────────────────────────────────
 function renderSweep(){
-  const matches=getMatches();
-  const sm=buildStandings(matches);
-  const allocs=CFG.allocations||{};
-  const allocated=new Set(Object.values(allocs).flat());
+  var matches=getMatches();
+  var sm=buildStandings(matches);
+  var allocs=CFG.allocations||{};
+  var allocated=new Set(Object.values(allocs).flat());
 
-  const totalP=Object.values(CFG.familyBuys).reduce((s,b)=>s+(b.primaries||0),0);
-  const totalS=Object.values(CFG.familyBuys).reduce((s,b)=>s+(b.secondaries||0),0);
-  const pool=(totalP*CFG.primaryCost)+(totalS*CFG.secondaryCost);
-  const p1done=[...allocated].filter(t=>CFG.pot1.includes(t)).length;
-  const p2done=[...allocated].filter(t=>CFG.pot2.includes(t)).length;
-  const p3done=[...allocated].filter(t=>CFG.pot3.includes(t)).length;
+  var totalP=Object.values(CFG.familyBuys).reduce(function(s,b){return s+(b.primaries||0);},0);
+  var totalS=Object.values(CFG.familyBuys).reduce(function(s,b){return s+(b.secondaries||0);},0);
+  var pool=(totalP*CFG.primaryCost)+(totalS*CFG.secondaryCost);
+  var p1done=[...allocated].filter(function(t){return CFG.pot1.includes(t);}).length;
+  var p2done=[...allocated].filter(function(t){return CFG.pot2.includes(t);}).length;
+  var p3done=[...allocated].filter(function(t){return CFG.pot3.includes(t);}).length;
+
+  // Prize total
+  var prz=CFG.prizes||{};
+  var prizeTotal=Object.values(prz).reduce(function(s,v){return s+(+v||0);},0);
+  var prizeColor=prizeTotal===pool?'#00d4aa':prizeTotal<pool?'#fbbf24':'#ff4757';
+  var prizeStatus=prizeTotal===pool?'✓ Balanced':prizeTotal<pool?'$'+(pool-prizeTotal)+' unallocated':'$'+(prizeTotal-pool)+' over budget';
 
   // Leaderboard
-  const allMembers=CFG.families.flatMap(fam=>fam.members.map(m=>({...m,famId:fam.id,famName:fam.name,famColor:fam.color})));
-  const lb=allMembers.map(m=>{
-    const teams=allocs[m.id]||[];
-    let pts=0,notes=[];
-    teams.forEach(t=>{
-      const r=getTeamResult(t,matches,sm);
-      if(r==='champion'){pts+=CFG.prizes.champion;notes.push(t+' 🏆');}
-      else if(r==='runner'){pts+=CFG.prizes.runner;notes.push(t+' 🥈');}
-      else if(r==='third'){pts+=CFG.prizes.third;notes.push(t+' 🥉');}
-      else if(r==='advanced'){pts+=CFG.prizes.groupAdvance;notes.push(t+' ✓');}
+  var allMembers=CFG.families.flatMap(function(fam){return fam.members.map(function(m){return Object.assign({},m,{famId:fam.id,famName:fam.name,famColor:fam.color});});});
+  var lb=allMembers.map(function(m){
+    var teams=allocs[m.id]||[];
+    var pts=0,notes=[];
+    teams.forEach(function(t){
+      var r=getTeamResult(t,matches,sm);
+      if(r==='champion'){pts+=prz.champion||0;notes.push(t+' 🏆');}
+      else if(r==='runner'){pts+=prz.runner||0;notes.push(t+' 🥈');}
+      else if(r==='third'){pts+=prz.third||0;notes.push(t+' 🥉');}
+      else if(r==='advanced'){pts+=prz.groupAdvance||0;notes.push(t+' ✓');}
     });
-    return{...m,pts,notes,teams};
-  }).sort((a,b)=>b.pts-a.pts);
+    var fam=CFG.families.find(function(f){return f.id===m.famId;});
+    return Object.assign({},m,{pts:pts,notes:notes,teams:teams,famColor:fam?fam.color:'#888'});
+  }).sort(function(a,b){return b.pts-a.pts;});
 
-  const famTotals={};
-  CFG.families.forEach(fam=>{
-    const buys=CFG.familyBuys[fam.id]||{primaries:0,secondaries:0};
-    famTotals[fam.id]={name:fam.name,color:fam.color,pts:0,paid:(buys.primaries*CFG.primaryCost)+(buys.secondaries*CFG.secondaryCost)};
+  var famTotals={};
+  CFG.families.forEach(function(fam){
+    var buys=CFG.familyBuys[fam.id]||{primaries:0,secondaries:0};
+    var paid=(buys.primaries*CFG.primaryCost)+(buys.secondaries*CFG.secondaryCost);
+    famTotals[fam.id]={name:fam.name,color:fam.color,pts:0,paid:paid};
   });
-  lb.forEach(p=>{if(famTotals[p.famId])famTotals[p.famId].pts+=p.pts;});
+  lb.forEach(function(p){if(famTotals[p.famId])famTotals[p.famId].pts+=p.pts;});
 
-  let out=`
-  <!-- Tier legend -->
-  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:10px 14px;background:#111827;border:1px solid #ffffff10;border-radius:8px;font-size:12px">
-    <span style="color:#5a6a88;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Draw order</span>
-    <span style="color:#fbbf24">★ Pot 1 Elite (ranked 1–8)</span>
-    <span style="color:#5a6a88">&mdash;</span>
-    <span style="color:#e8eeff">Pot 1 Standard (9–16)</span>
-    <span style="color:#5a6a88">&mdash;</span>
-    <span style="color:#60a5fa">Pot 2 (17–32)</span>
-    <span style="color:#5a6a88">&mdash;</span>
-    <span style="color:#a78bfa">Pot 3 random (33–48)</span>
-    <span style="color:#5a6a88;margin-left:6px;font-style:italic">First 8 Pot 1 spins should draw from elite tier</span>
-  </div>
+  var PRIZE_DEFS=[
+    {k:'champion',icon:'🏆',label:'Champion'},
+    {k:'runner',icon:'🥈',label:'Runner-up'},
+    {k:'third',icon:'🥉',label:'3rd Place'},
+    {k:'groupAdvance',icon:'✓',label:'Group Stage Advance (per team)'},
+    {k:'goldenBoot',icon:'⚽',label:'Golden Boot (top scorer)'},
+    {k:'bestGD',icon:'📈',label:'Best Goal Difference (team)'},
+    {k:'worstGD',icon:'📉',label:'Wooden Spoon (worst GD)'},
+    {k:'mostYellow',icon:'🟨',label:'Most Yellow Cards (team)'},
+    {k:'mostRed',icon:'🟥',label:'Most Red Cards (yellows as tiebreak)'},
+    {k:'firstGoal',icon:'💥',label:'First Goal Scorer (of tournament)'},
+    {k:'mostCleanSheets',icon:'🧤',label:'Most Clean Sheets (team)'},
+    {k:'topFamily',icon:'👨‍👩‍👧',label:'Top Family Bonus'},
+  ];
 
-  <!-- Stats row -->
-  <div class="grid-stats" style="margin-bottom:18px">
-    <div class="card-pad">
-      <div style="font-size:10px;color:#5a6a88;font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Prize Pool</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;color:#00d4aa;line-height:1">$${pool}</div>
-      <div style="font-size:11px;color:#5a6a88;margin-top:3px">${totalP}× primary · ${totalS}× secondary</div>
-    </div>
-    ${[1,2,3].map(p=>`
-    <div class="card-pad">
-      <div style="font-size:10px;color:#5a6a88;font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">${POT[p].label}</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;color:${POT[p].color};line-height:1">${p===1?p1done:p===2?p2done:p3done}/${CFG['pot'+p].length}</div>
-      <div style="font-size:11px;color:#5a6a88;margin-top:3px">${POT[p].desc}</div>
-    </div>`).join('')}
-  </div>
+  var out='';
 
-  <div class="grid-2">
-  <!-- LEFT: Allocation -->
-  <div>
-    <div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Team Allocation</div>
-    ${CFG.families.map(fam=>{
-      const buys=CFG.familyBuys[fam.id]||{primaries:0,secondaries:0};
-      return `
-      <div class="card" style="margin-bottom:12px">
-        <div style="padding:10px 14px;background:${fam.color}14;border-bottom:1px solid ${fam.color}25;display:flex;justify-content:space-between;align-items:center">
-          <span class="font-display" style="font-weight:700;font-size:15px;letter-spacing:.06em;color:${fam.color};text-transform:uppercase">${h(fam.name)}</span>
-          <span style="font-size:11px;color:#5a6a88">${buys.primaries}× primary · ${buys.secondaries}× secondary</span>
-        </div>
-        ${fam.members.map(mem=>{
-          const teams=allocs[mem.id]||[];
-          const p1t=teams.filter(t=>CFG.pot1.includes(t));
-          const p2t=teams.filter(t=>CFG.pot2.includes(t));
-          const p3t=teams.filter(t=>CFG.pot3.includes(t));
-          const needP1=p1t.length<buys.primaries;
-          const needP2=p2t.length<buys.secondaries;
-          const needP3=p3t.length<buys.primaries;
-          return `
-          <div style="padding:10px 14px;border-bottom:1px solid #ffffff08">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <span style="font-weight:600;font-size:13px">${h(mem.name)}${mem.type==='child'?' <span style="font-size:10px;padding:1px 5px;background:#ffffff10;color:#5a6a88;border-radius:3px">child</span>':''}</span>
-              <div style="display:flex;gap:5px">
-                ${needP1?`<button class="btn pot1" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',1)">+ P1</button>`:(buys.primaries>0?`<button class="btn" style="opacity:.3;cursor:default;color:#fbbf24;border-color:#fbbf2430" disabled>P1 ✓</button>`:'')}
-                ${needP2?`<button class="btn pot2" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',2)">+ P2</button>`:(buys.secondaries>0?`<button class="btn" style="opacity:.3;cursor:default;color:#60a5fa;border-color:#60a5fa30" disabled>P2 ✓</button>`:'')}
-                ${needP3?`<button class="btn pot3" onclick="startSpin('${mem.id}','${h(mem.name)}','${fam.color}',3)">+ P3</button>`:(buys.primaries>0?`<button class="btn" style="opacity:.3;cursor:default;color:#a78bfa;border-color:#a78bfa30" disabled>P3 ✓</button>`:'')}
-              </div>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:5px">
-              ${[...p1t.map(t=>[t,1]),...p2t.map(t=>[t,2]),...p3t.map(t=>[t,3])].map(([t,p])=>{
-                const r=getTeamResult(t,matches,sm);
-                const tc=tagClass(r);
-                var isElite=p===1&&CFG.pot1.indexOf(t)>=0&&CFG.pot1.indexOf(t)<8;
-                var potCol=isElite?'#fbbf24':POT[p].color;
-                var potLbl=isElite?'P1★':'P'+p;
-                var eliteBorder=isElite?';border-color:#fbbf2450':'';
-                return '<span class="tag '+tc+'" style="'+eliteBorder+'"><span style="font-size:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;color:'+potCol+'">'+potLbl+'</span> '+f(t)+' '+h(t)+'<span onclick="removeTeam(\''+mem.id+'\',\''+h(t)+'\')" style="cursor:pointer;opacity:.4;font-size:10px;margin-left:2px">×</span></span>';
-              }).join('')}
-              ${[...p1t,...p2t,...p3t].length===0?'<span style="font-size:12px;color:#5a6a88;font-style:italic">No teams yet</span>':''}
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`;
-    }).join('')}
-  </div>
+  // Tier legend
+  out+='<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:10px 14px;background:#111827;border:1px solid #ffffff10;border-radius:8px;font-size:12px">'+
+    '<span class="font-display" style="color:#5a6a88;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Draw order</span>'+
+    '<span style="color:#fbbf24">★ Pot 1 Elite (ranked 1–8)</span>'+
+    '<span style="color:#5a6a88">—</span>'+
+    '<span style="color:#e8eeff">Pot 1 Standard (9–16)</span>'+
+    '<span style="color:#5a6a88">—</span>'+
+    '<span style="color:#60a5fa">Pot 2 (17–32)</span>'+
+    '<span style="color:#5a6a88">—</span>'+
+    '<span style="color:#a78bfa">Pot 3 random (33–48)</span>'+
+    '</div>';
 
-  <!-- RIGHT: Leaderboard -->
-  <div>
-    <div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Live Standings</div>
+  // Stats row
+  out+='<div class="grid-stats" style="margin-bottom:14px">';
+  // Pool card - with per-family breakdown
+  out+='<div class="card-pad">';
+  out+='<div style="font-size:10px;color:#5a6a88;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Total Buy-in Pool</div>';
+  out+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:28px;color:#00d4aa;line-height:1">$'+pool+'</div>';
+  out+='<div style="font-size:11px;color:#5a6a88;margin-top:4px">'+totalP+'× primary ($'+CFG.primaryCost+') + '+totalS+'× secondary ($'+CFG.secondaryCost+')</div>';
+  // Per-family breakdown
+  out+='<div style="margin-top:8px;padding-top:8px;border-top:1px solid #ffffff08">';
+  CFG.families.forEach(function(fam){
+    var ft=famTotals[fam.id];
+    out+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0">'+
+      '<span style="color:'+fam.color+'">'+h(fam.name)+'</span>'+
+      '<span style="color:#8b9ab8">$'+ft.paid+'</span></div>';
+  });
+  out+='</div></div>';
+  // Pot progress cards
+  [1,2,3].forEach(function(p){
+    var done=p===1?p1done:p===2?p2done:p3done;
+    out+='<div class="card-pad">'+
+      '<div style="font-size:10px;color:#5a6a88;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">'+POT[p].label+'</div>'+
+      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:28px;color:'+POT[p].color+';line-height:1">'+done+'/'+CFG['pot'+p].length+'</div>'+
+      '<div style="font-size:11px;color:#5a6a88;margin-top:3px">'+POT[p].desc+'</div>'+
+      '</div>';
+  });
+  out+='</div>';
 
-    <!-- Family summary -->
-    <div class="card-pad" style="margin-bottom:14px">
-      <div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">By Family</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${CFG.families.map(fam=>{
-          const ft=famTotals[fam.id];
-          return `<div style="flex:1;min-width:90px;background:${fam.color}0c;border:1px solid ${fam.color}25;border-radius:8px;padding:8px 10px;text-align:center">
-            <div class="font-display" style="font-weight:700;font-size:11px;color:${fam.color};text-transform:uppercase;letter-spacing:.05em">${h(fam.name)}</div>
-            <div class="font-display" style="font-weight:800;font-size:22px;color:#f0f4ff;margin:2px 0">$${ft.pts}</div>
-            <div style="font-size:10px;color:#5a6a88">paid $${ft.paid}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
+  // Prize structure panel (full width, above the 2-col grid)
+  out+='<div class="card-pad" style="margin-bottom:14px">';
+  out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  out+='<div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase">Prize Structure</div>';
+  out+='<div style="display:flex;align-items:center;gap:10px">';
+  out+='<span style="font-size:11px;color:#5a6a88">Total prizes:</span>';
+  out+='<span class="font-display" style="font-weight:800;font-size:18px;color:'+prizeColor+'">$'+prizeTotal+'</span>';
+  out+='<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:'+prizeColor+'18;color:'+prizeColor+';border:1px solid '+prizeColor+'30">'+prizeStatus+'</span>';
+  out+='</div></div>';
+  // Prize grid - 3 columns
+  out+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px">';
+  PRIZE_DEFS.forEach(function(pd){
+    var val=prz[pd.k]||0;
+    out+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#ffffff05;border-radius:6px;border:1px solid #ffffff08">'+
+      '<span style="font-size:12px;color:#8b9ab8">'+pd.icon+' '+pd.label+'</span>'+
+      '<span class="font-display" style="font-weight:700;font-size:14px;color:'+(val>0?'#f0f4ff':'#5a6a88')+'">'+(val>0?'$'+val:'—')+'</span>'+
+      '</div>';
+  });
+  out+='</div>';
+  // Pool balance bar
+  var barPct=pool>0?Math.min(100,Math.round(prizeTotal/pool*100)):0;
+  out+='<div style="margin-top:12px;height:4px;background:#ffffff10;border-radius:2px;overflow:hidden">'+
+    '<div style="height:100%;width:'+barPct+'%;background:'+prizeColor+';border-radius:2px;transition:width .4s"></div></div>';
+  out+='<div style="font-size:10px;color:#5a6a88;margin-top:4px;text-align:right">'+barPct+'% of pool allocated as prizes</div>';
+  out+='</div>';
 
-    <!-- Individual -->
-    <div class="card-pad" style="margin-bottom:14px">
-      <div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">By Individual</div>
-      ${lb.map((p,i)=>{
-        const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':''
-        return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #ffffff08;${i===0&&p.pts>0?'background:#00d4aa04':''}">
-          <span class="font-display" style="width:20px;flex-shrink:0;font-weight:700;color:#5a6a88;font-size:13px">${medal||i+1}</span>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              ${h(p.name)}
-              <span style="font-size:10px;padding:1px 5px;background:${p.famColor}18;color:${p.famColor};border-radius:3px;border:1px solid ${p.famColor}30">${h(p.famName)}</span>
-            </div>
-            ${p.notes.length?`<div style="font-size:11px;color:#5a6a88;margin-top:2px">${p.notes.join(' · ')}</div>`:''}
-          </div>
-          <span class="font-display" style="font-weight:800;font-size:18px;color:${i===0&&p.pts>0?'#00d4aa':'#f0f4ff'};flex-shrink:0">$${p.pts}</span>
-        </div>`;
-      }).join('')}
-      ${lb.every(p=>p.pts===0)?'<div style="text-align:center;padding:20px;color:#5a6a88;font-size:13px">Standings update as results come in</div>':''}
-    </div>
+  // 2-col: allocation + leaderboard
+  out+='<div class="grid-2">';
 
-    <!-- Prize structure -->
-    <div class="card-pad">
-      <div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Prize Structure</div>
-      ${[['champion','🏆 Champion'],['runner','🥈 Runner-up'],['third','🥉 3rd Place'],['groupAdvance','✓ Group Advance']].map(([k,label])=>`
-        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid #ffffff06">
-          <span style="color:#8b9ab8">${label}</span>
-          <span class="font-display" style="font-weight:700">$${CFG.prizes[k]||0}</span>
-        </div>`).join('')}
-    </div>
-  </div>
-  </div>`;
+  // LEFT: Allocation
+  out+='<div>';
+  out+='<div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Team Allocation</div>';
+  CFG.families.forEach(function(fam){
+    var buys=CFG.familyBuys[fam.id]||{primaries:0,secondaries:0};
+    var famPool=(buys.primaries*CFG.primaryCost)+(buys.secondaries*CFG.secondaryCost);
+    out+='<div class="card" style="margin-bottom:12px">';
+    out+='<div style="padding:10px 14px;background:'+fam.color+'14;border-bottom:1px solid '+fam.color+'25;display:flex;justify-content:space-between;align-items:center">';
+    out+='<span class="font-display" style="font-weight:700;font-size:15px;letter-spacing:.06em;color:'+fam.color+';text-transform:uppercase">'+h(fam.name)+'</span>';
+    out+='<span style="font-size:11px;color:#5a6a88">'+buys.primaries+'× P ($'+buys.primaries*CFG.primaryCost+') + '+buys.secondaries+'× S ($'+buys.secondaries*CFG.secondaryCost+') = <strong style="color:'+fam.color+'">\$'+famPool+'</strong></span>';
+    out+='</div>';
+    fam.members.forEach(function(mem){
+      var teams=allocs[mem.id]||[];
+      var p1t=teams.filter(function(t){return CFG.pot1.includes(t);});
+      var p2t=teams.filter(function(t){return CFG.pot2.includes(t);});
+      var p3t=teams.filter(function(t){return CFG.pot3.includes(t);});
+      var needP1=p1t.length<buys.primaries;
+      var needP2=p2t.length<buys.secondaries;
+      var needP3=p3t.length<buys.primaries;
+      out+='<div style="padding:10px 14px;border-bottom:1px solid #ffffff08">';
+      out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+      var childBadge=mem.type==='child'?' <span style="font-size:10px;padding:1px 5px;background:#ffffff10;color:#5a6a88;border-radius:3px">child</span>':'';
+      out+='<span style="font-weight:600;font-size:13px">'+h(mem.name)+childBadge+'</span>';
+      out+='<div style="display:flex;gap:5px">';
+      out+=needP1?'<button class="btn pot1" onclick="startSpin(\''+mem.id+'\',\''+h(mem.name)+'\',\''+fam.color+'\',1)">+ P1</button>':(buys.primaries>0?'<button class="btn" style="opacity:.3;cursor:default;color:#fbbf24;border-color:#fbbf2430" disabled>P1 ✓</button>':'');
+      out+=needP2?'<button class="btn pot2" onclick="startSpin(\''+mem.id+'\',\''+h(mem.name)+'\',\''+fam.color+'\',2)">+ P2</button>':(buys.secondaries>0?'<button class="btn" style="opacity:.3;cursor:default;color:#60a5fa;border-color:#60a5fa30" disabled>P2 ✓</button>':'');
+      out+=needP3?'<button class="btn pot3" onclick="startSpin(\''+mem.id+'\',\''+h(mem.name)+'\',\''+fam.color+'\',3)">+ P3</button>':(buys.primaries>0?'<button class="btn" style="opacity:.3;cursor:default;color:#a78bfa;border-color:#a78bfa30" disabled>P3 ✓</button>':'');
+      out+='</div></div>';
+      out+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
+      var allTeamSlots=[...p1t.map(function(t){return[t,1];}), ...p2t.map(function(t){return[t,2];}), ...p3t.map(function(t){return[t,3];})];
+      if(allTeamSlots.length===0){
+        out+='<span style="font-size:12px;color:#5a6a88;font-style:italic">No teams yet</span>';
+      }else{
+        allTeamSlots.forEach(function(arr){
+          var t=arr[0],p=arr[1];
+          var r=getTeamResult(t,matches,sm);
+          var tc=tagClass(r);
+          var isElite=p===1&&CFG.pot1.indexOf(t)>=0&&CFG.pot1.indexOf(t)<8;
+          var potCol=isElite?'#fbbf24':POT[p].color;
+          var potLbl=isElite?'P1★':'P'+p;
+          var eliteBorder=isElite?';border-color:#fbbf2450':'';
+          out+='<span class="tag '+tc+'" style="'+eliteBorder+'">'+
+            '<span style="font-size:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;color:'+potCol+'">'+potLbl+'</span> '+
+            f(t)+' '+h(t)+
+            '<span onclick="removeTeam(\''+mem.id+'\',\''+h(t)+'\')" style="cursor:pointer;opacity:.4;font-size:10px;margin-left:2px">×</span></span>';
+        });
+      }
+      out+='</div></div>';
+    });
+    out+='</div>';
+  });
+  out+='</div>';
+
+  // RIGHT: Leaderboard
+  out+='<div>';
+  out+='<div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Live Standings</div>';
+  // Family summary
+  out+='<div class="card-pad" style="margin-bottom:14px">';
+  out+='<div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">By Family</div>';
+  out+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  CFG.families.forEach(function(fam){
+    var ft=famTotals[fam.id];
+    out+='<div style="flex:1;min-width:90px;background:'+fam.color+'0c;border:1px solid '+fam.color+'25;border-radius:8px;padding:8px 10px;text-align:center">'+
+      '<div class="font-display" style="font-weight:700;font-size:11px;color:'+fam.color+';text-transform:uppercase;letter-spacing:.05em">'+h(fam.name)+'</div>'+
+      '<div class="font-display" style="font-weight:800;font-size:22px;color:#f0f4ff;margin:2px 0">$'+ft.pts+'</div>'+
+      '<div style="font-size:10px;color:#5a6a88">paid $'+ft.paid+'</div>'+
+      '</div>';
+  });
+  out+='</div></div>';
+  // Individual
+  out+='<div class="card-pad">';
+  out+='<div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">By Individual</div>';
+  if(lb.every(function(p){return p.pts===0;})){
+    out+='<div style="text-align:center;padding:20px;color:#5a6a88;font-size:13px">Standings update as results come in</div>';
+  }else{
+    lb.forEach(function(p,i){
+      var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+      out+='<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #ffffff08">'+
+        '<span class="font-display" style="width:20px;flex-shrink:0;font-weight:700;color:#5a6a88;font-size:13px">'+(medal||i+1)+'</span>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
+            h(p.name)+
+            '<span style="font-size:10px;padding:1px 5px;background:'+p.famColor+'18;color:'+p.famColor+';border-radius:3px;border:1px solid '+p.famColor+'30">'+h(p.famName)+'</span>'+
+          '</div>'+
+          (p.notes.length?'<div style="font-size:11px;color:#5a6a88;margin-top:2px">'+p.notes.join(' · ')+'</div>':'')+
+        '</div>'+
+        '<span class="font-display" style="font-weight:800;font-size:18px;color:'+(i===0&&p.pts>0?'#00d4aa':'#f0f4ff')+';flex-shrink:0">$'+p.pts+'</span>'+
+      '</div>';
+    });
+  }
+  out+='</div>';
+  out+='</div>';
+  out+='</div>';
 
   document.getElementById('tab-sweep').innerHTML=out;
 }
+
 
 function removeTeam(memberId,teamName){
   if(!CFG.allocations[memberId])return;
@@ -986,8 +1064,8 @@ function renderAdmin(){
   <div id="admin-msg"></div>
   </div>`;
   document.getElementById('tab-admin').innerHTML=out;
-  // Update token status (must happen after innerHTML is set)
   updateTokenStatus();
+  updatePrizeTotals();
 }
 
 function updateTokenStatus(){
@@ -1024,13 +1102,29 @@ function saveToken(){
   });
 }
 
+function updatePrizeTotals(){
+  var prizeKeys=['champion','runner','third','groupAdvance','goldenBoot','bestGD','worstGD','mostYellow','mostRed','firstGoal','mostCleanSheets','topFamily'];
+  var total=prizeKeys.reduce(function(s,k){var el=document.getElementById('prize-'+k);return s+(el?+(el.value)||0:0);},0);
+  var totalP=Object.values(CFG.familyBuys).reduce(function(s,b){return s+(b.primaries||0);},0);
+  var totalS=Object.values(CFG.familyBuys).reduce(function(s,b){return s+(b.secondaries||0);},0);
+  var pool=(totalP*(+(document.getElementById('cost-primary')||{value:CFG.primaryCost}).value))+(totalS*(+(document.getElementById('cost-secondary')||{value:CFG.secondaryCost}).value));
+  var color=total===pool?'#00d4aa':total<pool?'#fbbf24':'#ff4757';
+  var status=total===pool?'✓ Balanced':total<pool?'$'+(pool-total)+' under':'$'+(total-pool)+' over';
+  var badge=document.getElementById('prize-total-badge');
+  if(badge){badge.textContent='$'+total;badge.style.color=color;}
+  var bar=document.getElementById('prize-bar');
+  if(bar){bar.style.width=pool>0?Math.min(100,Math.round(total/pool*100))+'%':'0%';bar.style.background=color;}
+  var lbl=document.getElementById('prize-bar-label');
+  if(lbl){lbl.textContent=status;lbl.style.color=color;}
+}
+
 async function saveAdmin(){
   CFG.primaryCost=+(document.getElementById('cost-primary')?.value||10);
   CFG.secondaryCost=+(document.getElementById('cost-secondary')?.value||5);
-  CFG.prizes.champion=+(document.getElementById('prize-champion')?.value||50);
-  CFG.prizes.runner=+(document.getElementById('prize-runner')?.value||25);
-  CFG.prizes.third=+(document.getElementById('prize-third')?.value||15);
-  CFG.prizes.groupAdvance=+(document.getElementById('prize-groupAdvance')?.value||5);
+  ['champion','runner','third','groupAdvance','goldenBoot','bestGD','worstGD','mostYellow','mostRed','firstGoal','mostCleanSheets','topFamily'].forEach(function(k){
+    var el=document.getElementById('prize-'+k);
+    if(el)CFG.prizes[k]=+(el.value)||0;
+  });
   CFG.families.forEach(fam=>{
     CFG.familyBuys[fam.id]={
       primaries:+(document.getElementById('buys-'+fam.id+'-p')?.value||0),
