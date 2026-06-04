@@ -118,20 +118,20 @@
   ],
   "familyBuys": {
     "mackenzie": {
-      "primaries": 4,
-      "secondaries": 4
+      "primaries": 3,
+      "secondaries": 3
     },
     "mackenzie2": {
       "primaries": 4,
       "secondaries": 4
     },
     "thomas": {
-      "primaries": 4,
+      "primaries": 5,
       "secondaries": 4
     },
     "harris": {
       "primaries": 4,
-      "secondaries": 4
+      "secondaries": 5
     }
   },
   "pot1": [
@@ -190,9 +190,9 @@
   ],
   "allocations": {},
   "prizes": {
-    "champion": 50,
-    "runner": 25,
-    "third": 15,
+    "champion": 80,
+    "runner": 50,
+    "third": 30,
     "groupAdvance": 5
   },
   "cycleOrder": [
