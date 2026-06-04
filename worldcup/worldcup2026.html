@@ -291,31 +291,34 @@ let scoreFilter='group';
 let statsSort='pts';
 let editScoreKey=null;
 
-try{SCORES=JSON.parse(localStorage.getItem('wc26_sc')||'{}');}catch{}
+try{SCORES=JSON.parse(localStorage.getItem('wc26_sc')||'{}');}catch(e){}
 
 // ═══════════════════════════════════════════════════════════
 // GITHUB SYNC
 // ═══════════════════════════════════════════════════════════
 async function loadFromGitHub(){
-  setStatus('loading','Loading from GitHub…','#fbbf24');
+  setStatus('loading','Syncing…','#fbbf24');
   try{
     const r=await fetch(CONFIG_URL+'?t='+Date.now());
     if(!r.ok)throw new Error('HTTP '+r.status);
-    const data=await r.json();
+    const text=await r.text();
+    let data;
+    try{data=JSON.parse(text);}catch(e){throw new Error('Invalid JSON in config');}
     CFG={...DEFAULT_CFG,...data};
     if(!CFG.allocations)CFG.allocations={};
+    if(!CFG.prizes)CFG.prizes={...DEFAULT_CFG.prizes};
+    if(!CFG.familyBuys)CFG.familyBuys={...DEFAULT_CFG.familyBuys};
     setStatus('ok','✓ Synced with GitHub','#00d4aa');
   }catch(e){
-    CFG=JSON.parse(JSON.stringify(DEFAULT_CFG));
-    // Check if there's a token saved locally
-    try{const t=localStorage.getItem('wc26_token');if(t)CFG.githubToken=t;}catch{}
-    setStatus('warn','Local mode — add GitHub token in ⚙ Admin to sync','#fbbf24');
+    // Keep using DEFAULT_CFG (already rendered), just restore any local token
+    try{const t=localStorage.getItem('wc26_token');if(t)CFG.githubToken=t;}catch(e2){}
+    setStatus('warn','Local mode — set token in ⚙ Admin to enable sync ('+e.message+')','#fbbf24');
   }
   render();
 }
 
 async function pushToGitHub(cfg){
-  const token=cfg.githubToken||(()=>{try{return localStorage.getItem('wc26_token')||'';}catch{return '';}}());
+  const token=cfg.githubToken||(()=>{try{return localStorage.getItem('wc26_token')||'';}catch(e){return '';}}());
   if(!token){
     alert('No GitHub token set. Go to ⚙ Admin tab and enter your token first.');
     return false;
@@ -748,13 +751,13 @@ function saveScore(key){
   const s1=document.getElementById('s1in')?.value;
   const s2=document.getElementById('s2in')?.value;
   if(s1===''&&s2===''){delete SCORES[key];}else{SCORES[key]={s1:s1===''?null:+s1,s2:s2===''?null:+s2};}
-  try{localStorage.setItem('wc26_sc',JSON.stringify(SCORES));}catch{}
+  try{localStorage.setItem('wc26_sc',JSON.stringify(SCORES));}catch(e){}
   editScoreKey=null;
   render();
 }
 function clearScore(key){
   delete SCORES[key];
-  try{localStorage.setItem('wc26_sc',JSON.stringify(SCORES));}catch{}
+  try{localStorage.setItem('wc26_sc',JSON.stringify(SCORES));}catch(e){}
   editScoreKey=null;
   render();
 }
@@ -848,7 +851,7 @@ function renderAdmin(){
 function saveToken(){
   const t=document.getElementById('token-input')?.value?.trim()||'';
   CFG.githubToken=t;
-  try{localStorage.setItem('wc26_token',t);}catch{}
+  try{localStorage.setItem('wc26_token',t);}catch(e){}
   pushToGitHub(CFG).then(ok=>{
     if(ok)document.getElementById('admin-msg').innerHTML=`<div style="padding:10px 14px;background:#00d4aa14;border:1px solid #00d4aa30;border-radius:6px;color:#00d4aa;font-size:13px;margin-top:8px">✓ Token saved and pushed to GitHub</div>`;
   });
@@ -975,6 +978,9 @@ function closeSpin(){
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
+// Render immediately with defaults so page is never blank
+render();
+// Then load remote config and re-render
 loadFromGitHub();
 </script>
 </body>
