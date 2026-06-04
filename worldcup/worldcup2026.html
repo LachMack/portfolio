@@ -284,9 +284,26 @@ const DEFAULT_CFG={
 // STATE
 // ═══════════════════════════════════════════════════════════
 let CFG=JSON.parse(JSON.stringify(DEFAULT_CFG));
-let SCORES={};
-let SCORES_SHA=null;
+let SCORES={};       // manual overrides keyed by match index
+let OFB={};          // openfootball scores keyed by match index
+let OFB_GOALS={};    // openfootball goal scorers keyed by match index
+let OFB_LAST_FETCH=0;
 let activeTab='sweep';
+
+// Name mapping: openfootball → our names
+const OFB_NAMES={
+  'Czech Republic':'UEFA Path D',  // placeholder until confirmed
+  'Czechia':'UEFA Path D',
+  'Turkey':'Turkey',
+  'Iraq':'IC Path 2',
+  'DR Congo':'IC Path 1',
+  'Sweden':'UEFA Path B',
+  'Bosnia & Herzegovina':'UEFA Path A',
+  'Bosnia and Herzegovina':'UEFA Path A',
+  'USA':'USA',
+  'United States':'USA',
+};
+function normTeam(n){return OFB_NAMES[n]||n;}
 let scoreFilter='group';
 let statsSort='pts';
 let editScoreKey=null;
@@ -296,6 +313,57 @@ try{SCORES=JSON.parse(localStorage.getItem('wc26_sc')||'{}');}catch(e){}
 // ═══════════════════════════════════════════════════════════
 // GITHUB SYNC
 // ═══════════════════════════════════════════════════════════
+const OFB_URL='https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+
+async function loadFromOpenFootball(){
+  // Only refetch if >5 mins since last fetch
+  var now=Date.now();
+  if(now-OFB_LAST_FETCH<5*60*1000&&OFB_LAST_FETCH>0)return;
+  try{
+    var r=await fetch(OFB_URL+'?t='+now);
+    if(!r.ok)return;
+    var data=await r.json();
+    var matches=data.matches||[];
+    OFB={};OFB_GOALS={};
+    matches.forEach(function(m,i){
+      // Match by date + team names
+      var t1=normTeam(m.team1||'');
+      var t2=normTeam(m.team2||'');
+      var key=findMatchKey(t1,t2,m.date||'');
+      if(key===null)return;
+      if(m.score&&m.score.ft){
+        OFB[key]={s1:m.score.ft[0],s2:m.score.ft[1],ht1:m.score.ht?m.score.ht[0]:null,ht2:m.score.ht?m.score.ht[1]:null};
+      }
+      var goals=[];
+      (m.goals1||[]).forEach(function(g){goals.push({name:g.name,team:t1,minute:g.minute,penalty:!!g.penalty,offset:g.offset||0});});
+      (m.goals2||[]).forEach(function(g){goals.push({name:g.name,team:t2,minute:g.minute,penalty:!!g.penalty,offset:g.offset||0});});
+      goals.sort(function(a,b){return a.minute-b.minute;});
+      if(goals.length)OFB_GOALS[key]=goals;
+    });
+    OFB_LAST_FETCH=now;
+  }catch(e){
+    // Silently fail - manual scores still work
+  }
+}
+
+function findMatchKey(t1,t2,date){
+  var matches=getMatches();
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i];
+    if(m.d===date&&((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1))){
+      return m.key;
+    }
+  }
+  // Fallback: match by teams only (different date format)
+  for(var i=0;i<matches.length;i++){
+    var m=matches[i];
+    if((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)){
+      return m.key;
+    }
+  }
+  return null;
+}
+
 async function loadFromGitHub(){
   setStatus('loading','Syncing…','#fbbf24');
   try{
@@ -313,6 +381,8 @@ async function loadFromGitHub(){
   }catch(e){
     setStatus('warn','Local mode — set token in ⚙ Admin to enable sync ('+e.message+')','#fbbf24');
   }
+  // Also fetch live scores from openfootball
+  await loadFromOpenFootball();
   render();
 }
 
@@ -705,63 +775,115 @@ function renderStats(){
 
 // ── SCORES TAB ────────────────────────────────────────────
 function renderScores(){
-  const matches=getMatches();
-  const filters=[['group','Group'],['knockout','Knockout'],['pending','Pending'],['done','Played'],['all','All']];
-  const filtered=matches.filter(m=>{
+  var matches=getMatches();
+  var filters=[['group','Group'],['knockout','Knockout'],['pending','Pending'],['done','Played'],['all','All']];
+  var filtered=matches.filter(function(m){
     if(scoreFilter==='group')return!!m.g;
     if(scoreFilter==='knockout')return!m.g;
     if(scoreFilter==='pending')return m.s1==null;
     if(scoreFilter==='done')return m.s1!=null;
     return true;
   });
-  let out=`<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-    <span style="font-size:11px;color:#5a6a88;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-right:4px">Show</span>
-    ${filters.map(([v,l])=>`<button class="btn${scoreFilter===v?' btn-accent':''}" onclick="scoreFilter='${v}';renderScores()">${l}</button>`).join('')}
-    <span style="font-size:11px;color:#5a6a88;margin-left:6px">Click a row to enter or edit</span>
-  </div>
-  <div style="display:flex;flex-direction:column;gap:4px">`;
+  var autoCount=matches.filter(function(m){return m.isAuto;}).length;
+  var manualCount=matches.filter(function(m){return m.isManual;}).length;
 
-  filtered.forEach(m=>{
-    const done=m.s1!=null,isEdit=editScoreKey===m.key;
-    const grpL=m.g?.replace('Group ','');
-    const c=GC[grpL]||'#60a5fa';
-    const isKO=!m.g;
-    const roundShort=m.round?.replace('Round of ','R');
+  var filterBtns=filters.map(function(fv){
+    var v=fv[0],l=fv[1];
+    var cls='btn'+(scoreFilter===v?' btn-accent':'');
+    return '<button class="'+cls+'" data-filter="'+v+'" onclick="setScoreFilter(this)">'+l+'</button>';
+  }).join('');
 
-    out+=`<div onclick="${isEdit?'':'editScore(\''+m.key+'\')'}" style="display:grid;grid-template-columns:90px 1fr ${isEdit?'220px':'80px'} 1fr 90px;align-items:center;gap:8px;padding:10px 14px;background:#111827;border:1px solid ${isEdit?'#00d4aa40':'#ffffff0e'};border-radius:8px;cursor:${isEdit?'default':'pointer'}">
-      <div style="font-size:11px">
-        ${grpL?`<span class="font-display" style="font-size:10px;font-weight:700;color:${c};background:${c}18;padding:2px 5px;border-radius:3px">${h(m.g)}</span>`:`<span class="font-display" style="font-size:10px;color:#5a6a88;font-weight:600;letter-spacing:.04em;text-transform:uppercase">${roundShort}</span>`}
-        <div style="margin-top:4px;color:#5a6a88">${fmtDate(m.d)}</div>
-      </div>
-      <span style="font-weight:${done?600:400};text-align:right;color:${done?'#e8eeff':'#8b9ab8'};font-size:13px">${isKnown(m.t1)?f(m.t1)+' ':''}${h(m.t1)}</span>
-      <div style="text-align:center">`;
+  var out='<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">'+
+    '<span class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.06em;text-transform:uppercase;margin-right:4px">Show</span>'+
+    filterBtns+'</div>';
 
-    if(isEdit){
-      out+=`<div style="display:flex;align-items:center;gap:5px" onclick="event.stopPropagation()">
-        <input id="s1in" type="number" min="0" max="20" value="${m.s1??''}" style="width:42px;text-align:center;font-size:17px;font-weight:700;padding:4px;font-family:'Barlow Condensed',sans-serif" onkeydown="if(event.key==='Enter')saveScore('${m.key}')">
-        <span style="font-weight:700;color:#5a6a88">–</span>
-        <input id="s2in" type="number" min="0" max="20" value="${m.s2??''}" style="width:42px;text-align:center;font-size:17px;font-weight:700;padding:4px;font-family:'Barlow Condensed',sans-serif" onkeydown="if(event.key==='Enter')saveScore('${m.key}')">
-        <button class="btn btn-accent" style="padding:4px 10px" onclick="event.stopPropagation();saveScore('${m.key}')">SAVE</button>
-        ${done?`<button class="btn" style="color:#ff4757;border-color:#ff475730;padding:4px 8px" onclick="event.stopPropagation();clearScore('${m.key}')">✕</button>`:''}
-        <button class="btn" style="padding:4px 8px" onclick="event.stopPropagation();editScoreKey=null;renderScores()">×</button>
-      </div>`;
-    }else if(done){
-      out+=`<span class="font-display" style="font-weight:700;font-size:20px;letter-spacing:.05em">${m.s1} – ${m.s2}</span>`;
-    }else{
-      out+=`<span style="font-size:11px;color:#5a6a88;border:1px dashed #ffffff14;padding:3px 10px;border-radius:4px">click to enter</span>`;
+  out+='<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px;font-size:11px;color:#8b9ab8">'+
+    '<span style="color:#5a6a88">Sources:</span>'+
+    '<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#00d4aa;margin-right:4px;vertical-align:-1px"></span>openfootball live ('+autoCount+')</span>'+
+    '<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#60a5fa;margin-right:4px;vertical-align:-1px"></span>Manual override ('+manualCount+')</span>'+
+    '<span style="color:#5a6a88;font-style:italic">Click any row to enter manually — overrides live data</span>'+
+    '</div>';
+
+  out+='<div style="display:flex;flex-direction:column;gap:4px">';
+
+  filtered.forEach(function(m){
+    var done=m.s1!=null;
+    var isEdit=editScoreKey===m.key;
+    var grpL=m.g?m.g.replace('Group ',''):'';
+    var c=GC[grpL]||'#60a5fa';
+    var roundShort=(m.round||'').replace('Round of ','R');
+
+    var srcDot='';
+    if(m.isAuto)srcDot='<span title="Live from openfootball" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#00d4aa;margin-left:5px;vertical-align:1px"></span>';
+    if(m.isManual)srcDot='<span title="Manually entered" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#60a5fa;margin-left:5px;vertical-align:1px"></span>';
+
+    var goalsHtml='';
+    if(m.goals&&m.goals.length&&!isEdit){
+      var gLines=m.goals.map(function(g){
+        var pen=g.penalty?' <span style="color:#fbbf24">(pen)</span>':'';
+        var off=g.offset?'+'+g.offset:'';
+        return f(g.team)+' <strong style="color:#8b9ab8">'+h(g.name)+'</strong> <span style="color:#5a6a88">'+g.minute+"'"+off+'</span>'+pen;
+      });
+      goalsHtml='<div style="font-size:10px;color:#5a6a88;margin-top:4px;padding-top:4px;border-top:1px solid #ffffff08;line-height:1.8">'+gLines.join('&nbsp;&nbsp; ')+'</div>';
+    }
+    var htHtml='';
+    if(m.ht1!=null&&m.ht2!=null&&!isEdit){
+      htHtml='<span style="font-size:10px;color:#5a6a88;margin-left:6px">(HT '+m.ht1+'-'+m.ht2+')</span>';
     }
 
-    out+=`</div>
-      <span style="font-weight:${done?600:400};color:${done?'#e8eeff':'#8b9ab8'};font-size:13px">${h(m.t2)} ${isKnown(m.t2)?f(m.t2):''}</span>
-      <span style="font-size:10px;color:#5a6a88;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h(m.gr)}</span>
-    </div>`;
+    var onclk=isEdit?'':'onclick="editScore(\''+m.key+'\')"';
+    var borderCol=isEdit?'#00d4aa40':'#ffffff0e';
+    out+='<div '+onclk+' style="padding:10px 14px;background:#111827;border:1px solid '+borderCol+';border-radius:8px;cursor:'+(isEdit?'default':'pointer')+'">';
+    out+='<div style="display:grid;grid-template-columns:90px 1fr '+(isEdit?'240px':'auto')+' 1fr 80px;align-items:center;gap:8px">';
+
+    // Meta
+    var metaLabel=grpL
+      ? '<span class="font-display" style="font-size:10px;font-weight:700;color:'+c+';background:'+c+'18;padding:2px 5px;border-radius:3px">'+h(m.g)+'</span>'
+      : '<span class="font-display" style="font-size:10px;color:#5a6a88;font-weight:600;letter-spacing:.04em;text-transform:uppercase">'+roundShort+'</span>';
+    out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:4px;color:#5a6a88">'+fmtDate(m.d)+'</div></div>';
+
+    // Home
+    var homeFlag=isKnown(m.t1)?f(m.t1)+' ':'';
+    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+homeFlag+h(m.t1)+'</span>';
+
+    // Score
+    out+='<div style="text-align:center;min-width:80px">';
+    if(isEdit){
+      var v1=m.s1!=null?m.s1:'';
+      var v2=m.s2!=null?m.s2:'';
+      var clearBtn=done?'<button class="btn" style="color:#ff4757;border-color:#ff475730;padding:3px 7px;font-size:11px" onclick="event.stopPropagation();clearScore(\''+m.key+'\')">&#x2715;</button>':'';
+      out+='<div style="display:flex;align-items:center;gap:4px;justify-content:center" onclick="event.stopPropagation()">'+
+        '<input id="s1in" type="number" min="0" max="20" value="'+v1+'" style="width:40px;text-align:center;font-size:16px;font-weight:700;padding:4px" onkeydown="if(event.key===\'Enter\')saveScore(\''+m.key+'\')">'+
+        '<span style="font-weight:700;color:#5a6a88">-</span>'+
+        '<input id="s2in" type="number" min="0" max="20" value="'+v2+'" style="width:40px;text-align:center;font-size:16px;font-weight:700;padding:4px" onkeydown="if(event.key===\'Enter\')saveScore(\''+m.key+'\')">'+
+        '<button class="btn btn-accent" style="padding:3px 8px;font-size:11px" onclick="event.stopPropagation();saveScore(\''+m.key+'\')">SAVE</button>'+
+        clearBtn+
+        '<button class="btn" style="padding:3px 7px;font-size:11px" onclick="event.stopPropagation();editScoreKey=null;renderScores()">&#x00D7;</button>'+
+        '</div>';
+    }else if(done){
+      out+='<div><span class="font-display" style="font-weight:700;font-size:20px;letter-spacing:.05em">'+m.s1+' - '+m.s2+'</span>'+srcDot+htHtml+'</div>';
+    }else{
+      out+='<span style="font-size:11px;color:#5a6a88;border:1px dashed #ffffff14;padding:3px 8px;border-radius:4px;white-space:nowrap">click to enter</span>';
+    }
+    out+='</div>';
+
+    // Away
+    var awayFlag=isKnown(m.t2)?f(m.t2):'';
+    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+h(m.t2)+' '+awayFlag+'</span>';
+
+    // Venue
+    out+='<span style="font-size:10px;color:#5a6a88;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(m.gr)+'</span>';
+    out+='</div>';
+    if(goalsHtml)out+=goalsHtml;
+    out+='</div>';
   });
 
-  out+=`</div>`;
+  out+='</div>';
   document.getElementById('tab-scores').innerHTML=out;
   if(editScoreKey)setTimeout(function(){var el=document.getElementById('s1in');if(el)el.focus();},50);
 }
 
+function setScoreFilter(btn){scoreFilter=btn.getAttribute('data-filter');renderScores();}
 function editScore(key){editScoreKey=key;renderScores();}
 function saveScore(key){
   const s1=document.getElementById('s1in')?.value;
@@ -1035,8 +1157,12 @@ function closeSpin(){
 // ═══════════════════════════════════════════════════════════
 // Render immediately with defaults so page is never blank
 render();
-// Then load remote config and re-render
+// Then load remote config + live scores
 loadFromGitHub();
+// Auto-refresh live scores every 5 minutes
+setInterval(function(){
+  loadFromOpenFootball().then(function(){render();});
+},5*60*1000);
 </script>
 </body>
 </html>
