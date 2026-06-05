@@ -130,7 +130,8 @@
     },
     "thomas": {
       "primaries": 4,
-      "secondaries": 4
+      "secondaries": 4,
+      "p0": 1
     },
     "harris": {
       "primaries": 5,
