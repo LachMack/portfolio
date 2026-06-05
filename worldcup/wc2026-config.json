@@ -2,25 +2,28 @@
   "allocations": {},
   "familyBuys": {
     "mackenzie": {
-      "primaries": 3,
-      "secondaries": 4
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
     },
     "mackenzie2": {
-      "primaries": 4,
-      "secondaries": 4,
       "p0": 0,
-      "p1": 4,
-      "p2": 4,
-      "p3": 2
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
     },
     "thomas": {
-      "primaries": 4,
-      "secondaries": 4,
-      "p0": 0
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
     },
     "harris": {
-      "primaries": 5,
-      "secondaries": 4
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
     }
   },
   "prizes": {
