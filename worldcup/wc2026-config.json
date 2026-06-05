@@ -1,19 +1,32 @@
 {
-  "pot0Cost": 15,
-  "pot1Cost": 10,
-  "pot2Cost": 5,
-  "pot3Cost": 5,
-  "familyBuys": {
-    "mackenzie":  { "p0": 0, "p1": 0, "p2": 0, "p3": 0 },
-    "mackenzie2": { "p0": 0, "p1": 0, "p2": 0, "p3": 0 },
-    "thomas":     { "p0": 0, "p1": 0, "p2": 0, "p3": 0 },
-    "harris":     { "p0": 0, "p1": 0, "p2": 0, "p3": 0 }
-  },
   "allocations": {},
+  "familyBuys": {
+    "mackenzie": {
+      "primaries": 3,
+      "secondaries": 4
+    },
+    "mackenzie2": {
+      "primaries": 4,
+      "secondaries": 4,
+      "p0": 0,
+      "p1": 4,
+      "p2": 4,
+      "p3": 2
+    },
+    "thomas": {
+      "primaries": 4,
+      "secondaries": 4,
+      "p0": 0
+    },
+    "harris": {
+      "primaries": 5,
+      "secondaries": 4
+    }
+  },
   "prizes": {
     "champion": 50,
-    "runner": 25,
-    "third": 15,
+    "runner": 20,
+    "third": 10,
     "groupAdvance": 5,
     "goldenBoot": 0,
     "bestGD": 0,
@@ -23,5 +36,9 @@
     "firstGoal": 0,
     "mostCleanSheets": 0,
     "topFamily": 0
-  }
+  },
+  "pot0Cost": 15,
+  "pot1Cost": 10,
+  "pot2Cost": 5,
+  "pot3Cost": 5
 }
