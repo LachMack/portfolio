@@ -68,7 +68,8 @@ input[type=number]::-webkit-inner-spin-button{opacity:1}
 /* Tags */
 .tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px}
 /* Pot colours */
-.pot1{color:#fbbf24;background:#fbbf2418;border:1px solid #fbbf2430}
+.pot0{color:#f59e0b;background:#f59e0b18;border:1px solid #f59e0b30}
+.pot1{color:#00d4aa;background:#00d4aa18;border:1px solid #00d4aa30}
 .pot2{color:#60a5fa;background:#60a5fa18;border:1px solid #60a5fa30}
 .pot3{color:#a78bfa;background:#a78bfa18;border:1px solid #a78bfa30}
 .champion{color:#a78bfa;background:#a78bfa18;border:1px solid #a78bfa30}
@@ -191,10 +192,15 @@ const ODDS={
 };
 var predView='strength';
 const GC={A:'#a78bfa',B:'#34d399',C:'#fb923c',D:'#60a5fa',E:'#fbbf24',F:'#f472b6',G:'#86efac',H:'#f87171',I:'#818cf8',J:'#2dd4bf',K:'#fb7185',L:'#38bdf8'};
-const POT={1:{label:'Pot 1',color:'#fbbf24',cls:'pot1',desc:'Elite (Ranked 1–16)'},2:{label:'Pot 2',color:'#60a5fa',cls:'pot2',desc:'Mid-tier (17–32)'},3:{label:'Pot 3',color:'#a78bfa',cls:'pot3',desc:'Underdogs (33–48)'}};
+const POT={
+  0:{label:'Pot 0',color:'#f59e0b',cls:'pot0',desc:'Elite (Top 8)'},
+  1:{label:'Pot 1',color:'#00d4aa',cls:'pot1',desc:'Strong (9–16)'},
+  2:{label:'Pot 2',color:'#60a5fa',cls:'pot2',desc:'Mid-tier (17–32)'},
+  3:{label:'Pot 3',color:'#a78bfa',cls:'pot3',desc:'Underdogs (33–48)'}
+};
 
 const isKnown=n=>n&&!n.match(/^[12WL]/)&&!n.includes('Path')&&!n.includes('Best')&&!n.includes('winner')&&!n.includes('/');
-function isPot1Elite(team){return CFG.pot1.indexOf(team)<8 && CFG.pot1.indexOf(team)>=0;}
+function isPot0Elite(team){return CFG.pot0&&CFG.pot0.includes(team);}
 const fmtDate=d=>{if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('en-AU',{month:'short',day:'numeric'});};
 const shuffle=a=>{const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;};
 const h=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -307,15 +313,21 @@ const MATCHES=[
 ];
 
 const DEFAULT_CFG={
-  primaryCost:10,secondaryCost:5,
+  pot0Cost:15,pot1Cost:10,pot2Cost:5,pot3Cost:5,
   families:[
     {id:'mackenzie',name:'Mackenzie',color:'#00d4aa',members:[{id:'lachlan',name:'Lachlan Mackenzie',type:'adult'},{id:'leia',name:'Leia Mackenzie',type:'adult'},{id:'elina',name:'Elina Mackenzie',type:'child'}]},
     {id:'mackenzie2',name:'Mackenzie/Wells',color:'#60a5fa',members:[{id:'nat',name:'Nat Mackenzie',type:'adult'},{id:'emily',name:'Emily Wells',type:'adult'},{id:'maya',name:'Maya Mackenzie',type:'child'},{id:'hamish',name:'Hamish Mackenzie',type:'child'}]},
-    {id:'thomas',name:'Thomas',color:'#f472b6',members:[{id:'rach',name:'Rach Thomas',type:'adult'},{id:'richard',name:'Richard Thomas',type:'adult'},{id:'gil',name:'Gil Thomas',type:'adult'},{id:'nina',name:'Nina Thomas',type:'adult'},{id:'xanthe',name:'Xanthe Thomas',type:'child'}]},
+    {id:'thomas',name:'Thomas',color:'#f472b6',members:[{id:'rach',name:'Rach Thomas',type:'adult'},{id:'richard',name:'Richard Thomas',type:'adult'},{id:'gil',name:'Gil Thomas',type:'adult'},{id:'nina',name:'Nina Thomas',type:'adult'},{id:'xanthe',name:'Xanthe Thomas',type:'child'},{id:'griffin',name:'Griffin Webb',type:'adult'}]},
     {id:'harris',name:'Harris',color:'#fbbf24',members:[{id:'davina',name:'Davina Harris',type:'adult'},{id:'craig',name:'Craig Harris',type:'adult'},{id:'jasper',name:'Jasper Harris',type:'adult'},{id:'livia',name:'Livia Harris',type:'child'},{id:'maggie',name:'Maggie Harris',type:'child'}]},
   ],
-  familyBuys:{mackenzie:{primaries:4,secondaries:4},mackenzie2:{primaries:4,secondaries:4},thomas:{primaries:4,secondaries:4},harris:{primaries:4,secondaries:4}},
-  pot1:['France','Spain','Argentina','England','Portugal','Brazil','Netherlands','Morocco','Belgium','Germany','Croatia','Colombia','Senegal','Mexico','USA','Uruguay'],
+  familyBuys:{
+    mackenzie:{p0:0,p1:0,p2:0,p3:0},
+    mackenzie2:{p0:0,p1:0,p2:0,p3:0},
+    thomas:{p0:0,p1:0,p2:0,p3:0},
+    harris:{p0:0,p1:0,p2:0,p3:0}
+  },
+  pot0:['France','Spain','Argentina','England','Portugal','Brazil','Netherlands','Morocco'],
+  pot1:['Belgium','Germany','Croatia','Colombia','Senegal','Mexico','USA','Uruguay'],
   pot2:['Japan','Switzerland','Iran','Austria','Ecuador','Australia','South Korea','Egypt','Canada','Ivory Coast','Qatar','Algeria','Sweden','Tunisia','Czechia','Türkiye'],
   pot3:['Norway','Scotland','DR Congo','Bosnia & Herzegovina','Panama','Saudi Arabia','South Africa','Iraq','Uzbekistan','Paraguay','Ghana','Jordan','Cape Verde','Curaçao','Haiti','New Zealand'],
   allocations:{},
@@ -597,9 +609,11 @@ function renderSweep(){
 
   // Prize total + pool
   var PRIZE_DEFS=getPrizeDefs();
-  var totalP=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.primaries||0);},0);
-  var totalS=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.secondaries||0);},0);
-  var pool=(totalP*(CFG.primaryCost||10))+(totalS*(CFG.secondaryCost||5));
+  var totalP0=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p0||0);},0);
+  var totalP1=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p1||0);},0);
+  var totalP2=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p2||0);},0);
+  var totalP3=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p3||0);},0);
+  var pool=(totalP0*(CFG.pot0Cost||15))+(totalP1*(CFG.pot1Cost||10))+(totalP2*(CFG.pot2Cost||5))+(totalP3*(CFG.pot3Cost||5));
   var prizeTotal=calcPrizeTotal(prz);
   var prizeColor=prizeTotal===pool?'#00d4aa':prizeTotal<pool?'#fbbf24':'#ff4757';
 
@@ -620,8 +634,8 @@ function renderSweep(){
   // Family totals
   var famTotals={};
   CFG.families.forEach(function(fam){
-    var b=CFG.familyBuys[fam.id]||{primaries:0,secondaries:0};
-    famTotals[fam.id]={pts:0,paid:(b.primaries*(CFG.primaryCost||10))+(b.secondaries*(CFG.secondaryCost||5))};
+    var b=CFG.familyBuys[fam.id]||{p0:0,p1:0,p2:0,p3:0};
+    famTotals[fam.id]={pts:0,paid:(((b.p0||0)*(CFG.pot0Cost||15))+((b.p1||0)*(CFG.pot1Cost||10))+((b.p2||0)*(CFG.pot2Cost||5))+((b.p3||0)*(CFG.pot3Cost||5)))};
   });
   lb.forEach(function(p){if(famTotals[p.famId])famTotals[p.famId].pts+=p.pts;});
 
@@ -632,7 +646,7 @@ function renderSweep(){
   // Pool
   out+='<div class="card-pad"><div style="font-size:10px;color:#5a6a88;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Prize Pool</div>'+
     '<div class="font-display" style="font-weight:800;font-size:26px;color:#00d4aa">$'+pool+'</div>'+
-    '<div style="font-size:11px;color:#5a6a88;margin-top:2px">'+totalP+'× P · '+totalS+'× S</div></div>';
+    '<div style="font-size:11px;color:#5a6a88;margin-top:2px">'+totalP0+'× P0 · '+totalP1+'× P1 · '+totalP2+'× P2 · '+totalP3+'× P3</div></div>';
   // Prize allocated
   out+='<div class="card-pad"><div style="font-size:10px;color:#5a6a88;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Prizes Set</div>'+
     '<div class="font-display" style="font-weight:800;font-size:26px;color:'+prizeColor+'">$'+prizeTotal+'</div>'+
@@ -730,11 +744,11 @@ function renderSweep(){
           teams.forEach(function(t){
             var r=getTeamResult(t,matches,sm);
             var tc=tagClass(r);
-            var pot=CFG.pot1.includes(t)?1:CFG.pot2.includes(t)?2:3;
-            var isElite=pot===1&&CFG.pot1.indexOf(t)<8;
-            var potCol=isElite?'#fbbf24':POT[pot].color;
-            out+='<span class="tag '+tc+'" style="'+(isElite?'border-color:#fbbf2450':'')+'">'+
-              '<span style="font-size:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;color:'+potCol+'">'+(isElite?'P1★':'P'+pot)+'</span> '+
+            var pot=CFG.pot0.includes(t)?0:CFG.pot1.includes(t)?1:CFG.pot2.includes(t)?2:3;
+            var isElite=pot===0;
+            var potCol=isElite?POT[0].color:POT[pot].color;
+            out+='<span class="tag '+tc+'" style="'+(isElite?'border-color:'+POT[0].color+'50':'')+'">'+
+              '<span style="font-size:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;color:'+potCol+'">'+(isElite?'P0★':'P'+pot)+'</span> '+
               f(t)+' '+h(t)+'</span>';
           });
         }
@@ -747,7 +761,7 @@ function renderSweep(){
   }else{ // teams view
     out+='<div style="margin-bottom:10px;font-size:12px;color:#5a6a88">All 48 teams · colour shows family · grey = undrawn</div>';
     // Group by pot
-    [1,2,3].forEach(function(p){
+    [0,1,2,3].forEach(function(p){
       out+='<div style="margin-bottom:16px">';
       out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:'+POT[p].color+';margin-bottom:8px">'+POT[p].label+' — '+POT[p].desc+'</div>';
       out+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px">';
@@ -758,7 +772,7 @@ function renderSweep(){
             if((allocs[mem.id]||[]).includes(team)){owner=mem;ownerFam=fam;}
           });
         });
-        var isElite=p===1&&idx<8;
+        var isElite=p===0;
         var bg=owner?ownerFam.color+'18':'#ffffff06';
         var border=owner?ownerFam.color+'40':'#ffffff10';
         out+='<div style="padding:8px 10px;background:'+bg+';border:1px solid '+border+';border-radius:7px;display:flex;align-items:center;gap:6px">'+
@@ -1007,16 +1021,19 @@ function renderAdmin(){
   var totalP1=CFG.pot1.length; // always 16
   var totalP2=CFG.pot2.length;
   var totalP3=CFG.pot3.length;
+  var usedP0=[...allocated].filter(function(t){return (CFG.pot0||[]).includes(t);}).length;
   var usedP1=[...allocated].filter(function(t){return CFG.pot1.includes(t);}).length;
   var usedP2=[...allocated].filter(function(t){return CFG.pot2.includes(t);}).length;
   var usedP3=[...allocated].filter(function(t){return CFG.pot3.includes(t);}).length;
 
   // Per-family claimed picks (from familyBuys)
-  var claimedP1=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.primaries||0);},0);
-  var claimedP2=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.secondaries||0);},0);
-  var claimedP3=claimedP1; // P3 matches primaries
+  var claimedP0=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p0||0);},0);
+  var claimedP1=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p1||0);},0);
+  var claimedP2=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p2||0);},0);
+  var claimedP3=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p3||0);},0);
+  var claimedP3=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.p3||0);},0);
 
-  var pool=(claimedP1*(CFG.primaryCost||10))+(claimedP2*(CFG.secondaryCost||5));
+  var pool=(claimedP0*(CFG.pot0Cost||15))+(claimedP1*(CFG.pot1Cost||10))+(claimedP2*(CFG.pot2Cost||5))+(claimedP3*(CFG.pot3Cost||5));
 
   var PRIZE_DEFS=getPrizeDefs();
   var prz=CFG.prizes||{};
@@ -1043,19 +1060,22 @@ function renderAdmin(){
 
   // ── Buy-in costs + prize structure (side by side) ────────
   var famRows=CFG.families.map(function(fam){
-    var b=CFG.familyBuys[fam.id]||{primaries:0,secondaries:0};
-    var famTotal=(b.primaries*(CFG.primaryCost||10))+(b.secondaries*(CFG.secondaryCost||5));
+    var b=CFG.familyBuys[fam.id]||{p0:0,p1:0,p2:0,p3:0};
+    var famTotal=(((b.p0||0)*(CFG.pot0Cost||15))+((b.p1||0)*(CFG.pot1Cost||10))+((b.p2||0)*(CFG.pot2Cost||5))+((b.p3||0)*(CFG.pot3Cost||5)));
     // Count actually drawn picks for this family
     var famMemIds=fam.members.map(function(m){return m.id;});
     var famTeams=famMemIds.flatMap(function(id){return (CFG.allocations||{})[id]||[];});
+    var drawnP0=famTeams.filter(function(t){return CFG.pot0.includes(t);}).length;
     var drawnP1=famTeams.filter(function(t){return CFG.pot1.includes(t);}).length;
     var drawnP2=famTeams.filter(function(t){return CFG.pot2.includes(t);}).length;
     var drawnP3=famTeams.filter(function(t){return CFG.pot3.includes(t);}).length;
     return '<tr>'+
       '<td class="left" style="font-weight:600;color:'+fam.color+'">'+h(fam.name)+'</td>'+
-      '<td class="font-display" style="font-weight:700;text-align:center">'+b.primaries+'</td>'+
-      '<td class="font-display" style="font-weight:700;text-align:center">'+b.secondaries+'</td>'+
-      '<td style="text-align:center;font-size:11px;color:#5a6a88">'+drawnP1+'/'+b.primaries+' · '+drawnP2+'/'+b.secondaries+' · '+drawnP3+'/'+b.primaries+'</td>'+
+      '<td class="font-display" style="font-weight:700;text-align:center">'+b.p0+'</td>'+
+      '<td class="font-display" style="font-weight:700;text-align:center">'+b.p1+'</td>'+
+      '<td class="font-display" style="font-weight:700;text-align:center">'+b.p2+'</td>'+
+      '<td class="font-display" style="font-weight:700;text-align:center">'+b.p3+'</td>'+
+      '<td style="text-align:center;font-size:11px;color:#5a6a88">'+drawnP0+'/'+b.p0+' · '+drawnP1+'/'+b.p1+' · '+drawnP2+'/'+b.p2+' · '+drawnP3+'/'+b.p3+'</td>'+
       '<td class="font-display" style="font-weight:700;color:'+fam.color+'" id="buys-'+fam.id+'-total">$'+famTotal+'</td>'+
       '</tr>';
   }).join('');
@@ -1078,26 +1098,23 @@ function renderAdmin(){
   out+='<div class="card-pad">'+
     '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Buy-in Costs</div>'+
     '<div style="display:flex;flex-direction:column;gap:8px">'+
-      '<label style="display:flex;align-items:center;gap:8px;font-size:13px">'+
-        '<span style="color:#8b9ab8;flex:1">Primary buy (P1 + P3)</span>'+
-        '<span style="color:#5a6a88">$</span>'+
-        '<input type="number" id="cost-primary" value="'+(CFG.primaryCost||10)+'" min="0" oninput="updatePoolTotal()" style="width:58px;text-align:center">'+
-      '</label>'+
-      '<label style="display:flex;align-items:center;gap:8px;font-size:13px">'+
-        '<span style="color:#8b9ab8;flex:1">Secondary buy (P2 only)</span>'+
-        '<span style="color:#5a6a88">$</span>'+
-        '<input type="number" id="cost-secondary" value="'+(CFG.secondaryCost||5)+'" min="0" oninput="updatePoolTotal()" style="width:58px;text-align:center">'+
-      '</label>'+
+      [['pot0Cost','Pot 0 — Elite (Top 8)',15],['pot1Cost','Pot 1 — Strong (9–16)',10],['pot2Cost','Pot 2 — Mid-tier',5],['pot3Cost','Pot 3 — Underdogs',5]].map(function(c){
+        return '<label style="display:flex;align-items:center;gap:8px;font-size:13px">'+
+          '<span style="color:'+POT[c[0]==='pot0Cost'?0:c[0]==='pot1Cost'?1:c[0]==='pot2Cost'?2:3].color+';flex:1">'+c[1]+'</span>'+
+          '<span style="color:#5a6a88">$</span>'+
+          '<input type="number" id="'+c[0]+'" value="'+(CFG[c[0]]||c[2])+'" min="0" oninput="updatePoolTotal()" style="width:58px;text-align:center">'+
+        '</label>';
+      }).join('')+
     '</div>'+
     '<div style="margin-top:12px;padding-top:10px;border-top:1px solid #ffffff0a">'+
       '<div style="font-size:10px;color:#5a6a88;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Total pool</div>'+
       '<div class="font-display" id="admin-pool-total" style="font-weight:800;font-size:26px;color:#00d4aa">$'+pool+'</div>'+
-      '<div id="admin-pool-breakdown" style="font-size:11px;color:#5a6a88;margin-top:2px">'+claimedP1+'× primary + '+claimedP2+'× secondary</div>'+
+      '<div id="admin-pool-breakdown" style="font-size:11px;color:#5a6a88;margin-top:2px">'+claimedP0+'× P0 · '+claimedP1+'× P1 · '+claimedP2+'× P2 · '+claimedP3+'× P3</div>+'
     '</div>'+
     '<div style="margin-top:12px">'+
       '<div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Family Buy-ins</div>'+
-      '<div style="font-size:11px;color:#5a6a88;margin-bottom:6px;font-style:italic">Allocations set via +/− controls in family panels below</div>'+
-      '<table><thead><tr><th class="left">Family</th><th>P1+P3</th><th>P2</th><th>Drawn (P1/P2/P3)</th><th>Owes</th></tr></thead><tbody>'+famRows+'</tbody></table>'+
+      '<div style="font-size:11px;color:#5a6a88;margin-bottom:6px;font-style:italic">Allocations set via +/− in family panels below</div>'+
+      '<table><thead><tr><th class="left">Family</th><th>P0</th><th>P1</th><th>P2</th><th>P3</th><th>Drawn</th><th>Owes</th></tr></thead><tbody>'+famRows+'</tbody></table>'+
     '</div>'+
     '</div>';
 
@@ -1121,9 +1138,10 @@ function renderAdmin(){
 
   // ── Global pick tally ─────────────────────────────────────
   // How many picks are available globally to be claimed
-  var availP1=totalP1-claimedP1;  // unclaimed spots
+  var availP0=(CFG.pot0||[]).length-claimedP0;
+  var availP1=totalP1-claimedP1;
   var availP2=totalP2-claimedP2;
-  var availP3=totalP3-claimedP1;  // P3 mirrors P1
+  var availP3=totalP3-claimedP3;
 
   out+='<div class="card-pad">';
   out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
@@ -1132,9 +1150,10 @@ function renderAdmin(){
     '</div>';
   out+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
   [
-    {p:1,label:'Pot 1 (Elite)',color:POT[1].color,total:totalP1,claimed:claimedP1,drawn:usedP1,avail:availP1},
-    {p:2,label:'Pot 2',       color:POT[2].color,total:totalP2,claimed:claimedP2,drawn:usedP2,avail:availP2},
-    {p:3,label:'Pot 3',       color:POT[3].color,total:totalP3,claimed:claimedP1,drawn:usedP3,avail:availP3},
+    {p:0,label:'Pot 0 — Elite',color:POT[0].color,total:(CFG.pot0||[]).length,claimed:claimedP0,drawn:usedP0,avail:(CFG.pot0||[]).length-claimedP0},
+    {p:1,label:'Pot 1 — Strong',color:POT[1].color,total:totalP1,claimed:claimedP1,drawn:usedP1,avail:totalP1-claimedP1},
+    {p:2,label:'Pot 2 — Mid',   color:POT[2].color,total:totalP2,claimed:claimedP2,drawn:usedP2,avail:totalP2-claimedP2},
+    {p:3,label:'Pot 3 — Dogs',  color:POT[3].color,total:totalP3,claimed:claimedP3,drawn:usedP3,avail:totalP3-claimedP3},
   ].forEach(function(pt){
     var barPct=pt.total>0?Math.round(pt.drawn/pt.total*100):0;
     var claimPct=pt.total>0?Math.round(pt.claimed/pt.total*100):0;
@@ -1160,17 +1179,19 @@ function renderAdmin(){
   out+='<div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-top:4px">Family Draw Panels</div>';
 
   CFG.families.forEach(function(fam){
-    var b=CFG.familyBuys[fam.id]||{primaries:0,secondaries:0};
-    var famPool=(b.primaries*(CFG.primaryCost||10))+(b.secondaries*(CFG.secondaryCost||5));
+    var b=CFG.familyBuys[fam.id]||{p0:0,p1:0,p2:0,p3:0};
+    var famPool=((b.p0||0)*(CFG.pot0Cost||15))+((b.p1||0)*(CFG.pot1Cost||10))+((b.p2||0)*(CFG.pot2Cost||5))+((b.p3||0)*(CFG.pot3Cost||5));
     // Count assigned picks per pot for this family
     var famMemIds=fam.members.map(function(m){return m.id;});
     var famTeams=famMemIds.flatMap(function(id){return allocs[id]||[];});
+    var famP0=famTeams.filter(function(t){return CFG.pot0.includes(t);});
     var famP1=famTeams.filter(function(t){return CFG.pot1.includes(t);});
     var famP2=famTeams.filter(function(t){return CFG.pot2.includes(t);});
     var famP3=famTeams.filter(function(t){return CFG.pot3.includes(t);});
-    var remP1=b.primaries-famP1.length;   // family's remaining P1 picks
-    var remP2=b.secondaries-famP2.length;
-    var remP3=b.primaries-famP3.length;
+    var remP0=(b.p0||0)-famP0.length;
+    var remP1=(b.p1||0)-famP1.length;
+    var remP2=(b.p2||0)-famP2.length;
+    var remP3=(b.p3||0)-famP3.length;
 
     out+='<div class="card" style="margin-bottom:4px">';
 
@@ -1179,54 +1200,35 @@ function renderAdmin(){
     out+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
     out+='<span class="font-display" style="font-weight:700;font-size:15px;color:'+fam.color+';text-transform:uppercase;letter-spacing:.06em">'+h(fam.name)+'</span>';
     // Buy pick controls
-    out+='<div style="display:flex;align-items:center;gap:6px;margin-left:8px">';
-    // P1 +/−
-    out+='<span style="font-size:11px;color:'+POT[1].color+';font-family:\'Barlow Condensed\',sans-serif;font-weight:700">P1</span>'+
-      '<button class="btn" style="padding:1px 7px;font-size:14px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\'p\',-1)">−</button>'+
-      '<span class="font-display" id="fp1-'+fam.id+'" style="font-weight:700;font-size:14px;color:#f0f4ff;min-width:20px;text-align:center">'+b.primaries+'</span>'+
-      '<button class="btn" style="padding:1px 7px;font-size:14px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\'p\',1)">+</button>';
-    // P2 +/−
-    out+='<span style="font-size:11px;color:'+POT[2].color+';font-family:\'Barlow Condensed\',sans-serif;font-weight:700;margin-left:8px">P2</span>'+
-      '<button class="btn" style="padding:1px 7px;font-size:14px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\'s\',-1)">−</button>'+
-      '<span class="font-display" id="fp2-'+fam.id+'" style="font-weight:700;font-size:14px;color:#f0f4ff;min-width:20px;text-align:center">'+b.secondaries+'</span>'+
-      '<button class="btn" style="padding:1px 7px;font-size:14px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\'s\',1)">+</button>';
+    out+='<div style="display:flex;align-items:center;gap:5px;margin-left:8px;flex-wrap:wrap">';
+    [0,1,2,3].forEach(function(p){
+      var key='p'+p;
+      var potColor=POT[p].color;
+      var val=b[key]||0;
+      out+='<span style="font-size:10px;color:'+potColor+';font-family:\'Barlow Condensed\',sans-serif;font-weight:700;margin-left:'+(p>0?'6px':'0')+'">P'+p+'</span>'+
+        '<button class="btn" style="padding:1px 6px;font-size:13px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\''+key+'\',−1)">−</button>'+
+        '<span class="font-display" style="font-weight:700;font-size:13px;color:#f0f4ff;min-width:18px;text-align:center">'+val+'</span>'+
+        '<button class="btn" style="padding:1px 6px;font-size:13px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\''+key+'\',1)">+</button>';
+    });
     out+='</div>';
     // Owes tally
     out+='<span class="font-display" style="margin-left:auto;font-weight:700;font-size:16px;color:'+fam.color+'">Owes $'+famPool+'</span>';
     out+='</div>';
     // Pick status pills in header — show drawn (solid) and undrawn (dashed)
-    var totalFamPicks=b.primaries+b.secondaries+b.primaries; // P1+P2+P3
+    var totalFamPicks=(b.p0||0)+(b.p1||0)+(b.p2||0)+(b.p3||0);
     if(totalFamPicks>0){
-      out+='<div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;align-items:center">';
-      // P1 picks: solid=drawn, dashed=undrawn
-      for(var i=0;i<b.primaries;i++){
-        var drawn=i<famP1.length;
-        out+='<span class="font-display" style="font-size:10px;padding:2px 8px;border-radius:4px;'+
-          (drawn
-            ? 'background:'+POT[1].color+'25;color:'+POT[1].color+';border:1px solid '+POT[1].color+'60'
-            : 'background:transparent;color:'+POT[1].color+'80;border:1px dashed '+POT[1].color+'40')+
-          '">P1</span>';
-      }
-      // P2 picks
-      for(var i=0;i<b.secondaries;i++){
-        var drawn=i<famP2.length;
-        out+='<span class="font-display" style="font-size:10px;padding:2px 8px;border-radius:4px;'+
-          (drawn
-            ? 'background:'+POT[2].color+'25;color:'+POT[2].color+';border:1px solid '+POT[2].color+'60'
-            : 'background:transparent;color:'+POT[2].color+'80;border:1px dashed '+POT[2].color+'40')+
-          '">P2</span>';
-      }
-      // P3 picks
-      for(var i=0;i<b.primaries;i++){
-        var drawn=i<famP3.length;
-        out+='<span class="font-display" style="font-size:10px;padding:2px 8px;border-radius:4px;'+
-          (drawn
-            ? 'background:'+POT[3].color+'25;color:'+POT[3].color+';border:1px solid '+POT[3].color+'60'
-            : 'background:transparent;color:'+POT[3].color+'80;border:1px dashed '+POT[3].color+'40')+
-          '">P3</span>';
-      }
-      // All done indicator
-      if(remP1===0&&remP2===0&&remP3===0&&totalFamPicks>0){
+      out+='<div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;align-items:center">';
+      var famPDrawn=[famP0.length,famP1.length,famP2.length,famP3.length];
+      var famPAlloc=[b.p0||0,b.p1||0,b.p2||0,b.p3||0];
+      [0,1,2,3].forEach(function(p){
+        for(var i=0;i<famPAlloc[p];i++){
+          var drawn=i<famPDrawn[p];
+          out+='<span class="font-display" style="font-size:10px;padding:2px 7px;border-radius:4px;'+
+            (drawn?'background:'+POT[p].color+'25;color:'+POT[p].color+';border:1px solid '+POT[p].color+'60':'background:transparent;color:'+POT[p].color+'80;border:1px dashed '+POT[p].color+'40')+
+            '">P'+p+'</span>';
+        }
+      });
+      if(remP0===0&&remP1===0&&remP2===0&&remP3===0&&totalFamPicks>0){
         out+='<span style="font-size:10px;color:#00d4aa;margin-left:4px">✓ All drawn</span>';
       }
       out+='</div>';
@@ -1237,6 +1239,7 @@ function renderAdmin(){
     fam.members.forEach(function(mem){
       var isActive=mem.active!==false;
       var teams=allocs[mem.id]||[];
+      var memP0=teams.filter(function(t){return CFG.pot0.includes(t);});
       var memP1=teams.filter(function(t){return CFG.pot1.includes(t);});
       var memP2=teams.filter(function(t){return CFG.pot2.includes(t);});
       var memP3=teams.filter(function(t){return CFG.pot3.includes(t);});
@@ -1260,11 +1263,11 @@ function renderAdmin(){
         teams.forEach(function(t){
           var r=getTeamResult(t,getMatches(),buildStandings(getMatches()));
           var tc=tagClass(r);
-          var pot=CFG.pot1.includes(t)?1:CFG.pot2.includes(t)?2:3;
-          var isElite=pot===1&&CFG.pot1.indexOf(t)<8;
-          var potCol=isElite?'#fbbf24':POT[pot].color;
-          out+='<span class="tag '+tc+'" style="'+(isElite?'border-color:#fbbf2450':'')+'">'+
-            '<span style="font-size:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;color:'+potCol+'">'+(isElite?'P1★':'P'+pot)+'</span> '+
+          var pot=CFG.pot0.includes(t)?0:CFG.pot1.includes(t)?1:CFG.pot2.includes(t)?2:3;
+          var isElite=pot===0;
+          var potCol=isElite?POT[0].color:POT[pot].color;
+          out+='<span class="tag '+tc+'" style="'+(isElite?'border-color:'+POT[0].color+'50':'')+'">'+
+            '<span style="font-size:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;color:'+potCol+'">'+(isElite?'P0★':'P'+pot)+'</span> '+
             f(t)+' '+h(t)+
             '<span onclick="removeTeam(\''+mem.id+'\',\''+h(t)+'\')" style="cursor:pointer;opacity:.4;font-size:10px;margin-left:2px">×</span>'+
             '</span>';
@@ -1275,13 +1278,16 @@ function renderAdmin(){
       // Spin buttons (only if active and family has remaining picks of that type)
       if(isActive){
         out+='<div style="display:flex;gap:5px;flex-shrink:0">';
-        if(remP1>0) out+='<button class="btn pot1" style="font-size:11px;padding:4px 10px" onclick="startSpin(\''+mem.id+'\',\''+h(mem.name)+'\',\''+fam.color+'\',1)">Draw P1</button>';
-        if(remP2>0) out+='<button class="btn pot2" style="font-size:11px;padding:4px 10px" onclick="startSpin(\''+mem.id+'\',\''+h(mem.name)+'\',\''+fam.color+'\',2)">Draw P2</button>';
-        if(remP3>0) out+='<button class="btn pot3" style="font-size:11px;padding:4px 10px" onclick="startSpin(\''+mem.id+'\',\''+h(mem.name)+'\',\''+fam.color+'\',3)">Draw P3</button>';
-        // Greyed done indicators
-        if(remP1<=0&&b.primaries>0&&memP1.length>0) out+='<button class="btn" style="opacity:.3;cursor:default;color:#fbbf24;border-color:#fbbf2430;font-size:11px" disabled>P1 ✓</button>';
-        if(remP2<=0&&b.secondaries>0&&memP2.length>0) out+='<button class="btn" style="opacity:.3;cursor:default;color:#60a5fa;border-color:#60a5fa30;font-size:11px" disabled>P2 ✓</button>';
-        if(remP3<=0&&b.primaries>0&&memP3.length>0) out+='<button class="btn" style="opacity:.3;cursor:default;color:#a78bfa;border-color:#a78bfa30;font-size:11px" disabled>P3 ✓</button>';
+        var remPots=[remP0,remP1,remP2,remP3];
+        var memPots=[memP0,memP1,memP2,memP3];
+        var bPots=[b.p0||0,b.p1||0,b.p2||0,b.p3||0];
+        [0,1,2,3].forEach(function(p){
+          if(remPots[p]>0){
+            out+='<button class="btn pot'+p+'" style="font-size:11px;padding:4px 10px" onclick="startSpin(\''+mem.id+'\',\''+h(mem.name)+'\',\''+fam.color+'\','+p+')">Draw P'+p+'</button>';
+          }else if(bPots[p]>0&&memPots[p].length>0){
+            out+='<button class="btn" style="opacity:.3;cursor:default;color:'+POT[p].color+';border-color:'+POT[p].color+'30;font-size:11px" disabled>P'+p+' ✓</button>';
+          }
+        });
         out+='</div>';
       }
 
@@ -1297,7 +1303,7 @@ function renderAdmin(){
     // Team list with strikethrough for allocated teams
     var teamItems=potTeams.map(function(team,idx){
       var isAllocated=allocated.has(team);
-      var isElite=p===1&&idx<8;
+      var isElite=p===0;
       var nameStyle=isAllocated
         ?'text-decoration:line-through;color:#5a6a88;opacity:.6'
         :'color:#e8eeff';
@@ -1352,32 +1358,28 @@ function renderAdmin(){
 }
 
 // Adjust family pick count
-function adjustFamPick(famId,type,delta){
-  var b=CFG.familyBuys[famId]||{primaries:0,secondaries:0};
+function adjustFamPick(famId,potKey,delta){
+  var b=CFG.familyBuys[famId]||{p0:0,p1:0,p2:0,p3:0};
+  var potNum=parseInt(potKey[1]); // 'p0'->0, 'p1'->1 etc
+  var potArr=CFG['pot'+potNum]||[];
 
-  // Calculate global claimed totals excluding this family
-  var otherP1=0,otherP2=0;
+  // Global pool: total slots = potArr.length
+  // Other families' claims for this pot
+  var otherClaimed=0;
   CFG.families.forEach(function(f){
     if(f.id===famId)return;
-    var fb=CFG.familyBuys[f.id]||{primaries:0,secondaries:0};
-    otherP1+=fb.primaries||0;
-    otherP2+=fb.secondaries||0;
+    var fb=CFG.familyBuys[f.id]||{};
+    otherClaimed+=(fb[potKey]||0);
   });
+  var maxForFam=potArr.length-otherClaimed;
 
-  // Also: can't reduce below what's already drawn for this family
+  // Can't reduce below what's already drawn
   var allocs=CFG.allocations||{};
   var famTeams=CFG.families.find(function(f){return f.id===famId;}).members
     .flatMap(function(m){return allocs[m.id]||[];});
-  var drawnP1=famTeams.filter(function(t){return CFG.pot1.includes(t);}).length;
-  var drawnP2=famTeams.filter(function(t){return CFG.pot2.includes(t);}).length;
+  var drawn=famTeams.filter(function(t){return potArr.includes(t);}).length;
 
-  if(type==='p'){
-    var maxP1=CFG.pot1.length-otherP1; // global pool minus others' claims
-    b.primaries=Math.max(drawnP1, Math.min(maxP1, (b.primaries||0)+delta));
-  }else{
-    var maxP2=CFG.pot2.length-otherP2;
-    b.secondaries=Math.max(drawnP2, Math.min(maxP2, (b.secondaries||0)+delta));
-  }
+  b[potKey]=Math.max(drawn, Math.min(maxForFam, (b[potKey]||0)+delta));
   CFG.familyBuys[famId]=b;
   pushToGitHub(CFG);
   renderAdmin();
@@ -1405,20 +1407,23 @@ function toggleMember(famId,memId){
 }
 
 function updatePoolTotal(){
-  // Pool is driven by CFG.familyBuys (set via +/− buttons) and cost inputs
-  var cp=+(document.getElementById('cost-primary')||{value:CFG.primaryCost}).value||CFG.primaryCost;
-  var cs=+(document.getElementById('cost-secondary')||{value:CFG.secondaryCost}).value||CFG.secondaryCost;
-  var totalP=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.primaries||0);},0);
-  var totalS=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.secondaries||0);},0);
-  var pool=(totalP*cp)+(totalS*cs);
+  var costs=[
+    +(document.getElementById('pot0Cost')||{value:CFG.pot0Cost||15}).value,
+    +(document.getElementById('pot1Cost')||{value:CFG.pot1Cost||10}).value,
+    +(document.getElementById('pot2Cost')||{value:CFG.pot2Cost||5}).value,
+    +(document.getElementById('pot3Cost')||{value:CFG.pot3Cost||5}).value,
+  ];
+  var totals=[0,1,2,3].map(function(p){
+    return Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b['p'+p]||0);},0);
+  });
+  var pool=totals.reduce(function(s,t,i){return s+(t*costs[i]);},0);
   var el=document.getElementById('admin-pool-total');
   if(el)el.textContent='$'+pool;
   var bd=document.getElementById('admin-pool-breakdown');
-  if(bd)bd.textContent=totalP+'× primary ($'+cp+' ea) + '+totalS+'× secondary ($'+cs+' ea)';
-  // Update family total cells
+  if(bd)bd.textContent=totals.map(function(t,i){return t+'× P'+i;}).join(' · ');
   CFG.families.forEach(function(fam){
-    var b=CFG.familyBuys[fam.id]||{primaries:0,secondaries:0};
-    var famTotal=(b.primaries*cp)+(b.secondaries*cs);
+    var b=CFG.familyBuys[fam.id]||{p0:0,p1:0,p2:0,p3:0};
+    var famTotal=[0,1,2,3].reduce(function(s,p){return s+(b['p'+p]||0)*costs[p];},0);
     var tel=document.getElementById('buys-'+fam.id+'-total');
     if(tel)tel.textContent='$'+famTotal;
   });
@@ -1468,8 +1473,8 @@ function updatePrizeTotals(){
     return s+(val*mult);
   },0);
   // Get pool from current admin inputs if available, else from CFG
-  var cp=+(document.getElementById('cost-primary')||{value:CFG.primaryCost}).value||CFG.primaryCost;
-  var cs=+(document.getElementById('cost-secondary')||{value:CFG.secondaryCost}).value||CFG.secondaryCost;
+  var cp=CFG.pot1Cost||10;
+  var cs=CFG.pot2Cost||5;
   var totalP=0,totalS=0;
   CFG.families.forEach(function(fam){
     var p=+(document.getElementById('buys-'+fam.id+'-p')||{value:CFG.familyBuys[fam.id]&&CFG.familyBuys[fam.id].primaries||0}).value;
@@ -1490,14 +1495,16 @@ function updatePrizeTotals(){
 }
 
 async function saveAdmin(){
-  CFG.primaryCost=+(document.getElementById('cost-primary')?.value||10);
-  CFG.secondaryCost=+(document.getElementById('cost-secondary')?.value||5);
+  [0,1,2,3].forEach(function(p){
+    var el=document.getElementById('pot'+p+'Cost');
+    if(el)CFG['pot'+p+'Cost']=+(el.value)||0;
+  });
   ['champion','runner','third','groupAdvance','goldenBoot','bestGD','worstGD','mostYellow','mostRed','firstGoal','mostCleanSheets','topFamily'].forEach(function(k){
     var el=document.getElementById('prize-'+k);
     if(el)CFG.prizes[k]=+(el.value)||0;
   });
   // familyBuys already updated live via adjustFamPick — no need to read inputs
-  for(let p=1;p<=3;p++){
+  for(var p=0;p<=3;p++){
     const v=document.getElementById('pot'+p+'-input')?.value||'';
     CFG['pot'+p]=v.split('\n').map(s=>s.trim()).filter(Boolean);
   }
@@ -1539,9 +1546,9 @@ function startSpin(memberId,memberName,famColor,pot){
   // Once all elite are drawn, open up to full pot.
   var spinPool=available;
   if(pot===1){
-    var eliteAvailable=available.filter(function(t){return CFG.pot1.indexOf(t)<8;});
+    var eliteAvailable=spinPot===0?available:[];
     if(eliteAvailable.length>0){
-      spinPool=eliteAvailable; // must draw from elite until exhausted
+      spinPool=eliteAvailable; // pot 0 = all elite
     }
   }
 
@@ -1563,9 +1570,9 @@ function startSpin(memberId,memberName,famColor,pot){
 
 function renderSpinner(){
   var p=POT[spinPot];
-  var pot1Elite=spinPot===1?CFG.pot1.slice(0,8):[];
+  var pot1Elite=spinPot===0?CFG.pot0:[];
   // Check if we're in elite-only mode
-  var eliteStillAvail=spinPot===1&&spinTeams.some(function(t){return CFG.pot1.indexOf(t)<8;});
+  var eliteStillAvail=spinPot===0&&spinTeams.some(function(t){return CFG.pot0.includes(t);});
   var allEliteGone=spinPot===1&&!eliteStillAvail;
   var eliteNote='';
   if(spinPot===1){
@@ -1593,7 +1600,7 @@ function renderSpinner(){
   }else if(spinPhase==='spinning'){
     document.getElementById('spin-controls').innerHTML='<div class="font-display pulse" style="font-size:16px;color:#5a6a88;padding:14px;text-align:center;letter-spacing:.1em;text-transform:uppercase">Drawing…</div>';
   }else if(spinPhase==='result'){
-    var isEliteWinner=spinPot===1&&CFG.pot1.indexOf(spinWinner)>=0&&CFG.pot1.indexOf(spinWinner)<8;
+    var isEliteWinner=spinPot===0;
     var eliteBadge=isEliteWinner?'<div style="display:inline-block;background:#fbbf2420;border:1px solid #fbbf2440;border-radius:4px;padding:3px 10px;font-size:11px;color:#fbbf24;letter-spacing:.06em;margin-bottom:6px">★ ELITE PICK — TOP 8</div><br>':'';
     var winCol=isEliteWinner?'color:#fbbf24':'color:#00d4aa';
     document.getElementById('spin-controls').innerHTML=
@@ -1738,7 +1745,7 @@ function renderPredictions(){
     allTeamsSorted.forEach(function(team,rank){
       var elo=ELO[team]||1700;
       var odds=ODDS[team]||0;
-      var pot=CFG.pot1.includes(team)?1:CFG.pot2.includes(team)?2:3;
+      var pot=CFG.pot0.includes(team)?0:CFG.pot1.includes(team)?1:CFG.pot2.includes(team)?2:3;
       var potColor=POT[pot].color;
       var isElite=pot===1&&CFG.pot1.indexOf(team)<8;
       var barPct=Math.round((elo-ELO_MIN)/(ELO_MAX-ELO_MIN)*100);
