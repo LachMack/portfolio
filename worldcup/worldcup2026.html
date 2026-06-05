@@ -486,11 +486,16 @@ function getTeamResult(teamName,matches,sm){
     var t3=km.find(function(m){return m.round==='Match for third place'&&m.s1!=null;});
     if(t3&&teamName===(t3.s1>t3.s2?t3.t1:t3.t2))return'third';
   }
+  // Group advancement: only award once ALL 6 group matches are complete
   var grpMatch=MATCHES.find(function(m){return m.t1===teamName||m.t2===teamName;});
   var grp=grpMatch&&grpMatch.g?grpMatch.g.replace('Group ',''):null;
   if(grp&&sm[grp]){
-    var sorted=Object.values(sm[grp]).sort(function(a,b){return b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;});
-    if(sorted.slice(0,2).some(function(s){return s.name===teamName;}))return'advanced';
+    var grpMatches=matches.filter(function(m){return m.g==='Group '+grp;});
+    var allPlayed=grpMatches.length===6&&grpMatches.every(function(m){return m.s1!=null;});
+    if(allPlayed){
+      var sorted=Object.values(sm[grp]).sort(function(a,b){return b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;});
+      if(sorted.slice(0,2).some(function(s){return s.name===teamName;}))return'advanced';
+    }
   }
   return'active';
 }
@@ -538,6 +543,14 @@ function getPrizeDefs(){
   ];
 }
 
+function calcPrizeTotal(prz){
+  return getPrizeDefs().reduce(function(s,pd){
+    var val=+prz[pd.k]||0;
+    var mult=pd.k==='groupAdvance'?24:1;
+    return s+(val*mult);
+  },0);
+}
+
 // ═══════════════════════════════════════════════════════════
 // NEW SWEEP TAB — read-only dashboard
 // ═══════════════════════════════════════════════════════════
@@ -557,7 +570,7 @@ function renderSweep(){
   var totalP=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.primaries||0);},0);
   var totalS=Object.values(CFG.familyBuys||{}).reduce(function(s,b){return s+(b.secondaries||0);},0);
   var pool=(totalP*(CFG.primaryCost||10))+(totalS*(CFG.secondaryCost||5));
-  var prizeTotal=PRIZE_DEFS.reduce(function(s,pd){return s+(+prz[pd.k]||0);},0);
+  var prizeTotal=calcPrizeTotal(prz);
   var prizeColor=prizeTotal===pool?'#00d4aa':prizeTotal<pool?'#fbbf24':'#ff4757';
 
   // Leaderboard
@@ -977,7 +990,7 @@ function renderAdmin(){
 
   var PRIZE_DEFS=getPrizeDefs();
   var prz=CFG.prizes||{};
-  var prizeTotal=PRIZE_DEFS.reduce(function(s,pd){return s+(+prz[pd.k]||0);},0);
+  var prizeTotal=calcPrizeTotal(prz);
   var prizeColor=prizeTotal===pool?'#00d4aa':prizeTotal<pool?'#fbbf24':'#ff4757';
   var prizeStatus=prizeTotal===pool?'✓ Balanced':prizeTotal<pool?'$'+(pool-prizeTotal)+' unallocated':'$'+(prizeTotal-pool)+' over budget';
 
@@ -1019,10 +1032,13 @@ function renderAdmin(){
 
   var prizeInputs=PRIZE_DEFS.map(function(pd){
     var val=prz[pd.k]||0;
+    var mult=pd.k==='groupAdvance'?24:1;
+    var multLabel=mult>1?'<span style="font-size:10px;color:#5a6a88;margin-left:2px">×'+mult+' = $'+(val*mult)+'</span>':'';
     return '<label style="display:flex;align-items:center;gap:7px;padding:6px 10px;background:#ffffff05;border-radius:6px;border:1px solid #ffffff08;font-size:12px">'+
       '<span style="color:#8b9ab8;flex:1">'+pd.icon+' '+pd.label+'</span>'+
       '<span style="color:#5a6a88">$</span>'+
       '<input type="number" id="prize-'+pd.k+'" value="'+val+'" min="0" oninput="updatePrizeTotals()" style="width:54px;text-align:center;padding:3px 6px">'+
+      multLabel+
       '</label>';
   }).join('');
 
@@ -1415,7 +1431,12 @@ function saveToken(){
 
 function updatePrizeTotals(){
   var prizeKeys=['champion','runner','third','groupAdvance','goldenBoot','bestGD','worstGD','mostYellow','mostRed','firstGoal','mostCleanSheets','topFamily'];
-  var total=prizeKeys.reduce(function(s,k){var el=document.getElementById('prize-'+k);return s+(el?+(el.value)||0:0);},0);
+  var total=prizeKeys.reduce(function(s,k){
+    var el=document.getElementById('prize-'+k);
+    var val=el?+(el.value)||0:0;
+    var mult=k==='groupAdvance'?24:1;
+    return s+(val*mult);
+  },0);
   // Get pool from current admin inputs if available, else from CFG
   var cp=+(document.getElementById('cost-primary')||{value:CFG.primaryCost}).value||CFG.primaryCost;
   var cs=+(document.getElementById('cost-secondary')||{value:CFG.secondaryCost}).value||CFG.secondaryCost;
