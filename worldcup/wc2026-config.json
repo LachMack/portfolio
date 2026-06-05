@@ -3,205 +3,17 @@
   "pot1Cost": 10,
   "pot2Cost": 5,
   "pot3Cost": 5,
-  "families": [
-    {
-      "id": "mackenzie",
-      "name": "Mackenzie",
-      "color": "#00d4aa",
-      "members": [
-        {
-          "id": "lachlan",
-          "name": "Lachlan Mackenzie",
-          "type": "adult"
-        },
-        {
-          "id": "leia",
-          "name": "Leia Mackenzie",
-          "type": "adult"
-        },
-        {
-          "id": "elina",
-          "name": "Elina Mackenzie",
-          "type": "child"
-        }
-      ]
-    },
-    {
-      "id": "mackenzie2",
-      "name": "Mackenzie/Wells",
-      "color": "#60a5fa",
-      "members": [
-        {
-          "id": "nat",
-          "name": "Nat Mackenzie",
-          "type": "adult"
-        },
-        {
-          "id": "emily",
-          "name": "Emily Wells",
-          "type": "adult"
-        },
-        {
-          "id": "maya",
-          "name": "Maya Mackenzie",
-          "type": "child"
-        },
-        {
-          "id": "hamish",
-          "name": "Hamish Mackenzie",
-          "type": "child"
-        }
-      ]
-    },
-    {
-      "id": "thomas",
-      "name": "Thomas",
-      "color": "#f472b6",
-      "members": [
-        {
-          "id": "rach",
-          "name": "Rach Thomas",
-          "type": "adult"
-        },
-        {
-          "id": "richard",
-          "name": "Richard Thomas",
-          "type": "adult"
-        },
-        {
-          "id": "gil",
-          "name": "Gil Thomas",
-          "type": "adult"
-        },
-        {
-          "id": "nina",
-          "name": "Nina Thomas",
-          "type": "adult",
-          "active": true
-        },
-        {
-          "id": "xanthe",
-          "name": "Xanthe Thomas",
-          "type": "child"
-        }
-      ]
-    },
-    {
-      "id": "harris",
-      "name": "Harris",
-      "color": "#fbbf24",
-      "members": [
-        {
-          "id": "davina",
-          "name": "Davina Harris",
-          "type": "adult"
-        },
-        {
-          "id": "craig",
-          "name": "Craig Harris",
-          "type": "adult"
-        },
-        {
-          "id": "jasper",
-          "name": "Jasper Harris",
-          "type": "adult"
-        },
-        {
-          "id": "livia",
-          "name": "Livia Harris",
-          "type": "child"
-        },
-        {
-          "id": "maggie",
-          "name": "Maggie Harris",
-          "type": "child"
-        }
-      ]
-    }
-  ],
   "familyBuys": {
-    "mackenzie": {
-      "primaries": 3,
-      "secondaries": 4
-    },
-    "mackenzie2": {
-      "primaries": 4,
-      "secondaries": 4,
-      "p0": 0,
-      "p1": 4,
-      "p2": 4,
-      "p3": 2
-    },
-    "thomas": {
-      "primaries": 4,
-      "secondaries": 4,
-      "p0": 1
-    },
-    "harris": {
-      "primaries": 5,
-      "secondaries": 4
-    }
+    "mackenzie":  { "p0": 0, "p1": 0, "p2": 0, "p3": 0 },
+    "mackenzie2": { "p0": 0, "p1": 0, "p2": 0, "p3": 0 },
+    "thomas":     { "p0": 0, "p1": 0, "p2": 0, "p3": 0 },
+    "harris":     { "p0": 0, "p1": 0, "p2": 0, "p3": 0 }
   },
-  "pot0": [],
-  "pot1": [
-    "Argentina",
-    "France",
-    "England",
-    "Brazil",
-    "Spain",
-    "Portugal",
-    "Germany",
-    "Netherlands",
-    "Belgium",
-    "Uruguay",
-    "USA",
-    "Mexico",
-    "Colombia",
-    "Morocco",
-    "Japan",
-    "Croatia"
-  ],
-  "pot2": [
-    "Senegal",
-    "Switzerland",
-    "Denmark",
-    "South Korea",
-    "Ecuador",
-    "Canada",
-    "Australia",
-    "Austria",
-    "Ivory Coast",
-    "Norway",
-    "Iran",
-    "Tunisia",
-    "Scotland",
-    "Ghana",
-    "Egypt",
-    "Panama"
-  ],
-  "pot3": [
-    "Saudi Arabia",
-    "Uruguay",
-    "Cape Verde",
-    "Paraguay",
-    "Algeria",
-    "Jordan",
-    "Uzbekistan",
-    "Haiti",
-    "South Africa",
-    "New Zealand",
-    "Curaçao",
-    "Qatar",
-    "UEFA Path A",
-    "UEFA Path B",
-    "UEFA Path C",
-    "UEFA Path D"
-  ],
   "allocations": {},
   "prizes": {
     "champion": 50,
-    "runner": 20,
-    "third": 10,
+    "runner": 25,
+    "third": 15,
     "groupAdvance": 5,
     "goldenBoot": 0,
     "bestGD": 0,
@@ -211,13 +23,5 @@
     "firstGoal": 0,
     "mostCleanSheets": 0,
     "topFamily": 0
-  },
-  "primaryCost": 10,
-  "secondaryCost": 5,
-  "cycleOrder": [
-    "mackenzie",
-    "mackenzie2",
-    "thomas",
-    "harris"
-  ]
+  }
 }
