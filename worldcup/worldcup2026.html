@@ -1515,10 +1515,19 @@ async function saveAdmin(){
 }
 
 function resetDraws(){
-  if(!confirm('Clear ALL team draws? This cannot be undone.'))return;
+  if(!confirm('Reset everything? This clears all team draws AND all pick allocations (P0/P1/P2/P3 counts). Cannot be undone.'))return;
+  // Clear all team allocations
   CFG.allocations={};
+  // Reset all family pick counts to zero
+  CFG.families.forEach(function(fam){
+    CFG.familyBuys[fam.id]={p0:0,p1:0,p2:0,p3:0};
+  });
+  // Also clear any active=false flags so all members are re-activated
+  CFG.families.forEach(function(fam){
+    fam.members.forEach(function(mem){mem.active=true;});
+  });
   pushToGitHub(CFG);
-  renderSweep();
+  render();
 }
 
 // ═══════════════════════════════════════════════════════════
