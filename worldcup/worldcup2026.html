@@ -431,11 +431,28 @@ async function loadFromGitHub(){
     const text=await r.text();
     let data;
     try{data=JSON.parse(text);}catch(e){throw new Error('Invalid JSON in config');}
-    CFG={...DEFAULT_CFG,...data};
-    if(!CFG.allocations)CFG.allocations={};
-    if(!CFG.prizes)CFG.prizes={...DEFAULT_CFG.prizes};
-    if(!CFG.familyBuys)CFG.familyBuys={...DEFAULT_CFG.familyBuys};
-    delete CFG.githubToken; // token never stored in remote config
+    // Only sync mutable state from remote — never overwrite structure
+    // (families, pots, pot costs stay hardcoded in HTML as source of truth)
+    if(data.allocations){
+      // Validate: only keep allocations for teams that exist in current pots
+      var validTeams=new Set([...(DEFAULT_CFG.pot0||[]),...DEFAULT_CFG.pot1,...DEFAULT_CFG.pot2,...DEFAULT_CFG.pot3]);
+      var cleaned={};
+      Object.entries(data.allocations).forEach(function(e){
+        var id=e[0], teams=e[1];
+        var valid=(teams||[]).filter(function(t){return validTeams.has(t);});
+        if(valid.length) cleaned[id]=valid;
+      });
+      CFG.allocations=cleaned;
+    }
+    if(data.familyBuys)   CFG.familyBuys   = data.familyBuys;
+    if(data.prizes)       CFG.prizes       = data.prizes;
+    if(data.pot0Cost)     CFG.pot0Cost     = data.pot0Cost;
+    if(data.pot1Cost)     CFG.pot1Cost     = data.pot1Cost;
+    if(data.pot2Cost)     CFG.pot2Cost     = data.pot2Cost;
+    if(data.pot3Cost)     CFG.pot3Cost     = data.pot3Cost;
+    if(!CFG.allocations)  CFG.allocations  = {};
+    if(!CFG.prizes)       CFG.prizes       = {...DEFAULT_CFG.prizes};
+    if(!CFG.familyBuys)   CFG.familyBuys   = {...DEFAULT_CFG.familyBuys};
     setStatus('ok','✓ Synced with GitHub','#00d4aa');
   }catch(e){
     setStatus('warn','Local mode — set token in ⚙ Admin to enable sync ('+e.message+')','#fbbf24');
@@ -458,7 +475,17 @@ async function pushToGitHub(cfg){
     if(!metaRes.ok)throw new Error('GitHub API '+metaRes.status+' — check your token has Contents:Write on the portfolio repo');
     const meta=await metaRes.json();
     const sha=meta.sha;
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(cfg,null,2))));
+    // Only persist mutable state — families/pots live in the HTML as source of truth
+    var mutable={
+      allocations: cfg.allocations||{},
+      familyBuys:  cfg.familyBuys||{},
+      prizes:      cfg.prizes||{},
+      pot0Cost:    cfg.pot0Cost||15,
+      pot1Cost:    cfg.pot1Cost||10,
+      pot2Cost:    cfg.pot2Cost||5,
+      pot3Cost:    cfg.pot3Cost||5,
+    };
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(mutable,null,2))));
     const putRes=await fetch(GH_API,{
       method:'PUT',
       headers:{Authorization:'token '+token,'Content-Type':'application/json',Accept:'application/vnd.github.v3+json'},
@@ -1206,7 +1233,7 @@ function renderAdmin(){
       var potColor=POT[p].color;
       var val=b[key]||0;
       out+='<span style="font-size:10px;color:'+potColor+';font-family:\'Barlow Condensed\',sans-serif;font-weight:700;margin-left:'+(p>0?'6px':'0')+'">P'+p+'</span>'+
-        '<button class="btn" style="padding:1px 6px;font-size:13px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\''+key+'\',−1)">−</button>'+
+        '<button class="btn" style="padding:1px 6px;font-size:13px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\''+key+'\',-1)">−</button>'+
         '<span class="font-display" style="font-weight:700;font-size:13px;color:#f0f4ff;min-width:18px;text-align:center">'+val+'</span>'+
         '<button class="btn" style="padding:1px 6px;font-size:13px;line-height:1" onclick="adjustFamPick(\''+fam.id+'\',\''+key+'\',1)">+</button>';
     });
@@ -1298,8 +1325,8 @@ function renderAdmin(){
 
   // ── Pot editors ───────────────────────────────────────────
   out+='<div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-top:4px">Pot Configuration</div>';
-  [1,2,3].forEach(function(p){
-    var potTeams=CFG['pot'+p];
+  [0,1,2,3].forEach(function(p){
+    var potTeams=(CFG['pot'+p]||[]);
     // Team list with strikethrough for allocated teams
     var teamItems=potTeams.map(function(team,idx){
       var isAllocated=allocated.has(team);
