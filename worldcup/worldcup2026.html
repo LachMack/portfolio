@@ -600,7 +600,7 @@ function getPrizeDefs(){
     {k:'champion',       icon:'🏆', label:'Champion'},
     {k:'runner',         icon:'🥈', label:'Runner-up'},
     {k:'third',          icon:'🥉', label:'3rd Place'},
-    {k:'groupAdvance',   icon:'✓',  label:'Group Stage Advance (per team)'},
+    {k:'groupAdvance',   icon:'✓',  label:'Group Stage Advance'},
     {k:'goldenBoot',     icon:'⚽', label:'Golden Boot (top scorer)'},
     {k:'bestGD',         icon:'📈', label:'Best Goal Difference (team)'},
     {k:'worstGD',        icon:'📉', label:'Wooden Spoon (worst GD)'},
@@ -1110,7 +1110,7 @@ function renderAdmin(){
   var prizeInputs=PRIZE_DEFS.map(function(pd){
     var val=prz[pd.k]||0;
     var mult=pd.k==='groupAdvance'?24:1;
-    var multLabel=mult>1?'<span style="font-size:10px;color:#5a6a88;margin-left:2px">×'+mult+' = $'+(val*mult)+'</span>':'';
+    var multLabel=mult>1?'<span style="font-size:10px;color:#5a6a88;margin-left:2px">×'+mult+'</span>':'';
     return '<label style="display:flex;align-items:center;gap:7px;padding:6px 10px;background:#ffffff05;border-radius:6px;border:1px solid #ffffff08;font-size:12px">'+
       '<span style="color:#8b9ab8;flex:1">'+pd.icon+' '+pd.label+'</span>'+
       '<span style="color:#5a6a88">$</span>'+
@@ -1180,7 +1180,7 @@ function renderAdmin(){
     {p:0,label:'Pot 0 — Elite',color:POT[0].color,total:(CFG.pot0||[]).length,claimed:claimedP0,drawn:usedP0,avail:(CFG.pot0||[]).length-claimedP0},
     {p:1,label:'Pot 1 — Strong',color:POT[1].color,total:totalP1,claimed:claimedP1,drawn:usedP1,avail:totalP1-claimedP1},
     {p:2,label:'Pot 2 — Mid',   color:POT[2].color,total:totalP2,claimed:claimedP2,drawn:usedP2,avail:totalP2-claimedP2},
-    {p:3,label:'Pot 3 — Dogs',  color:POT[3].color,total:totalP3,claimed:claimedP3,drawn:usedP3,avail:totalP3-claimedP3},
+    {p:3,label:'Pot 3 — Underdogs',  color:POT[3].color,total:totalP3,claimed:claimedP3,drawn:usedP3,avail:totalP3-claimedP3},
   ].forEach(function(pt){
     var barPct=pt.total>0?Math.round(pt.drawn/pt.total*100):0;
     var claimPct=pt.total>0?Math.round(pt.claimed/pt.total*100):0;
