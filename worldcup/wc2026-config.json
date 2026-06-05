@@ -12,17 +12,20 @@
         {
           "id": "lachlan",
           "name": "Lachlan Mackenzie",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "leia",
           "name": "Leia Mackenzie",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "elina",
           "name": "Elina Mackenzie",
-          "type": "child"
+          "type": "child",
+          "active": true
         }
       ]
     },
@@ -34,22 +37,26 @@
         {
           "id": "nat",
           "name": "Nat Mackenzie",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "emily",
           "name": "Emily Wells",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "maya",
           "name": "Maya Mackenzie",
-          "type": "child"
+          "type": "child",
+          "active": true
         },
         {
           "id": "hamish",
           "name": "Hamish Mackenzie",
-          "type": "child"
+          "type": "child",
+          "active": true
         }
       ]
     },
@@ -61,17 +68,20 @@
         {
           "id": "rach",
           "name": "Rach Thomas",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "richard",
           "name": "Richard Thomas",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "gil",
           "name": "Gil Thomas",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "nina",
@@ -82,7 +92,8 @@
         {
           "id": "xanthe",
           "name": "Xanthe Thomas",
-          "type": "child"
+          "type": "child",
+          "active": true
         }
       ]
     },
@@ -94,48 +105,60 @@
         {
           "id": "davina",
           "name": "Davina Harris",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "craig",
           "name": "Craig Harris",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "jasper",
           "name": "Jasper Harris",
-          "type": "adult"
+          "type": "adult",
+          "active": true
         },
         {
           "id": "livia",
           "name": "Livia Harris",
-          "type": "child"
+          "type": "child",
+          "active": true
         },
         {
           "id": "maggie",
           "name": "Maggie Harris",
-          "type": "child"
+          "type": "child",
+          "active": true
         }
       ]
     }
   ],
   "familyBuys": {
     "mackenzie": {
-      "primaries": 3,
-      "secondaries": 4
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
     },
     "mackenzie2": {
-      "primaries": 4,
-      "secondaries": 4
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
     },
     "thomas": {
-      "primaries": 4,
-      "secondaries": 4,
-      "p0": 1
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
     },
     "harris": {
-      "primaries": 5,
-      "secondaries": 4
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
     }
   },
   "pot0": [],
