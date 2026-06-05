@@ -1651,14 +1651,27 @@ function closeSpin(){
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
-// Render immediately with defaults so page is never blank
-render();
-// Then load remote config + live scores
-loadFromGitHub();
-// Auto-refresh live scores every 5 minutes
-setInterval(function(){
-  loadFromOpenFootball().then(function(){render();});
-},5*60*1000);
+function init(){
+  try{
+    // Render immediately with defaults so page is never blank
+    render();
+    // Then load remote config + live scores
+    loadFromGitHub();
+    // Auto-refresh live scores every 5 minutes
+    setInterval(function(){
+      loadFromOpenFootball().then(function(){render();});
+    },5*60*1000);
+  }catch(e){
+    console.error('WC2026 init error:',e);
+    document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#ff4757;font-family:sans-serif"><h2>Error loading dashboard</h2><p style="color:#8b9ab8;margin-top:8px">'+e.message+'</p></div>';
+  }
+}
+// Run after DOM is ready, regardless of other scripts
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+}else{
+  init();
+}
 
 // ── PREDICTIONS TAB ────────────────────────────────────────────────
 function renderPredictions(){
@@ -1947,5 +1960,7 @@ function renderPredictions(){
 var h2hTeamA='France',h2hTeamB='Spain';
 
 </script>
+<!-- Satisfy site-level share-modal.js -->
+<div id="share-modal"></div>
 </body>
 </html>
