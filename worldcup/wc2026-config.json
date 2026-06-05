@@ -74,7 +74,8 @@
         {
           "id": "nina",
           "name": "Nina Thomas",
-          "type": "adult"
+          "type": "adult",
+          "active": false
         },
         {
           "id": "xanthe",
