@@ -1,6 +1,8 @@
 {
-  "primaryCost": 10,
-  "secondaryCost": 5,
+  "pot0Cost": 15,
+  "pot1Cost": 10,
+  "pot2Cost": 5,
+  "pot3Cost": 5,
   "families": [
     {
       "id": "mackenzie",
@@ -135,6 +137,16 @@
       "secondaries": 4
     }
   },
+  "pot0": [
+    "France",
+    "Spain",
+    "Argentina",
+    "England",
+    "Portugal",
+    "Brazil",
+    "Netherlands",
+    "Morocco"
+  ],
   "pot1": [
     "Argentina",
     "France",
@@ -189,56 +201,7 @@
     "UEFA Path C",
     "UEFA Path D"
   ],
-  "allocations": {
-    "lachlan": [
-      "Netherlands"
-    ],
-    "nat": [
-      "Brazil"
-    ],
-    "rach": [
-      "England"
-    ],
-    "davina": [
-      "Argentina"
-    ],
-    "leia": [
-      "Portugal"
-    ],
-    "emily": [
-      "Germany"
-    ],
-    "richard": [
-      "Spain"
-    ],
-    "craig": [
-      "France"
-    ],
-    "elina": [
-      "USA"
-    ],
-    "maya": [
-      "Croatia"
-    ],
-    "gil": [
-      "Japan"
-    ],
-    "jasper": [
-      "Belgium"
-    ],
-    "hamish": [
-      "Colombia"
-    ],
-    "xanthe": [
-      "Mexico"
-    ],
-    "livia": [
-      "Uruguay"
-    ],
-    "maggie": [
-      "Morocco"
-    ]
-  },
+  "allocations": {},
   "prizes": {
     "champion": 50,
     "runner": 20,
@@ -253,6 +216,8 @@
     "mostCleanSheets": 0,
     "topFamily": 0
   },
+  "primaryCost": 10,
+  "secondaryCost": 5,
   "cycleOrder": [
     "mackenzie",
     "mackenzie2",
