@@ -128,7 +128,8 @@
       "primaries": 4,
       "secondaries": 4,
       "p0": 0,
-      "p1": 4
+      "p1": 4,
+      "p2": 2
     },
     "thomas": {
       "primaries": 4,
