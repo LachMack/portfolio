@@ -188,7 +188,11 @@
     "UEFA Path C",
     "UEFA Path D"
   ],
-  "allocations": {},
+  "allocations": {
+    "lachlan": [
+      "Netherlands"
+    ]
+  },
   "prizes": {
     "champion": 50,
     "runner": 20,
