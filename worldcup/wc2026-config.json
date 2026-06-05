@@ -138,16 +138,7 @@
       "secondaries": 4
     }
   },
-  "pot0": [
-    "France",
-    "Spain",
-    "Argentina",
-    "England",
-    "Portugal",
-    "Brazil",
-    "Netherlands",
-    "Morocco"
-  ],
+  "pot0": [],
   "pot1": [
     "Argentina",
     "France",
