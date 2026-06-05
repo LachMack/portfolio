@@ -77,7 +77,7 @@
           "id": "nina",
           "name": "Nina Thomas",
           "type": "adult",
-          "active": false
+          "active": true
         },
         {
           "id": "xanthe",
@@ -126,7 +126,8 @@
     },
     "mackenzie2": {
       "primaries": 4,
-      "secondaries": 4
+      "secondaries": 4,
+      "p0": 0
     },
     "thomas": {
       "primaries": 4,
