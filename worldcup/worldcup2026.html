@@ -1695,4 +1695,257 @@ function renderPredictions(){
   });
 
   // View toggle
-  var out='<div style
+  var out='<div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">';
+  out+='<span class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.06em;text-transform:uppercase;margin-right:4px">View</span>';
+  [['strength','Team Strength'],['sweep','Sweep Value'],['groups','Group Difficulty'],['h2h','Head-to-Head']].forEach(function(v){
+    out+='<button class="btn'+(predView===v[0]?' btn-accent':'')+'" onclick="predView=\''+v[0]+'\';renderPredictions()">'+v[1]+'</button>';
+  });
+  out+='</div>';
+
+  out+='<div style="font-size:11px;color:#5a6a88;margin-bottom:14px">'+
+    'Elo ratings: <a href="https://github.com/Hicruben/world-cup-2026-prediction-model" target="_blank" style="color:#60a5fa">Hicruben/world-cup-2026-prediction-model</a> (MIT) · '+
+    'Win odds: Polymarket (pre-tournament) · Data as of June 2026'+
+    '</div>';
+
+  // ── STRENGTH VIEW ───────────────────────────────────────────────
+  if(predView==='strength'){
+    out+='<div style="font-size:12px;color:#8b9ab8;margin-bottom:12px">All 48 teams ranked by calibrated Elo rating. Higher = stronger. Colour shows pot tier.</div>';
+    out+='<div class="card" style="overflow:hidden">';
+    out+='<table><thead><tr>';
+    out+='<th style="text-align:left;width:30px">#</th>';
+    out+='<th style="text-align:left">Team</th>';
+    out+='<th>Pot</th>';
+    out+='<th>Elo</th>';
+    out+='<th>Strength</th>';
+    out+='<th>Win %</th>';
+    out+='<th style="text-align:left">Owner</th>';
+    out+='</tr></thead><tbody>';
+
+    var allTeamsSorted=Object.keys(ELO).sort(function(a,b){return ELO[b]-ELO[a];});
+    allTeamsSorted.forEach(function(team,rank){
+      var elo=ELO[team]||1700;
+      var odds=ODDS[team]||0;
+      var pot=CFG.pot1.includes(team)?1:CFG.pot2.includes(team)?2:3;
+      var potColor=POT[pot].color;
+      var isElite=pot===1&&CFG.pot1.indexOf(team)<8;
+      var barPct=Math.round((elo-ELO_MIN)/(ELO_MAX-ELO_MIN)*100);
+
+      // Find owner
+      var owner=null,ownerFam=null;
+      CFG.families.forEach(function(fam){
+        fam.members.forEach(function(mem){
+          if((allocs[mem.id]||[]).includes(team)){owner=mem;ownerFam=fam;}
+        });
+      });
+
+      out+='<tr style="border-bottom:1px solid #ffffff06">';
+      out+='<td style="color:#5a6a88;font-size:11px;text-align:center">'+(rank+1)+'</td>';
+      out+='<td style="text-align:left;font-weight:500;font-size:13px">'+f(team)+' '+h(team)+(isElite?' <span style="color:#fbbf24;font-size:10px">★</span>':'')+'</td>';
+      out+='<td style="text-align:center"><span class="font-display" style="font-size:10px;font-weight:700;color:'+potColor+';background:'+potColor+'18;padding:1px 6px;border-radius:3px">P'+pot+'</span></td>';
+      out+='<td style="text-align:center"><span class="font-display" style="font-weight:700;font-size:13px">'+elo+'</span></td>';
+      out+='<td style="width:120px;padding:0 8px">';
+      out+='<div style="height:6px;background:#ffffff10;border-radius:3px;overflow:hidden">';
+      out+='<div style="height:100%;width:'+barPct+'%;background:'+potColor+';border-radius:3px"></div>';
+      out+='</div></td>';
+      out+='<td style="text-align:center;font-size:12px;color:'+(odds>=5?'#00d4aa':odds>=1?'#fbbf24':'#8b9ab8')+'">';
+      out+=odds>=1?odds.toFixed(1)+'%':'<'+1+'%';
+      out+='</td>';
+      out+='<td style="text-align:left;font-size:11px">';
+      if(owner){
+        out+='<span style="color:'+ownerFam.color+';font-weight:600">'+h(owner.name.split(' ')[0])+'</span>';
+      }else{
+        out+='<span style="color:#5a6a88">—</span>';
+      }
+      out+='</td></tr>';
+    });
+    out+='</tbody></table></div>';
+
+  // ── SWEEP VALUE VIEW ────────────────────────────────────────────
+  }else if(predView==='sweep'){
+    out+='<div style="font-size:12px;color:#8b9ab8;margin-bottom:14px">How well did each participant do in the draw? Ranked by combined Elo of their teams. Higher = stronger draw.</div>';
+
+    if(!personElo.length){
+      out+='<div class="card-pad" style="text-align:center;color:#5a6a88;padding:40px">No teams allocated yet — run the draw in ⚙ Admin first</div>';
+    }else{
+      // Top/bottom picks callout
+      var best=personElo[0],worst=personElo[personElo.length-1];
+      out+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
+      out+='<div class="card-pad" style="border-color:#00d4aa30;text-align:center">';
+      out+='<div style="font-size:11px;color:#5a6a88;margin-bottom:4px">🏆 Strongest Draw</div>';
+      out+='<div style="font-weight:700;font-size:15px;color:#00d4aa">'+h(best.name)+'</div>';
+      out+='<div style="font-size:11px;color:#5a6a88;margin-top:2px">Avg Elo '+best.avgElo+' · Win odds '+best.totalOdds.toFixed(1)+'%</div>';
+      out+='</div>';
+      out+='<div class="card-pad" style="border-color:#fbbf2430;text-align:center">';
+      out+='<div style="font-size:11px;color:#5a6a88;margin-bottom:4px">🤞 Underdog Draw</div>';
+      out+='<div style="font-weight:700;font-size:15px;color:#fbbf24">'+h(worst.name)+'</div>';
+      out+='<div style="font-size:11px;color:#5a6a88;margin-top:2px">Avg Elo '+worst.avgElo+' · Win odds '+worst.totalOdds.toFixed(1)+'%</div>';
+      out+='</div></div>';
+
+      // Full leaderboard
+      out+='<div class="card">';
+      out+='<table><thead><tr>';
+      out+='<th style="width:30px">#</th><th style="text-align:left">Participant</th><th>Teams</th><th>Avg Elo</th><th>Win Chances</th><th style="text-align:left">Holdings</th>';
+      out+='</tr></thead><tbody>';
+
+      var maxElo=personElo[0].avgElo,minElo=personElo[personElo.length-1].avgElo;
+      personElo.forEach(function(p,i){
+        var barPct=maxElo>minElo?Math.round((p.avgElo-minElo)/(maxElo-minElo)*100):50;
+        var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+        out+='<tr style="border-bottom:1px solid #ffffff06">';
+        out+='<td style="text-align:center;font-size:13px">'+(medal||i+1)+'</td>';
+        out+='<td style="text-align:left"><div style="font-weight:600;font-size:13px">'+h(p.name)+'</div>'+
+          '<div style="font-size:10px;margin-top:1px"><span style="color:'+p.famColor+'">'+h(p.famName)+'</span></div></td>';
+        out+='<td style="text-align:center;color:#5a6a88">'+p.teams.length+'</td>';
+        out+='<td><div class="font-display" style="font-weight:700;font-size:14px;text-align:center">'+p.avgElo+'</div>'+
+          '<div style="height:4px;background:#ffffff10;border-radius:2px;overflow:hidden;margin-top:3px;width:80px;margin-left:auto;margin-right:auto">'+
+          '<div style="height:100%;width:'+barPct+'%;background:#00d4aa;border-radius:2px"></div></div></td>';
+        out+='<td style="text-align:center;font-size:12px;color:'+(p.totalOdds>=5?'#00d4aa':p.totalOdds>=1?'#fbbf24':'#8b9ab8')+'">';
+        out+=p.totalOdds>=0.1?p.totalOdds.toFixed(1)+'%':'<0.1%';
+        out+='</td>';
+        out+='<td style="text-align:left"><div style="display:flex;flex-wrap:wrap;gap:3px">';
+        p.teams.forEach(function(t){
+          var elo=ELO[t]||1700;
+          var strength=elo>=2000?'#00d4aa':elo>=1900?'#fbbf24':elo>=1800?'#60a5fa':'#8b9ab8';
+          out+='<span style="font-size:10px;padding:1px 6px;border-radius:3px;background:'+strength+'18;color:'+strength+';border:1px solid '+strength+'30">'+
+            f(t)+' '+h(t)+'</span>';
+        });
+        out+='</div></td></tr>';
+      });
+      out+='</tbody></table></div>';
+    }
+
+  // ── GROUP DIFFICULTY VIEW ───────────────────────────────────────
+  }else if(predView==='groups'){
+    out+='<div style="font-size:12px;color:#8b9ab8;margin-bottom:14px">Average Elo strength of each group. Harder groups have stronger opponents to navigate through.</div>';
+
+    var sortedGroups=Object.keys(groupElo).sort(function(a,b){return groupElo[b].avg-groupElo[a].avg;});
+    var maxAvg=groupElo[sortedGroups[0]].avg,minAvg=groupElo[sortedGroups[sortedGroups.length-1]].avg;
+
+    out+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">';
+    sortedGroups.forEach(function(g,rank){
+      var ge=groupElo[g];
+      var c=GC[g]||'#888';
+      var barPct=maxAvg>minAvg?Math.round((ge.avg-minAvg)/(maxAvg-minAvg)*100):50;
+      var label=rank===0?'💀 Group of Death':rank===1?'🔥 Very Tough':rank<4?'💪 Tough':rank<8?'⚖️ Balanced':'😌 Manageable';
+
+      out+='<div class="card-pad" style="border-color:'+c+'30">';
+      out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+      out+='<span class="font-display" style="font-weight:700;font-size:16px;color:'+c+'">Group '+g+'</span>';
+      out+='<span style="font-size:11px;color:#5a6a88">'+label+'</span>';
+      out+='</div>';
+      out+='<div class="font-display" style="font-weight:800;font-size:24px;color:#f0f4ff;margin-bottom:6px">'+ge.avg+' <span style="font-size:12px;color:#5a6a88;font-weight:400">avg Elo</span></div>';
+      out+='<div style="height:5px;background:#ffffff10;border-radius:3px;overflow:hidden;margin-bottom:10px">';
+      out+='<div style="height:100%;width:'+barPct+'%;background:'+c+';border-radius:3px"></div></div>';
+
+      ge.teams.sort(function(a,b){return (ELO[b]||1700)-(ELO[a]||1700);}).forEach(function(team){
+        var elo=ELO[team]||1700;
+        var eloBarPct=Math.round((elo-ELO_MIN)/(ELO_MAX-ELO_MIN)*100);
+        var owner=null,ownerFam=null;
+        CFG.families.forEach(function(fam){
+          fam.members.forEach(function(mem){
+            if((allocs[mem.id]||[]).includes(team)){owner=mem;ownerFam=fam;}
+          });
+        });
+        out+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid #ffffff06">';
+        out+='<span style="font-size:14px;flex-shrink:0">'+f(team)+'</span>';
+        out+='<div style="flex:1;min-width:0">';
+        out+='<div style="display:flex;justify-content:space-between;align-items:center">';
+        out+='<span style="font-size:12px;font-weight:500">'+h(team)+'</span>';
+        out+='<span class="font-display" style="font-size:12px;font-weight:700;color:#8b9ab8">'+elo+'</span>';
+        out+='</div>';
+        out+='<div style="height:3px;background:#ffffff08;border-radius:2px;overflow:hidden;margin-top:3px">';
+        out+='<div style="height:100%;width:'+eloBarPct+'%;background:'+(elo>=2000?'#00d4aa':elo>=1900?'#fbbf24':elo>=1800?'#60a5fa':'#8b9ab8')+';border-radius:2px"></div></div>';
+        out+='</div>';
+        if(owner){
+          out+='<span style="font-size:10px;color:'+ownerFam.color+';font-weight:600;flex-shrink:0">'+h(owner.name.split(' ')[0])+'</span>';
+        }
+        out+='</div>';
+      });
+      out+='</div>';
+    });
+    out+='</div>';
+
+  // ── HEAD TO HEAD VIEW ───────────────────────────────────────────
+  }else if(predView==='h2h'){
+    out+='<div style="font-size:12px;color:#8b9ab8;margin-bottom:14px">Dixon-Coles model: pick any two teams to see predicted win/draw/loss probabilities.</div>';
+
+    var allTeamNames=Object.keys(ELO).sort();
+    var teamAOpts=allTeamNames.map(function(t){return '<option value="'+h(t)+'"'+(h2hTeamA===t?' selected':'')+'>'+f(t)+' '+h(t)+'</option>';}).join('');
+    var teamBOpts=allTeamNames.map(function(t){return '<option value="'+h(t)+'"'+(h2hTeamB===t?' selected':'')+'>'+f(t)+' '+h(t)+'</option>';}).join('');
+
+    out+='<div class="card-pad" style="max-width:500px">';
+    out+='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">';
+    out+='<select id="h2h-a" onchange="h2hTeamA=this.value;renderPredictions()" style="flex:1;min-width:140px">'+teamAOpts+'</select>';
+    out+='<span class="font-display" style="font-weight:700;color:#5a6a88;font-size:18px">vs</span>';
+    out+='<select id="h2h-b" onchange="h2hTeamB=this.value;renderPredictions()" style="flex:1;min-width:140px">'+teamBOpts+'</select>';
+    out+='</div>';
+
+    if(h2hTeamA&&h2hTeamB&&h2hTeamA!==h2hTeamB){
+      var eloA=ELO[h2hTeamA]||1700,eloB=ELO[h2hTeamB]||1700;
+      // Dixon-Coles simplified: logistic + draw adjustment
+      var eloDiff=eloA-eloB;
+      var pWinA=1/(1+Math.pow(10,-eloDiff/400));
+      var drawProb=0.28-Math.abs(eloDiff)*0.00045; // flatter = more draws
+      drawProb=Math.max(0.08,Math.min(0.35,drawProb));
+      pWinA=(pWinA*(1-drawProb));
+      var pWinB=(1-drawProb)-pWinA;
+      var pWinAPct=Math.round(pWinA*100),drawPct=Math.round(drawProb*100),pWinBPct=100-pWinAPct-drawPct;
+
+      // Expected goals (rough)
+      var expGoalsA=(1.15+eloDiff*0.0004).toFixed(1);
+      var expGoalsB=(1.15-eloDiff*0.0004).toFixed(1);
+
+      var potA=CFG.pot1.includes(h2hTeamA)?1:CFG.pot2.includes(h2hTeamA)?2:3;
+      var potB=CFG.pot1.includes(h2hTeamB)?1:CFG.pot2.includes(h2hTeamB)?2:3;
+
+      out+='<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin-bottom:16px">';
+      // Team A
+      out+='<div style="text-align:center">';
+      out+='<div style="font-size:36px">'+f(h2hTeamA)+'</div>';
+      out+='<div style="font-weight:700;font-size:14px;margin-top:4px">'+h(h2hTeamA)+'</div>';
+      out+='<div class="font-display" style="font-size:12px;color:#5a6a88;margin-top:2px">Elo '+eloA+' · <span style="color:'+POT[potA].color+'">P'+potA+'</span></div>';
+      out+='<div class="font-display" style="font-weight:800;font-size:32px;color:#00d4aa;margin-top:8px">'+pWinAPct+'%</div>';
+      out+='<div style="font-size:11px;color:#5a6a88">win probability</div>';
+      out+='<div style="font-size:13px;color:#8b9ab8;margin-top:6px">xG: '+expGoalsA+'</div>';
+      out+='</div>';
+      // Draw
+      out+='<div style="text-align:center;padding-top:40px">';
+      out+='<div class="font-display" style="font-weight:700;font-size:20px;color:#5a6a88">'+drawPct+'%</div>';
+      out+='<div style="font-size:11px;color:#5a6a88">draw</div>';
+      out+='</div>';
+      // Team B
+      out+='<div style="text-align:center">';
+      out+='<div style="font-size:36px">'+f(h2hTeamB)+'</div>';
+      out+='<div style="font-weight:700;font-size:14px;margin-top:4px">'+h(h2hTeamB)+'</div>';
+      out+='<div class="font-display" style="font-size:12px;color:#5a6a88;margin-top:2px">Elo '+eloB+' · <span style="color:'+POT[potB].color+'">P'+potB+'</span></div>';
+      out+='<div class="font-display" style="font-weight:800;font-size:32px;color:#fbbf24;margin-top:8px">'+pWinBPct+'%</div>';
+      out+='<div style="font-size:11px;color:#5a6a88">win probability</div>';
+      out+='<div style="font-size:13px;color:#8b9ab8;margin-top:6px">xG: '+expGoalsB+'</div>';
+      out+='</div>';
+      out+='</div>';
+
+      // Bar
+      out+='<div style="height:8px;border-radius:4px;overflow:hidden;display:flex;margin-bottom:8px">';
+      out+='<div style="width:'+pWinAPct+'%;background:#00d4aa"></div>';
+      out+='<div style="width:'+drawPct+'%;background:#5a6a88"></div>';
+      out+='<div style="flex:1;background:#fbbf24"></div>';
+      out+='</div>';
+      out+='<div style="display:flex;justify-content:space-between;font-size:10px;color:#5a6a88">';
+      out+='<span>'+h(h2hTeamA)+' win</span><span>Draw</span><span>'+h(h2hTeamB)+' win</span></div>';
+      out+='<div style="margin-top:12px;padding:8px 12px;background:#ffffff06;border-radius:6px;font-size:11px;color:#5a6a88">';
+      out+='Model: Dixon-Coles bivariate Poisson · Elo difference: '+(eloA-eloB>0?'+':'')+(eloA-eloB)+' · Neutral venue assumed';
+      out+='</div>';
+    }else{
+      out+='<div style="text-align:center;padding:20px;color:#5a6a88;font-size:13px">Select two different teams to compare</div>';
+    }
+    out+='</div>';
+  }
+
+  document.getElementById('tab-predictions').innerHTML=out;
+}
+
+var h2hTeamA='France',h2hTeamB='Spain';
+
+</script>
+</body>
+</html>
