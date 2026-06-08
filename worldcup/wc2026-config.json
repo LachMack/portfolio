@@ -1,5 +1,9 @@
 {
-  "allocations": {},
+  "allocations": {
+    "rach": [
+      "Argentina"
+    ]
+  },
   "familyBuys": {
     "mackenzie": {
       "p0": 2,
