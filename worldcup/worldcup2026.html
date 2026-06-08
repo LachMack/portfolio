@@ -1650,6 +1650,53 @@ function renderSpinner(){
   }
 }
 
+
+// ── Spinner sounds (Web Audio API — no files needed) ──────────────
+var audioCtx=null;
+function getAudioCtx(){
+  if(!audioCtx){
+    try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  }
+  return audioCtx;
+}
+
+function playTick(freq,duration,vol){
+  var ctx=getAudioCtx();
+  if(!ctx)return;
+  var osc=ctx.createOscillator();
+  var gain=ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type='sine';
+  osc.frequency.setValueAtTime(freq,ctx.currentTime);
+  gain.gain.setValueAtTime(vol||0.08,ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+(duration||0.04));
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime+(duration||0.04));
+}
+
+function playWinSound(){
+  var ctx=getAudioCtx();
+  if(!ctx)return;
+  // Rising arpeggio
+  var notes=[523,659,784,1047]; // C5 E5 G5 C6
+  notes.forEach(function(freq,i){
+    setTimeout(function(){playTick(freq,0.18,0.15);},i*80);
+  });
+  // Final flourish
+  setTimeout(function(){
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='triangle';
+    osc.frequency.setValueAtTime(1047,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1568,ctx.currentTime+0.3);
+    gain.gain.setValueAtTime(0.12,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.4);
+  },320);
+}
+
 function doRespin(){spinPhase='ready';spinWinner=null;renderSpinner();}
 function doSpin(){
   spinPhase='spinning';
@@ -1659,15 +1706,29 @@ function doSpin(){
   const finalY=-(winIdx*itemH)+((80-itemH)/2);
   const start=Date.now();
   function ease(t){return 1-Math.pow(1-t,4);}
+  var lastItemIdx=-1;
   function step(){
     const prog=Math.min((Date.now()-start)/duration,1);
     const y=ease(prog)*finalY;
     document.getElementById('spin-reel').style.transform=`translateY(${y}px)`;
+    // Tick each time we cross a new item boundary
+    var currentIdx=Math.floor(Math.abs(y)/itemH);
+    if(currentIdx!==lastItemIdx){
+      lastItemIdx=currentIdx;
+      // Slow down: tick pitch and speed follow animation progress
+      var speed=1-ease(prog); // 1=fast, 0=stopped
+      if(speed>0.05){
+        var freq=200+speed*400; // 200-600Hz, higher when fast
+        var vol=0.04+speed*0.04;
+        playTick(freq,0.025,vol);
+      }
+    }
     if(prog<1){spinAnimId=requestAnimationFrame(step);}
     else{
       spinWinner=spinTeams[winIdx];
       spinPhase='result';
       renderSpinner();
+      playWinSound();
     }
   }
   spinAnimId=requestAnimationFrame(step);
