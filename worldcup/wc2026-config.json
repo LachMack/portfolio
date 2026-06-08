@@ -112,16 +112,16 @@
     }
   },
   "prizes": {
-    "champion": 90,
+    "champion": 100,
     "runner": 50,
-    "third": 30,
+    "third": 25,
     "groupAdvance": 5,
     "goldenBoot": 10,
     "bestGD": 10,
     "worstGD": 15,
     "mostYellow": 0,
     "mostRed": 15,
-    "firstGoal": 10,
+    "firstGoal": 5,
     "mostCleanSheets": 10,
     "topFamily": 0
   },
