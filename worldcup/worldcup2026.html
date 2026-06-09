@@ -44,7 +44,37 @@ input[type=number]::-webkit-inner-spin-button{opacity:1}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .grid-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
-@media(max-width:680px){.grid-2{grid-template-columns:1fr}}
+/* ── Responsive ─────────────────────────────── */
+@media(max-width:800px){
+  .grid-2{grid-template-columns:1fr}
+  .grid-groups{grid-template-columns:1fr}
+  #app{padding:0 10px 60px}
+  .ko-rounds{min-width:600px}
+  .ko-col.wide{flex:1.5}
+}
+@media(max-width:600px){
+  #tabs{gap:0}
+  .tab-btn{padding:8px 10px;font-size:11px;letter-spacing:.03em}
+  .font-display.hero{font-size:22px!important}
+  .grid-stats{grid-template-columns:1fr 1fr}
+  /* Scores tab - stack on mobile */
+  .score-row-grid{grid-template-columns:1fr auto 1fr!important;gap:4px!important}
+  .score-row-venue{display:none}
+  .score-row-meta{font-size:10px}
+  /* KO bracket - allow scroll */
+  .ko-rounds{min-width:480px;gap:4px}
+  .ko-match{font-size:10px}
+  .ko-team .name{font-size:10px!important}
+  /* Family panels */
+  .fam-header{flex-wrap:wrap;gap:6px}
+  .fam-pm-controls{flex-wrap:wrap;gap:4px}
+  /* Tables - compress */
+  table td,table th{padding:5px 4px!important;font-size:11px!important}
+}
+@media(max-width:420px){
+  .tab-btn{padding:6px 8px;font-size:10px}
+  .grid-stats{grid-template-columns:1fr}
+}
 /* Status bar */
 #statusbar{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.05em}
 /* Spinner overlay */
@@ -202,6 +232,36 @@ const POT={
 const isKnown=n=>n&&!n.match(/^[12WL]/)&&!n.includes('Path')&&!n.includes('Best')&&!n.includes('winner')&&!n.includes('/');
 function isPot0Elite(team){return CFG.pot0&&CFG.pot0.includes(team);}
 const fmtDate=d=>{if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('en-AU',{month:'short',day:'numeric'});};
+function fmtDateAEST(isoDate,utcTime){
+  if(!isoDate)return'';
+  // Parse UTC time if given (e.g. "19:00 UTC-4")
+  var aestStr='';
+  try{
+    if(utcTime){
+      var m=utcTime.match(/(\d+):(\d+)\s*UTC([+-]\d+(?:\.\d+)?)/);
+      if(m){
+        var h=parseInt(m[1]),mn=parseInt(m[2]),off=parseFloat(m[3]);
+        // Convert to UTC then to AEST (UTC+10)
+        var utcH=h-off; // UTC hours
+        var aestH=utcH+10; // AEST
+        var d=new Date(isoDate+'T00:00:00');
+        var dayOff=0;
+        if(aestH>=24){aestH-=24;dayOff=1;}
+        if(aestH<0){aestH+=24;dayOff=-1;}
+        d.setDate(d.getDate()+dayOff);
+        var mn2=mn<10?'0'+mn:''+mn;
+        var h2=aestH<10?'0'+aestH:''+aestH;
+        var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        aestStr=days[d.getDay()]+' '+d.toLocaleDateString('en-AU',{month:'short',day:'numeric'})+' '+h2+':'+mn2+' AEST';
+      }
+    }
+    if(!aestStr){
+      // No time — just show date
+      aestStr=new Date(isoDate+'T12:00:00').toLocaleDateString('en-AU',{weekday:'short',month:'short',day:'numeric'});
+    }
+  }catch(e){aestStr=isoDate;}
+  return aestStr;
+}
 const shuffle=a=>{const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;};
 const h=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -819,6 +879,20 @@ function renderSweep(){
 
 function setSweepView(v){sweepView=v;renderSweep();}
 
+function fmtKOTeam(code){
+  // e.g. '1A' -> '1st Group A', '2B' -> '2nd Group B'
+  // e.g. 'W73' -> 'W/Mx #73', 'L101' -> 'L/Mx #101'
+  // 'Best 3rd' stays
+  if(!code||isKnown(code))return code;
+  var m1=code.match(/^([12])([A-L])$/);
+  if(m1)return (m1[1]==='1'?'1st':'2nd')+' Grp '+m1[2];
+  var m2=code.match(/^([WL])(\d+)$/);
+  if(m2)return (m2[1]==='W'?'W':'L')+' Mx#'+m2[2];
+  var m3=code.match(/^(\d)([A-L])\/?/);
+  if(m3)return m3[1]+' Grp '+m3[2];
+  return code;
+}
+
 // ── GROUPS TAB ────────────────────────────────────────────
 function renderGroups(){
   var matches=getMatches();
@@ -860,7 +934,8 @@ function renderGroups(){
       var done=m.s1!=null;
       out+='<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:4px;font-size:11px;padding:3px 0">';
       out+='<span style="text-align:right;font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+'">'+(isKnown(m.t1)?f(m.t1):'')+' '+h(m.t1)+'</span>';
-      out+='<span class="font-display" style="text-align:center;min-width:44px;font-weight:700;font-size:'+(done?14:11)+'px;color:'+(done?'#f0f4ff':'#5a6a88')+'">'+(done?m.s1+'–'+m.s2:fmtDate(m.d))+'</span>';
+      var aestLbl=(!done&&m.t)?'<div style="font-size:9px;color:#5a6a88;text-align:center;line-height:1.3;margin-top:2px">'+fmtDateAEST(m.d,m.t)+'</div>':'';
+      out+='<div style="text-align:center;min-width:70px"><span class="font-display" style="font-weight:700;font-size:'+(done?14:11)+'px;color:'+(done?'#f0f4ff':'#5a6a88')+'">'+(done?m.s1+'–'+m.s2:fmtDate(m.d))+'</span>'+aestLbl+'</div>';
       out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+'">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+'</span>';
       out+='</div>';
     });
@@ -886,11 +961,12 @@ function renderKnockout(){
       [{t:m.t1,s:m.s1,w:h1w,k:t1k},{t:m.t2,s:m.s2,w:h2w,k:t2k}].forEach(function(side,si){
         out+='<div class="ko-team'+(side.w?' winner':'')+'">'+
           '<span class="name" style="font-weight:'+(side.w?700:400)+';color:'+(side.k?'#e8eeff':'#5a6a88')+';font-style:'+(side.k?'normal':'italic')+';font-size:'+(side.k?11:10)+'px">'+
-          (side.k?f(side.t)+' ':'')+h(side.t)+'</span>'+
+          (side.k?f(side.t)+' ':'')+h(side.k?side.t:fmtKOTeam(side.t))+'</span>'+
           '<span class="score" style="color:'+(side.w?'#00d4aa':'#f0f4ff')+'">'+(done?side.s:'')+'</span>'+
           '</div>';
       });
-      out+='<div class="ko-meta">'+fmtDate(m.d)+' · '+h(m.gr)+'</div></div>';
+      var koAest=m.t?'<br><span style="font-size:9px">'+fmtDateAEST(m.d,m.t)+'</span>':'';
+      out+='<div class="ko-meta">'+fmtDate(m.d)+' · '+h(m.gr)+koAest+'</div></div>';
     });
     out+='</div>';
   });
@@ -990,10 +1066,11 @@ function renderScores(){
     var htHtml=(m.ht1!=null&&m.ht2!=null&&!isEdit)?'<span style="font-size:10px;color:#5a6a88;margin-left:6px">(HT '+m.ht1+'-'+m.ht2+')</span>':'';
     var onclk=isEdit?'':'onclick="editScore(\''+m.key+'\')"';
     out+='<div '+onclk+' style="padding:10px 14px;background:#111827;border:1px solid '+(isEdit?'#00d4aa40':'#ffffff0e')+';border-radius:8px;cursor:'+(isEdit?'default':'pointer')+'">';
-    out+='<div style="display:grid;grid-template-columns:90px 1fr '+(isEdit?'240px':'auto')+' 1fr 80px;align-items:center;gap:8px">';
+    out+='<div class="score-row-grid" style="display:grid;grid-template-columns:90px 1fr '+(isEdit?'240px':'auto')+' 1fr 80px;align-items:center;gap:8px">';
     var metaLabel=grpL?'<span class="font-display" style="font-size:10px;font-weight:700;color:'+c+';background:'+c+'18;padding:2px 5px;border-radius:3px">'+h(m.g)+'</span>':
       '<span class="font-display" style="font-size:10px;color:#5a6a88;font-weight:600;letter-spacing:.04em;text-transform:uppercase">'+roundShort+'</span>';
-    out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:4px;color:#5a6a88">'+fmtDate(m.d)+'</div></div>';
+    var aestTime=m.t?fmtDateAEST(m.d,m.t):'';
+    out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:3px;color:#5a6a88">'+fmtDate(m.d)+'</div>'+(aestTime?'<div style="margin-top:1px;font-size:9px;color:#5a6a88">'+aestTime+'</div>':'')+'</div>';
     out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+'</span>';
     out+='<div style="text-align:center;min-width:80px">';
     if(isEdit){
@@ -1224,7 +1301,7 @@ function renderAdmin(){
 
     // Family header with +/− pick controls and tally
     out+='<div style="padding:10px 14px;background:'+fam.color+'14;border-bottom:1px solid '+fam.color+'25">';
-    out+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+    out+='<div class="fam-header" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
     out+='<span class="font-display" style="font-weight:700;font-size:15px;color:'+fam.color+';text-transform:uppercase;letter-spacing:.06em">'+h(fam.name)+'</span>';
     // Buy pick controls
     out+='<div style="display:flex;align-items:center;gap:5px;margin-left:8px;flex-wrap:wrap">';
