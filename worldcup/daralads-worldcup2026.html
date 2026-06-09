@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚽ World Cup 2026 Sweep</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#080d18;color:#e8eeff;font-family:'Barlow',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 15% 0%,#00d4aa14,transparent 55%),radial-gradient(ellipse 50% 40% at 85% 100%,#60a5fa12,transparent 55%);pointer-events:none;z-index:0}
+#app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 16px 60px}
+.font-display{font-family:'Barlow Condensed',sans-serif}
+.card{background:#111827;border:1px solid #ffffff10;border-radius:10px;overflow:hidden}
+.card-pad{background:#111827;border:1px solid #ffffff10;border-radius:10px;padding:16px 18px}
+.btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;border-radius:4px;cursor:pointer;border:1px solid #ffffff22;background:transparent;color:#5a6a88;transition:all .15s}
+.btn-accent{background:#00d4aa18;border-color:#00d4aa40;color:#00d4aa}
+.btn-lg{font-size:15px;padding:11px 20px;border-radius:8px}
+input,select,textarea{font-family:'Barlow',sans-serif;font-size:13px;background:#1a2235;border:1px solid #ffffff18;border-radius:6px;color:#e8eeff;padding:7px 11px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#00d4aa50}
+table{width:100%;border-collapse:collapse}
+th{padding:6px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#5a6a88;border-bottom:1px solid #ffffff0a;text-align:center}
+th.left{text-align:left}
+td{padding:7px 8px;font-size:13px;border-bottom:1px solid #ffffff06;text-align:center}
+td.left{text-align:left}
+tr:last-child td{border-bottom:none}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px}
+.champion{color:#a78bfa;background:#a78bfa18;border:1px solid #a78bfa30}
+.runner{color:#60a5fa;background:#60a5fa18;border:1px solid #60a5fa30}
+.advanced{color:#00d4aa;background:#00d4aa18;border:1px solid #00d4aa30}
+.neutral{color:#8b9ab8;background:#ffffff08;border:1px solid #ffffff10}
+.tab-btn{padding:9px 16px;font-size:12px;border:none;border-bottom:2px solid transparent;background:none;color:#5a6a88;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:color .15s}
+.tab-btn.active{color:#00d4aa;border-bottom-color:#00d4aa}
+@media(max-width:680px){
+  #app{padding:0 10px 60px}
+  .grid-auto{grid-template-columns:1fr 1fr!important}
+  table td,table th{padding:5px 4px!important;font-size:11px!important}
+  .hide-mobile{display:none!important}
+}
+@media(max-width:420px){
+  .grid-auto{grid-template-columns:1fr!important}
+  .tab-btn{padding:8px 10px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <div style="padding:22px 0 0;margin-bottom:18px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="font-display" style="font-weight:800;font-size:28px;line-height:1">
+          <span style="color:#00d4aa">FIFA </span>World Cup<span style="color:#00d4aa"> 2026</span>
+        </div>
+        <div id="sweep-name" class="font-display" style="font-size:16px;color:#8b9ab8;margin-top:2px">Sweep</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span id="status-bar" style="font-size:11px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em"></span>
+        <span id="pool-badge" style="font-size:11px;padding:4px 10px;background:#00d4aa18;color:#00d4aa;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-weight:700"></span>
+      </div>
+    </div>
+    <div style="margin-top:14px;height:1px;background:linear-gradient(90deg,#00d4aa40,#60a5fa30,transparent)"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;gap:2px;border-bottom:1px solid #ffffff10;margin-bottom:18px;overflow-x:auto">
+    <button class="tab-btn active" onclick="showTab('lb',this)">🏆 Leaderboard</button>
+    <button class="tab-btn" onclick="showTab('teams',this)">Teams</button>
+    <button class="tab-btn" onclick="showTab('admin',this)">⚙ Admin</button>
+  </div>
+
+  <div id="tab-lb"></div>
+  <div id="tab-teams" style="display:none"></div>
+  <div id="tab-admin" style="display:none"></div>
+</div>
+<div id="share-modal"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// GITHUB CONFIG — update GH_USER/REPO/PATH for your setup
+// ══════════════════════════════════════════════════════════
+var GH_USER='LachMack', GH_REPO='portfolio', GH_PATH='worldcup/daralads-config.json';
+var GH_API='https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/'+GH_PATH;
+var CONFIG_URL='https://raw.githubusercontent.com/'+GH_USER+'/'+GH_REPO+'/main/'+GH_PATH;
+
+// ── State ──────────────────────────────────────────────────────────
+var CFG={
+  sweepName:'World Cup 2026 — Daralads Sweep',
+  buyIn:20,
+  prizes:{champion:0,runner:0,third:0,groupAdvance:0},
+  participants:[
+    {name:'Jasper', teams:['Colombia','England','USA','Uruguay','Jordan','Paraguay','Qatar','Cape Verde']},
+    {name:'Cooper', teams:['Netherlands','Argentina','Türkiye','Austria','Canada','Scotland','DR Congo','Iraq']},
+    {name:'Archie', teams:['Belgium','Brazil','Japan','South Korea','Norway','Czechia','Panama','New Zealand']},
+    {name:'Blake',  teams:['France','Spain','Australia','Mexico','Ivory Coast','Poland','Saudi Arabia','Bosnia & Herzegovina']},
+    {name:'Cael',   teams:['Morocco','Germany','Iran','Switzerland','Tunisia','Sweden','Uzbekistan','Curaçao']},
+    {name:'Riley',  teams:['Portugal','Croatia','Senegal','Ecuador','Algeria','Egypt','South Africa','Haiti']}
+  ],
+  results:{champion:'',runner:'',third:'',advanced:[]}
+};
+
+var ALL_TEAMS=['Argentina','Australia','Austria','Belgium','Bosnia & Herzegovina','Brazil','Canada','Cape Verde',
+  'Colombia','Croatia','Curaçao','Czechia','DR Congo','Ecuador','Egypt','England','France','Germany','Ghana',
+  'Haiti','Iran','Iraq','Ivory Coast','Japan','Jordan','Mexico','Morocco','Netherlands','New Zealand','Norway',
+  'Panama','Paraguay','Portugal','Qatar','Saudi Arabia','Scotland','Senegal','South Africa','South Korea',
+  'Spain','Sweden','Switzerland','Tunisia','Türkiye','Uruguay','USA','Uzbekistan','Bosnia & Herzegovina'].sort();
+
+var FLAGS={'Argentina':'🇦🇷','France':'🇫🇷','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Brazil':'🇧🇷','Spain':'🇪🇸','Portugal':'🇵🇹',
+  'Germany':'🇩🇪','Netherlands':'🇳🇱','Belgium':'🇧🇪','Croatia':'🇭🇷','Colombia':'🇨🇴','Senegal':'🇸🇳',
+  'Morocco':'🇲🇦','Mexico':'🇲🇽','USA':'🇺🇸','Uruguay':'🇺🇾','Japan':'🇯🇵','Switzerland':'🇨🇭',
+  'Iran':'🇮🇷','Austria':'🇦🇹','Ecuador':'🇪🇨','Australia':'🇦🇺','South Korea':'🇰🇷','Egypt':'🇪🇬',
+  'Canada':'🇨🇦','Ivory Coast':'🇨🇮','Qatar':'🇶🇦','Algeria':'🇩🇿','Sweden':'🇸🇪','Tunisia':'🇹🇳',
+  'Czechia':'🇨🇿','Türkiye':'🇹🇷','Norway':'🇳🇴','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','DR Congo':'🇨🇩',
+  'Bosnia & Herzegovina':'🇧🇦','Panama':'🇵🇦','Saudi Arabia':'🇸🇦','South Africa':'🇿🇦','Iraq':'🇮🇶',
+  'Uzbekistan':'🇺🇿','Paraguay':'🇵🇾','Ghana':'🇬🇭','Jordan':'🇯🇴','Cape Verde':'🇨🇻',
+  'Curaçao':'🇨🇼','Haiti':'🇭🇹','New Zealand':'🇳🇿'};
+
+var f=function(n){return FLAGS[n]||'🏳️';};
+var h=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+
+// ── GitHub sync ────────────────────────────────────────────────────
+async function loadFromGitHub(){
+  setStatus('loading','Syncing…','#fbbf24');
+  try{
+    var r=await fetch(CONFIG_URL+'?t='+Date.now());
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    var data=await r.json();
+    // Only sync mutable fields — never overwrite hardcoded defaults
+    if(data.sweepName)  CFG.sweepName  = data.sweepName;
+    if(data.buyIn!=null)CFG.buyIn      = data.buyIn;
+    if(data.prizes)     CFG.prizes     = Object.assign({},CFG.prizes,data.prizes);
+    if(data.participants&&data.participants.length) CFG.participants = data.participants;
+    if(data.results)    CFG.results    = Object.assign({champion:'',runner:'',third:'',advanced:[]},data.results);
+    setStatus('ok','✓ Synced','#00d4aa');
+  }catch(e){
+    setStatus('warn','Local mode ('+e.message+')','#fbbf24');
+  }
+  renderAll();
+}
+
+async function pushToGitHub(){
+  var token='';
+  try{token=localStorage.getItem('daralads_token')||'';}catch(e){}
+  if(!token){alert('No GitHub token set — enter it in ⚙ Admin');return false;}
+  setStatus('saving','Saving…','#fbbf24');
+  try{
+    var meta=await fetch(GH_API,{headers:{Authorization:'token '+token,Accept:'application/vnd.github.v3+json'}});
+    if(!meta.ok)throw new Error('GitHub API '+meta.status);
+    var sha=(await meta.json()).sha;
+    var payload={
+      sweepName:CFG.sweepName,
+      buyIn:CFG.buyIn,
+      prizes:CFG.prizes,
+      participants:CFG.participants,
+      results:CFG.results
+    };
+    var content=btoa(unescape(encodeURIComponent(JSON.stringify(payload,null,2))));
+    var put=await fetch(GH_API,{
+      method:'PUT',
+      headers:{Authorization:'token '+token,'Content-Type':'application/json',Accept:'application/vnd.github.v3+json'},
+      body:JSON.stringify({message:'daralads sweep: update config',content:content,sha:sha})
+    });
+    if(!put.ok){var e2=await put.json();throw new Error(e2.message||'Push failed');}
+    setStatus('ok','✓ Saved to GitHub','#00d4aa');
+    return true;
+  }catch(e){
+    setStatus('err','⚠ '+e.message,'#ff4757');
+    return false;
+  }
+}
+
+function setStatus(type,msg,color){
+  var el=document.getElementById('status-bar');
+  if(el){el.textContent=msg;el.style.color=color;}
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+function getResult(team){
+  var r=CFG.results;
+  if(r.champion===team)return'champion';
+  if(r.runner===team)return'runner';
+  if(r.third===team)return'third';
+  if((r.advanced||[]).includes(team))return'advanced';
+  return'active';
+}
+function tagClass(r){return{champion:'champion',runner:'runner',third:'advanced',advanced:'advanced'}[r]||'neutral';}
+function calcScore(p){
+  var pts=0,notes=[];
+  (p.teams||[]).forEach(function(t){
+    var r=getResult(t);
+    var prz=CFG.prizes;
+    if(r==='champion'){pts+=prz.champion||0;notes.push(t+' 🏆');}
+    else if(r==='runner'){pts+=prz.runner||0;notes.push(t+' 🥈');}
+    else if(r==='third'){pts+=prz.third||0;notes.push(t+' 🥉');}
+    else if(r==='advanced'){pts+=prz.groupAdvance||0;notes.push(t+' ✓');}
+  });
+  return{pts:pts,notes:notes};
+}
+function calcPrizeTotal(){
+  var p=CFG.prizes;
+  return (p.champion||0)+(p.runner||0)+(p.third||0)+((p.groupAdvance||0)*24);
+}
+
+// ── Tab switching ──────────────────────────────────────────────────
+function showTab(id,btn){
+  ['lb','teams','admin'].forEach(function(t){
+    document.getElementById('tab-'+t).style.display=t===id?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.classList.remove('active');
+  });
+  if(btn)btn.classList.add('active');
+  if(id==='lb')renderLB();
+  else if(id==='teams')renderTeams();
+  else renderAdmin();
+}
+
+function renderAll(){
+  renderLB();
+  var pool=CFG.participants.length*(CFG.buyIn||0);
+  document.getElementById('pool-badge').textContent='$'+pool+' pool · '+CFG.participants.length+' players';
+  document.getElementById('sweep-name').textContent=CFG.sweepName||'World Cup 2026 Sweep';
+}
+
+// ══════════════════════════════════════════════════════════
+// LEADERBOARD TAB
+// ══════════════════════════════════════════════════════════
+function renderLB(){
+  var scored=CFG.participants.map(function(p){
+    var sc=calcScore(p);
+    return Object.assign({},p,sc);
+  }).sort(function(a,b){return b.pts-a.pts;});
+
+  var pool=CFG.participants.length*(CFG.buyIn||0);
+  var prizeTotal=calcPrizeTotal();
+  var prizeColor=prizeTotal===pool?'#00d4aa':prizeTotal<pool?'#fbbf24':'#ff4757';
+  var prizeStatus=prizeTotal===pool?'✓ Balanced':prizeTotal<pool?'$'+(pool-prizeTotal)+' unallocated':'$'+(prizeTotal-pool)+' over budget';
+
+  var out='<div class="grid-auto" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px">';
+  out+='<div class="card-pad"><div class="font-display" style="font-size:10px;color:#5a6a88;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Prize Pool</div>';
+  out+='<div class="font-display" style="font-weight:800;font-size:26px;color:#00d4aa">$'+pool+'</div>';
+  out+='<div style="font-size:11px;color:#5a6a88;margin-top:2px">'+CFG.participants.length+' × $'+(CFG.buyIn||0)+'</div></div>';
+
+  out+='<div class="card-pad"><div class="font-display" style="font-size:10px;color:#5a6a88;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Prizes Set</div>';
+  out+='<div class="font-display" style="font-weight:800;font-size:26px;color:'+prizeColor+'">$'+prizeTotal+'</div>';
+  out+='<div style="font-size:11px;color:'+prizeColor+';margin-top:2px">'+prizeStatus+'</div></div>';
+
+  var hasResults=CFG.results.champion||CFG.results.runner||(CFG.results.advanced||[]).length;
+  out+='<div class="card-pad"><div class="font-display" style="font-size:10px;color:#5a6a88;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Results</div>';
+  out+='<div class="font-display" style="font-weight:800;font-size:26px;color:'+(hasResults?'#f0f4ff':'#5a6a88')+'">'+(hasResults?'Live':'TBD')+'</div>';
+  out+='<div style="font-size:11px;color:#5a6a88;margin-top:2px">Set in ⚙ Admin</div></div>';
+  out+='</div>';
+
+  // Leaderboard table
+  out+='<div class="card" style="margin-bottom:14px"><table><thead><tr>';
+  out+='<th style="width:30px">#</th><th class="left">Name</th>';
+  out+='<th class="hide-mobile">Teams</th>';
+  out+='<th>Earnings</th><th class="left hide-mobile">Notes</th>';
+  out+='</tr></thead><tbody>';
+  scored.forEach(function(p,i){
+    var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    out+='<tr>';
+    out+='<td style="font-size:13px">'+(medal||i+1)+'</td>';
+    out+='<td class="left" style="font-weight:600;font-size:13px">'+h(p.name)+'</td>';
+    out+='<td class="hide-mobile" style="color:#5a6a88">'+(p.teams||[]).length+'</td>';
+    out+='<td class="font-display" style="font-weight:800;font-size:18px;color:'+(i===0&&p.pts>0?'#00d4aa':'#f0f4ff')+'">$'+p.pts+'</td>';
+    out+='<td class="left hide-mobile" style="font-size:11px;color:#5a6a88">'+p.notes.join(' · ')+'</td>';
+    out+='</tr>';
+  });
+  out+='</tbody></table></div>';
+
+  // Active prizes
+  var prizeDefs=[['champion','🏆 Champion',1],['runner','🥈 Runner-up',1],['third','🥉 3rd Place',1],['groupAdvance','✓ Group Advance',24]];
+  var activePrizes=prizeDefs.filter(function(e){return (CFG.prizes[e[0]]||0)>0;});
+  if(activePrizes.length){
+    out+='<div class="card-pad">';
+    out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:10px">Prize Structure</div>';
+    out+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px">';
+    activePrizes.forEach(function(e){
+      var val=CFG.prizes[e[0]]||0;
+      out+='<div style="padding:7px 10px;background:#ffffff05;border-radius:6px;border:1px solid #ffffff08;display:flex;justify-content:space-between;align-items:center">';
+      out+='<span style="font-size:12px;color:#8b9ab8">'+e[1]+(e[2]>1?' ×'+e[2]:'')+'</span>';
+      out+='<span class="font-display" style="font-weight:700;font-size:14px">$'+val+'</span>';
+      out+='</div>';
+    });
+    out+='</div></div>';
+  }
+
+  document.getElementById('tab-lb').innerHTML=out;
+}
+
+// ══════════════════════════════════════════════════════════
+// TEAMS TAB
+// ══════════════════════════════════════════════════════════
+function renderTeams(){
+  var byTeam={};
+  CFG.participants.forEach(function(p){
+    (p.teams||[]).forEach(function(t){byTeam[t]=p.name;});
+  });
+  var allDrawn=Object.keys(byTeam).sort();
+
+  var out='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">All Teams by Owner</div>';
+  out+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin-bottom:20px">';
+  allDrawn.forEach(function(team){
+    var r=getResult(team);
+    var cls=tagClass(r);
+    out+='<div class="tag '+cls+'" style="padding:8px 10px;border-radius:8px;justify-content:space-between;border-radius:8px">';
+    out+='<span>'+f(team)+' '+h(team)+'</span>';
+    out+='<span style="font-size:11px;opacity:.7;font-weight:600">'+h(byTeam[team])+'</span>';
+    out+='</div>';
+  });
+  out+='</div>';
+
+  // Per-person breakdown
+  out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">By Person</div>';
+  out+='<div style="display:flex;flex-direction:column;gap:10px">';
+  CFG.participants.forEach(function(p){
+    out+='<div class="card-pad">';
+    out+='<div style="font-weight:700;font-size:14px;margin-bottom:8px">'+h(p.name)+'</div>';
+    out+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
+    (p.teams||[]).forEach(function(t){
+      var r=getResult(t);
+      var cls=tagClass(r);
+      out+='<span class="tag '+cls+'">'+f(t)+' '+h(t)+'</span>';
+    });
+    out+='</div></div>';
+  });
+  out+='</div>';
+
+  document.getElementById('tab-teams').innerHTML=out;
+}
+
+// ══════════════════════════════════════════════════════════
+// ADMIN TAB
+// ══════════════════════════════════════════════════════════
+function renderAdmin(){
+  var out='<div style="display:flex;flex-direction:column;gap:14px;max-width:680px">';
+
+  // GitHub token
+  out+='<div class="card-pad" style="border-color:#00d4aa30">';
+  out+='<div class="font-display" style="font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#00d4aa;margin-bottom:8px">⚡ GitHub Token</div>';
+  out+='<div style="font-size:13px;color:#8b9ab8;margin-bottom:8px;line-height:1.5">Stored in your browser only — never pushed to GitHub. Required to save changes so everyone sees them.</div>';
+  out+='<div style="font-size:12px;color:#5a6a88;margin-bottom:10px;padding:8px 10px;background:#ffffff06;border-radius:6px">';
+  out+='Generate at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:#60a5fa">github.com → Settings → Developer settings → Fine-grained tokens</a>';
+  out+=' → Contents: Read &amp; Write on the <strong style="color:#e8eeff">portfolio</strong> repo.</div>';
+  out+='<div style="display:flex;gap:8px;align-items:center">';
+  out+='<input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1">';
+  out+='<button class="btn btn-accent" style="padding:8px 14px" onclick="saveToken()">Save to browser</button>';
+  out+='</div><div id="token-status" style="margin-top:8px;font-size:11px;color:#5a6a88"></div>';
+  out+='</div>';
+
+  // General settings
+  out+='<div class="card-pad">';
+  out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">General</div>';
+  out+='<div style="display:flex;flex-direction:column;gap:10px">';
+  out+='<label style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="color:#8b9ab8;min-width:120px">Sweep name</span><input id="cfg-name" value="'+h(CFG.sweepName||'')+'" style="flex:1"></label>';
+  out+='<label style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="color:#8b9ab8;min-width:120px">Buy-in per person</span><span style="color:#5a6a88">$</span><input id="cfg-buyin" type="number" min="0" value="'+(CFG.buyIn||0)+'" style="width:80px;text-align:center"></label>';
+  out+='</div></div>';
+
+  // Prize structure
+  out+='<div class="card-pad">';
+  out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">Prize Structure</div>';
+  var pool=CFG.participants.length*(CFG.buyIn||0);
+  var pt=calcPrizeTotal();
+  var pc=pt===pool?'#00d4aa':pt<pool?'#fbbf24':'#ff4757';
+  out+='<span class="font-display" style="font-weight:800;font-size:16px;color:'+pc+'">$'+pt+' / $'+pool+'</span>';
+  out+='</div>';
+  out+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px">';
+  [['champion','🏆 Champion',1],['runner','🥈 Runner-up',1],['third','🥉 3rd Place',1],['groupAdvance','✓ Group Advance',24]].forEach(function(e){
+    var val=CFG.prizes[e[0]]||0;
+    out+='<label style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:#ffffff05;border-radius:6px;border:1px solid #ffffff08;font-size:12px">';
+    out+='<span style="color:#8b9ab8;flex:1">'+e[1]+(e[2]>1?' ×'+e[2]:'')+'</span>';
+    out+='<span style="color:#5a6a88">$</span>';
+    out+='<input type="number" id="prize-'+e[0]+'" min="0" value="'+val+'" style="width:58px;text-align:center;padding:3px 6px">';
+    out+='</label>';
+  });
+  out+='</div></div>';
+
+  // Results
+  out+='<div class="card-pad">';
+  out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Tournament Results</div>';
+  out+='<div style="display:flex;flex-direction:column;gap:8px">';
+  [['champion','🏆 Champion'],['runner','🥈 Runner-up'],['third','🥉 3rd Place']].forEach(function(e){
+    out+='<label style="display:flex;align-items:center;gap:10px;font-size:13px">';
+    out+='<span style="color:#8b9ab8;min-width:110px">'+e[1]+'</span>';
+    out+='<select id="res-'+e[0]+'" style="flex:1;max-width:240px"><option value="">— not decided —</option>';
+    ALL_TEAMS.forEach(function(t){
+      out+='<option value="'+h(t)+'"'+(CFG.results[e[0]]===t?' selected':'')+'>'+f(t)+' '+h(t)+'</option>';
+    });
+    out+='</select></label>';
+  });
+  out+='<label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;margin-top:4px">';
+  out+='<span style="color:#8b9ab8;min-width:110px;padding-top:7px">✓ Advanced</span>';
+  out+='<textarea id="res-advanced" rows="4" style="flex:1;max-width:340px;font-size:12px;line-height:1.7" placeholder="One team per line — teams that advanced from groups">'+((CFG.results.advanced||[]).join('\n'))+'</textarea>';
+  out+='</label></div></div>';
+
+  // Participants
+  out+='<div class="card-pad">';
+  out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">Participants</div>';
+  out+='<button class="btn btn-accent" onclick="addParticipant()">+ Add Person</button></div>';
+
+  CFG.participants.forEach(function(p,i){
+    var usedByOthers=new Set(CFG.participants.flatMap(function(pp,ii){return ii===i?[]:(pp.teams||[]);}));
+    out+='<div style="padding:12px 0;border-bottom:1px solid #ffffff08">';
+    out+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    out+='<input id="p-name-'+i+'" value="'+h(p.name||'')+'" placeholder="Name…" style="max-width:180px">';
+    out+='<button class="btn" style="color:#ff4757;border-color:#ff475730;padding:3px 8px" onclick="removeParticipant('+i+')">Remove</button>';
+    out+='</div>';
+    out+='<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">';
+    (p.teams||[]).forEach(function(t,ti){
+      out+='<span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#ffffff08;color:#e8eeff;border:1px solid #ffffff14;display:inline-flex;align-items:center;gap:4px">';
+      out+=f(t)+' '+h(t);
+      out+='<span onclick="removeTeamFromP('+i+','+ti+')" style="cursor:pointer;opacity:.5;font-size:10px">×</span></span>';
+    });
+    out+='<select style="font-size:11px;padding:3px 8px;width:auto;min-width:130px" onchange="addTeamToP('+i+',this)">';
+    out+='<option value="">+ add team…</option>';
+    ALL_TEAMS.forEach(function(t){
+      if(!(p.teams||[]).includes(t)){
+        var dimmed=usedByOthers.has(t)?' style="color:#5a6a88"':'';
+        out+='<option value="'+h(t)+'"'+dimmed+'>'+f(t)+' '+h(t)+'</option>';
+      }
+    });
+    out+='</select>';
+    out+='</div></div>';
+  });
+  out+='</div>';
+
+  // Save button
+  out+='<div style="display:flex;gap:10px">';
+  out+='<button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAll()">SAVE & PUSH TO GITHUB</button>';
+  out+='</div>';
+  out+='<div id="admin-msg" style="font-size:12px;margin-top:8px"></div>';
+  out+='</div>';
+
+  document.getElementById('tab-admin').innerHTML=out;
+
+  // Show token status
+  updateTokenStatus();
+}
+
+// ── Admin actions ──────────────────────────────────────────────────
+function saveToken(){
+  var el=document.getElementById('token-input');
+  var t=el?el.value.trim():'';
+  if(!t){showAdminMsg('Please enter a token','#ff4757');return;}
+  try{localStorage.setItem('daralads_token',t);}catch(e){}
+  updateTokenStatus();
+  pushToGitHub().then(function(ok){
+    showAdminMsg(ok?'✓ Token saved and verified':'⚠ Token saved but push failed — check permissions',ok?'#00d4aa':'#ff4757');
+  });
+}
+
+function updateTokenStatus(){
+  var el=document.getElementById('token-status');
+  if(!el)return;
+  var t='';try{t=localStorage.getItem('daralads_token')||'';}catch(e){}
+  if(t){
+    el.innerHTML='<span style="color:#00d4aa">✓ Token set in this browser</span> — <span style="cursor:pointer;color:#ff4757;text-decoration:underline" onclick="try{localStorage.removeItem(\'daralads_token\');}catch(e){}updateTokenStatus()">Clear</span>';
+  }else{
+    el.innerHTML='<span style="color:#fbbf24">⚠ No token set</span> — view-only for this device';
+  }
+}
+
+function addParticipant(){
+  CFG.participants.push({name:'',teams:[]});renderAdmin();
+}
+function removeParticipant(i){
+  if(!confirm('Remove '+CFG.participants[i].name+'?'))return;
+  CFG.participants.splice(i,1);renderAdmin();renderLB();
+}
+function addTeamToP(i,sel){
+  var t=sel.value;if(!t)return;
+  if(!CFG.participants[i].teams)CFG.participants[i].teams=[];
+  if(!CFG.participants[i].teams.includes(t))CFG.participants[i].teams.push(t);
+  sel.value='';renderAdmin();
+}
+function removeTeamFromP(i,ti){
+  CFG.participants[i].teams.splice(ti,1);renderAdmin();
+}
+
+function showAdminMsg(msg,color){
+  var el=document.getElementById('admin-msg');
+  if(el){el.textContent=msg;el.style.color=color||'#8b9ab8';}
+}
+
+async function saveAll(){
+  // Read all inputs
+  var nameEl=document.getElementById('cfg-name');
+  var buyinEl=document.getElementById('cfg-buyin');
+  if(nameEl)CFG.sweepName=nameEl.value.trim();
+  if(buyinEl)CFG.buyIn=+(buyinEl.value)||0;
+  ['champion','runner','third','groupAdvance'].forEach(function(k){
+    var el=document.getElementById('prize-'+k);if(el)CFG.prizes[k]=+(el.value)||0;
+  });
+  ['champion','runner','third'].forEach(function(k){
+    var el=document.getElementById('res-'+k);if(el)CFG.results[k]=el.value;
+  });
+  var adv=document.getElementById('res-advanced');
+  if(adv)CFG.results.advanced=adv.value.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  CFG.participants.forEach(function(p,i){
+    var el=document.getElementById('p-name-'+i);if(el)p.name=el.value.trim();
+  });
+
+  var ok=await pushToGitHub();
+  showAdminMsg(ok?'✓ Saved to GitHub — everyone will see updates within a minute':'⚠ Save failed — check your token',ok?'#00d4aa':'#ff4757');
+  if(ok)renderAll();
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+function init(){
+  try{
+    loadFromGitHub();
+    // Auto-refresh every 3 minutes
+    setInterval(function(){loadFromGitHub();},3*60*1000);
+  }catch(e){
+    document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#ff4757"><h2>Error</h2><p style="color:#8b9ab8;margin-top:8px">'+e.message+'</p></div>';
+  }
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+</script>
+</body>
+</html>

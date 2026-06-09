@@ -1,0 +1,96 @@
+{
+  "sweepName": "World Cup 2026 \u2014 Daralads Sweep",
+  "buyIn": 20,
+  "prizes": {
+    "champion": 0,
+    "runner": 0,
+    "third": 0,
+    "groupAdvance": 0
+  },
+  "participants": [
+    {
+      "name": "Jasper",
+      "teams": [
+        "Colombia",
+        "England",
+        "USA",
+        "Uruguay",
+        "Jordan",
+        "Paraguay",
+        "Qatar",
+        "Cape Verde"
+      ]
+    },
+    {
+      "name": "Cooper",
+      "teams": [
+        "Netherlands",
+        "Argentina",
+        "T\u00fcrkiye",
+        "Austria",
+        "Canada",
+        "Scotland",
+        "DR Congo",
+        "Iraq"
+      ]
+    },
+    {
+      "name": "Archie",
+      "teams": [
+        "Belgium",
+        "Brazil",
+        "Japan",
+        "South Korea",
+        "Norway",
+        "Czechia",
+        "Panama",
+        "New Zealand"
+      ]
+    },
+    {
+      "name": "Blake",
+      "teams": [
+        "France",
+        "Spain",
+        "Australia",
+        "Mexico",
+        "Ivory Coast",
+        "Poland",
+        "Saudi Arabia",
+        "Bosnia & Herzegovina"
+      ]
+    },
+    {
+      "name": "Cael",
+      "teams": [
+        "Morocco",
+        "Germany",
+        "Iran",
+        "Switzerland",
+        "Tunisia",
+        "Sweden",
+        "Uzbekistan",
+        "Cura\u00e7ao"
+      ]
+    },
+    {
+      "name": "Riley",
+      "teams": [
+        "Portugal",
+        "Croatia",
+        "Senegal",
+        "Ecuador",
+        "Algeria",
+        "Egypt",
+        "South Africa",
+        "Haiti"
+      ]
+    }
+  ],
+  "results": {
+    "champion": "",
+    "runner": "",
+    "third": "",
+    "advanced": []
+  }
+}
