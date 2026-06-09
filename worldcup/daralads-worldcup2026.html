@@ -130,7 +130,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:1}
       <div>
         <div class="font-display" style="font-weight:800;font-size:30px;line-height:1">
           <span style="color:#00d4aa">FIFA </span>World Cup<span style="color:#00d4aa"> 2026</span>
-          <span style="font-size:14px;font-weight:500;color:#5a6a88;margin-left:12px;letter-spacing:.02em">Mackenzie Sweep</span>
+          <span id="sweep-name-display" style="font-size:14px;font-weight:500;color:#5a6a88;margin-left:12px;letter-spacing:.02em">Daralads Sweep</span>
         </div>
         <div style="font-size:11px;color:#5a6a88;margin-top:4px;letter-spacing:.05em;text-transform:uppercase">Canada · USA · Mexico · Jun 11 – Jul 19</div>
       </div>
@@ -219,8 +219,19 @@ const POT={
   3:{label:'Pot 3',color:'#a78bfa',cls:'pot3',desc:'Underdogs (33–48)'}
 };
 
+
+// Pot map for Daralads predictions tab
+var DARALADS_POT_MAP=(function(){
+  var m={};
+  ['France','Spain','Argentina','England','Portugal','Brazil','Netherlands','Morocco'].forEach(function(t){m[t]=0;});
+  ['Belgium','Germany','Croatia','Colombia','Senegal','Mexico','USA','Uruguay'].forEach(function(t){m[t]=1;});
+  ['Japan','Switzerland','Iran','Austria','Ecuador','Australia','South Korea','Egypt','Canada','Ivory Coast','Qatar','Algeria','Sweden','Tunisia','Czechia','Türkiye'].forEach(function(t){m[t]=2;});
+  ['Norway','Scotland','DR Congo','Bosnia & Herzegovina','Panama','Saudi Arabia','South Africa','Iraq','Uzbekistan','Paraguay','Ghana','Jordan','Cape Verde','Curaçao','Haiti','New Zealand'].forEach(function(t){m[t]=3;});
+  return m;
+})();
+
 const isKnown=n=>n&&!n.match(/^[12WL]/)&&!n.includes('Path')&&!n.includes('Best')&&!n.includes('winner')&&!n.includes('/');
-function isPot0Elite(team){return CFG.pot0&&CFG.pot0.includes(team);}
+function isPot0Elite(team){return DARALADS_POT_MAP[team]===0;}
 const fmtDate=d=>{if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('en-AU',{month:'short',day:'numeric'});};
 function fmtDateAEST(isoDate,utcTime){
   if(!isoDate)return'';
@@ -480,6 +491,8 @@ async function loadFromGitHub(){
     if(data.results)      CFG.results      = Object.assign({champion:'',runner:'',third:'',advanced:[]},data.results);
     if(!CFG.prizes)       CFG.prizes       = Object.assign({},DEFAULT_CFG.prizes);
     setStatus('ok','✓ Synced with GitHub','#00d4aa');
+    var nd=document.getElementById('sweep-name-display');
+    if(nd&&CFG.sweepName)nd.textContent=CFG.sweepName;
   }catch(e){
     setStatus('warn','Local mode — set token in ⚙ Admin to enable sync ('+e.message+')','#fbbf24');
   }
@@ -799,6 +812,29 @@ function setSweepView(v){sweepView=v;renderSweep();}
 // ══════════════════════════════════════════════════════════════════
 // DARALADS ADMIN TAB
 // ══════════════════════════════════════════════════════════════════
+function updatePrizeTotals(){
+  var prizeKeys=['champion','runner','third','groupAdvance','goldenBoot','bestGD','worstGD','mostYellow','mostRed','firstGoal','mostCleanSheets','topFamily'];
+  var total=prizeKeys.reduce(function(s,k){
+    var el=document.getElementById('prize-'+k);
+    var val=el?+(el.value)||0:0;
+    var mult=k==='groupAdvance'?24:1;
+    return s+(val*mult);
+  },0);
+  var buyin=+(document.getElementById('cfg-buyin')||{value:CFG.buyIn||0}).value||CFG.buyIn||0;
+  var pool=(CFG.participants||[]).length*buyin;
+  var color=total===pool?'#00d4aa':total<pool?'#fbbf24':'#ff4757';
+  var status=total===pool?'✓ Balanced':total<pool?'$'+(pool-total)+' unallocated':'$'+(total-pool)+' over budget';
+  var badge=document.getElementById('prize-total-badge');
+  if(badge){badge.textContent='$'+total;badge.style.color=color;}
+  var statusBadge=document.getElementById('prize-status-badge');
+  if(statusBadge){statusBadge.textContent=status;statusBadge.style.color=color;statusBadge.style.background=color+'18';statusBadge.style.borderColor=color+'30';}
+  var bar=document.getElementById('prize-bar');
+  if(bar){bar.style.width=pool>0?Math.min(100,Math.round(total/pool*100))+'%':'0%';bar.style.background=color;}
+  var lbl=document.getElementById('prize-bar-label');
+  if(lbl){lbl.textContent=Math.round(total/Math.max(pool,1)*100)+'% of pool · '+status;lbl.style.color=color;}
+}
+
+
 function renderAdmin(){
   var pool=(CFG.participants||[]).length*(CFG.buyIn||0);
   var prz=CFG.prizes||{};
@@ -1014,6 +1050,27 @@ function resetDraws(){
   CFG.results={champion:'',runner:'',third:'',advanced:[]};
   pushToGitHub(CFG);render();
 }
+
+function fmtKOTeam(code){
+  if(!code||isKnown(code))return code;
+  var m1=code.match(/^([12])([A-L])$/);
+  if(m1)return(m1[1]==='1'?'1st':'2nd')+' Grp '+m1[2];
+  var m2=code.match(/^([WL])(\d+)$/);
+  if(m2)return(m2[1]==='W'?'W':'L')+' Mx#'+m2[2];
+  return code;
+}
+
+function updateTokenStatus(){
+  var el=document.getElementById('token-status-placeholder');
+  if(!el)return;
+  var t='';try{t=localStorage.getItem('wc26_token')||'';}catch(e){}
+  if(t){
+    el.innerHTML='<div style="font-size:11px;color:#00d4aa;margin-top:8px">✓ Token set in this browser — <span style="cursor:pointer;color:#ff4757;text-decoration:underline" onclick="try{localStorage.removeItem(\'wc26_token\');}catch(e){}updateTokenStatus()">Clear</span></div>';
+  }else{
+    el.innerHTML='<div style="font-size:11px;color:#fbbf24;margin-top:8px">⚠ No token set — view-only for this device</div>';
+  }
+}
+
 
 // ── GROUPS TAB ────────────────────────────────────────────
 function renderGroups(){
@@ -1296,9 +1353,9 @@ function renderPredictions(){
     allTeamsSorted.forEach(function(team,rank){
       var elo=ELO[team]||1700;
       var odds=ODDS[team]||0;
-      var pot=CFG.pot0.includes(team)?0:CFG.pot1.includes(team)?1:CFG.pot2.includes(team)?2:3;
+      var pot=DARALADS_POT_MAP[team]!==undefined?DARALADS_POT_MAP[team]:3;
       var potColor=POT[pot].color;
-      var isElite=pot===1&&CFG.pot1.indexOf(team)<8;
+      var isElite=DARALADS_POT_MAP[team]===0;
       var barPct=Math.round((elo-ELO_MIN)/(ELO_MAX-ELO_MIN)*100);
 
       // Find owner
@@ -1461,8 +1518,8 @@ function renderPredictions(){
       var expGoalsA=(1.15+eloDiff*0.0004).toFixed(1);
       var expGoalsB=(1.15-eloDiff*0.0004).toFixed(1);
 
-      var potA=CFG.pot1.includes(h2hTeamA)?1:CFG.pot2.includes(h2hTeamA)?2:3;
-      var potB=CFG.pot1.includes(h2hTeamB)?1:CFG.pot2.includes(h2hTeamB)?2:3;
+      var potA=DARALADS_POT_MAP[h2hTeamA]!==undefined?DARALADS_POT_MAP[h2hTeamA]:3;
+      var potB=DARALADS_POT_MAP[h2hTeamB]!==undefined?DARALADS_POT_MAP[h2hTeamB]:3;
 
       out+='<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin-bottom:16px">';
       // Team A
@@ -1512,6 +1569,23 @@ function renderPredictions(){
 
 var h2hTeamA='France',h2hTeamB='Spain';
 
+function init(){
+  try{
+    render();
+    loadFromGitHub();
+    setInterval(function(){
+      loadFromOpenFootball().then(function(){render();});
+    },5*60*1000);
+  }catch(e){
+    console.error('Daralads init error:',e);
+    document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#ff4757;font-family:sans-serif"><h2>Error loading dashboard</h2><p style="color:#8b9ab8;margin-top:8px">'+e.message+'</p></div>';
+  }
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+}else{
+  init();
+}
 </script>
 <!-- Satisfy site-level share-modal.js -->
 <div id="share-modal"></div>
