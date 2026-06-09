@@ -388,7 +388,6 @@ const DEFAULT_CFG={
     {name:'Cael',   teams:['Morocco','Germany','Iran','Switzerland','Tunisia','Sweden','Uzbekistan','Curaçao']},
     {name:'Riley',  teams:['Portugal','Croatia','Senegal','Ecuador','Ghana','Egypt','South Africa','Haiti']}
   ],
-  results:{champion:'',runner:'',third:'',advanced:[]}
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -488,7 +487,7 @@ async function loadFromGitHub(){
     if(data.buyIn!=null)  CFG.buyIn        = data.buyIn;
     if(data.prizes)       CFG.prizes       = Object.assign({},DEFAULT_CFG.prizes,data.prizes);
     if(data.participants&&data.participants.length) CFG.participants = data.participants;
-    if(data.results)      CFG.results      = Object.assign({champion:'',runner:'',third:'',advanced:[]},data.results);
+
     if(!CFG.prizes)       CFG.prizes       = Object.assign({},DEFAULT_CFG.prizes);
     setStatus('ok','✓ Synced with GitHub','#00d4aa');
     var nd=document.getElementById('sweep-name-display');
@@ -520,7 +519,7 @@ async function pushToGitHub(cfg){
       buyIn:        cfg.buyIn||0,
       prizes:       cfg.prizes||{},
       participants: cfg.participants||[],
-      results:      cfg.results||{champion:'',runner:'',third:'',advanced:[]},
+
     };
     const content=btoa(unescape(encodeURIComponent(JSON.stringify(mutable,null,2))));
     const putRes=await fetch(GH_API,{
@@ -668,21 +667,11 @@ function renderSweep(){
   var matches=getMatches();
   var sm=buildStandings(matches);
   var prz=CFG.prizes||{};
-  var results=CFG.results||{champion:'',runner:'',third:'',advanced:[]};
-
-  // Leaderboard calc
-  function getResult(team){
-    if(results.champion===team)return'champion';
-    if(results.runner===team)return'runner';
-    if(results.third===team)return'third';
-    if((results.advanced||[]).includes(team))return'advanced';
-    return'active';
-  }
-
+  // Leaderboard calc — uses live match results via getTeamResult
   var lb=(CFG.participants||[]).map(function(p){
     var pts=0,notes=[];
     (p.teams||[]).forEach(function(t){
-      var r=getResult(t);
+      var r=getTeamResult(t,matches,sm);
       if(r==='champion'){pts+=prz.champion||0;notes.push(t+' 🏆');}
       else if(r==='runner'){pts+=prz.runner||0;notes.push(t+' 🥈');}
       else if(r==='third'){pts+=prz.third||0;notes.push(t+' 🥉');}
@@ -769,7 +758,7 @@ function renderSweep(){
       out+='<div style="font-weight:600;font-size:13px;margin-bottom:6px">'+h(p.name)+'</div>';
       out+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
       (p.teams||[]).forEach(function(t){
-        var r=getResult(t);
+        var r=getTeamResult(t,matches,sm);
         var cls={champion:'champion',runner:'runner',third:'advanced',advanced:'advanced'}[r]||'neutral';
         out+='<span class="tag '+cls+'">'+f(t)+' '+h(t)+'</span>';
       });
@@ -793,7 +782,7 @@ function renderSweep(){
     out+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:6px">';
     allTeams.forEach(function(team){
       var owner=byTeam[team];
-      var r=owner?getResult(team):'active';
+      var r=owner?getTeamResult(team,matches,sm):'active';
       var cls={champion:'champion',runner:'runner',third:'advanced',advanced:'advanced'}[r]||'neutral';
       var bg=owner?'background:#ffffff0a':'background:#ffffff05';
       out+='<div class="tag '+cls+'" style="padding:7px 10px;border-radius:7px;justify-content:space-between;'+bg+'">';
@@ -836,6 +825,12 @@ function updatePrizeTotals(){
 
 
 function renderAdmin(){
+  var allTeamsSorted=['Algeria','Argentina','Australia','Austria','Belgium','Bosnia & Herzegovina',
+    'Brazil','Canada','Cape Verde','Colombia','Croatia','Curaçao','Czechia','DR Congo','Ecuador',
+    'Egypt','England','France','Germany','Ghana','Haiti','Iran','Iraq','Ivory Coast','Japan',
+    'Jordan','Mexico','Morocco','Netherlands','New Zealand','Norway','Panama','Paraguay',
+    'Portugal','Qatar','Saudi Arabia','Scotland','Senegal','South Africa','South Korea','Spain',
+    'Sweden','Switzerland','Tunisia','Türkiye','Uruguay','USA','Uzbekistan'].sort();
   var pool=(CFG.participants||[]).length*(CFG.buyIn||0);
   var prz=CFG.prizes||{};
   var prizeTotal=calcPrizeTotal(prz);
@@ -911,30 +906,11 @@ function renderAdmin(){
 
   out+='</div>'; // end general+prizes grid
 
-  // ── Results ───────────────────────────────────────────────────────
-  var res=CFG.results||{champion:'',runner:'',third:'',advanced:[]};
-  var allTeamsSorted=['Argentina','Australia','Austria','Belgium','Bosnia & Herzegovina','Brazil','Canada','Cape Verde',
-    'Colombia','Croatia','Curaçao','Czechia','DR Congo','Ecuador','Egypt','England','France','Germany',
-    'Ghana','Haiti','Iran','Iraq','Ivory Coast','Japan','Jordan','Mexico','Morocco','Netherlands',
-    'New Zealand','Norway','Panama','Paraguay','Portugal','Qatar','Saudi Arabia','Scotland','Senegal',
-    'South Africa','South Korea','Spain','Sweden','Switzerland','Tunisia','Türkiye','Uruguay','USA','Uzbekistan'];
-
-  out+='<div class="card-pad">'+
-    '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:12px">Tournament Results</div>'+
-    '<div style="display:flex;flex-direction:column;gap:10px">';
-  [['champion','🏆 Champion'],['runner','🥈 Runner-up'],['third','🥉 3rd Place']].forEach(function(e){
-    out+='<label style="display:flex;align-items:center;gap:10px;font-size:13px">'+
-      '<span style="color:#8b9ab8;min-width:110px">'+e[1]+'</span>'+
-      '<select id="res-'+e[0]+'" style="flex:1;max-width:240px"><option value="">— not decided —</option>';
-    allTeamsSorted.forEach(function(t){
-      out+='<option value="'+h(t)+'"'+(res[e[0]]===t?' selected':'')+'>'+f(t)+' '+h(t)+'</option>';
-    });
-    out+='</select></label>';
-  });
-  out+='<label style="display:flex;align-items:flex-start;gap:10px;font-size:13px">'+
-    '<span style="color:#8b9ab8;min-width:110px;padding-top:7px">✓ Advanced</span>'+
-    '<textarea id="res-advanced" rows="4" style="flex:1;max-width:340px;font-size:12px;line-height:1.7" placeholder="One team per line">'+((res.advanced||[]).join('\n'))+'</textarea>'+
-    '</label></div></div>';
+  out+='<div class="card-pad" style="border-color:#60a5fa30">'+
+    '<div style="font-size:13px;color:#8b9ab8;display:flex;align-items:center;gap:10px">'+
+    '<span style="font-size:20px">✏</span>'+
+    '<div><strong style="color:#f0f4ff">Results are live.</strong> Scores from the Scores tab flow through to the leaderboard automatically. openfootball data updates every 5 minutes — use the Scores tab to enter or override any result manually.</div>'+
+    '</div></div>';
 
   // ── Participants ──────────────────────────────────────────────────
   out+='<div class="card-pad">';
@@ -1021,12 +997,7 @@ async function saveAdmin(){
     var el=document.getElementById('prize-'+pd.k);
     if(el)CFG.prizes[pd.k]=+(el.value)||0;
   });
-  ['champion','runner','third'].forEach(function(k){
-    var el=document.getElementById('res-'+k);
-    if(el){if(!CFG.results)CFG.results={};CFG.results[k]=el.value;}
-  });
-  var advEl=document.getElementById('res-advanced');
-  if(advEl){if(!CFG.results)CFG.results={};CFG.results.advanced=advEl.value.split('\n').map(function(s){return s.trim();}).filter(Boolean);}
+
   (CFG.participants||[]).forEach(function(p,i){
     var el=document.getElementById('p-name-'+i);if(el)p.name=el.value.trim();
   });
