@@ -477,9 +477,15 @@ function findMatchKey(t1,t2,date){
 async function loadFromGitHub(){
   setStatus('loading','Syncing…','#fbbf24');
   try{
-    const r=await fetch(CONFIG_URL+'?t='+Date.now());
+    // Use API endpoint to bypass CDN cache — raw URL caches for up to 5 mins
+    var token='';try{token=localStorage.getItem('wc26_token')||'';}catch(e){}
+    var headers={Accept:'application/vnd.github.v3+json'};
+    if(token)headers.Authorization='token '+token;
+    const r=await fetch(GH_API,{headers:headers});
     if(!r.ok)throw new Error('HTTP '+r.status);
-    const text=await r.text();
+    const meta=await r.json();
+    // Content is base64 encoded in API response
+    const text=decodeURIComponent(escape(atob(meta.content.replace(/\n/g,''))));
     let data;
     try{data=JSON.parse(text);}catch(e){throw new Error('Invalid JSON in config');}
     // Daralads: sync all mutable sweep config from remote
