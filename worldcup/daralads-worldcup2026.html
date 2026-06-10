@@ -1037,12 +1037,36 @@ function fmtKOTeam(code){
   return code;
 }
 
+
+
+function clearToken(){
+  try{localStorage.removeItem('wc26_token');}catch(e){}
+  updateTokenStatus();
+}
+
+function saveToken(){
+  var el=document.getElementById('token-input');
+  var t=el?el.value.trim():'';
+  if(!t){
+    var msg=document.getElementById('admin-msg');
+    if(msg)msg.innerHTML='<div style="padding:10px 14px;background:#ff475714;border:1px solid #ff475730;border-radius:6px;color:#ff4757;font-size:13px;margin-top:8px">⚠ Please enter a token</div>';
+    return;
+  }
+  try{localStorage.setItem('wc26_token',t);}catch(e){}
+  updateTokenStatus();
+  pushToGitHub(CFG).then(function(ok){
+    var msg=document.getElementById('admin-msg');
+    if(msg)msg.innerHTML='<div style="padding:10px 14px;background:'+(ok?'#00d4aa14':'#ff475714')+';border:1px solid '+(ok?'#00d4aa30':'#ff475730')+';border-radius:6px;color:'+(ok?'#00d4aa':'#ff4757')+';font-size:13px;margin-top:8px">'+(ok?'✓ Token saved and verified':'⚠ Token saved but push failed — check permissions')+'</div>';
+    updateTokenStatus();
+  });
+}
+
 function updateTokenStatus(){
   var el=document.getElementById('token-status-placeholder');
   if(!el)return;
   var t='';try{t=localStorage.getItem('wc26_token')||'';}catch(e){}
   if(t){
-    el.innerHTML='<div style="font-size:11px;color:#00d4aa;margin-top:8px">✓ Token set in this browser — <span style="cursor:pointer;color:#ff4757;text-decoration:underline" onclick="try{localStorage.removeItem(\'wc26_token\');}catch(e){}updateTokenStatus()">Clear</span></div>';
+    el.innerHTML='<div style="font-size:11px;color:#00d4aa;margin-top:8px">✓ Token set in this browser — <span style="cursor:pointer;color:#ff4757;text-decoration:underline" onclick="clearToken()">Clear</span></div>';
   }else{
     el.innerHTML='<div style="font-size:11px;color:#fbbf24;margin-top:8px">⚠ No token set — view-only for this device</div>';
   }
