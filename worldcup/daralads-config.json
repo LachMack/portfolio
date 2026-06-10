@@ -1,11 +1,19 @@
 {
-  "sweepName": "World Cup 2026 \u2014 Daralads Sweep",
+  "sweepName": "World Cup 2026 — Daralads Sweep",
   "buyIn": 20,
   "prizes": {
-    "champion": 0,
+    "champion": 3,
     "runner": 0,
     "third": 0,
-    "groupAdvance": 0
+    "groupAdvance": 0,
+    "goldenBoot": 0,
+    "bestGD": 0,
+    "worstGD": 0,
+    "mostYellow": 0,
+    "mostRed": 0,
+    "firstGoal": 0,
+    "mostCleanSheets": 0,
+    "topFamily": 0
   },
   "participants": [
     {
@@ -26,7 +34,7 @@
       "teams": [
         "Netherlands",
         "Argentina",
-        "T\u00fcrkiye",
+        "Türkiye",
         "Austria",
         "Canada",
         "Scotland",
@@ -70,7 +78,7 @@
         "Tunisia",
         "Sweden",
         "Uzbekistan",
-        "Cura\u00e7ao"
+        "Curaçao"
       ]
     },
     {
@@ -86,11 +94,5 @@
         "Haiti"
       ]
     }
-  ],
-  "results": {
-    "champion": "",
-    "runner": "",
-    "third": "",
-    "advanced": []
-  }
+  ]
 }
