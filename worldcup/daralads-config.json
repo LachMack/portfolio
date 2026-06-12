@@ -2,17 +2,17 @@
   "sweepName": "World Cup 2026 — Daralads Sweep",
   "buyIn": 20,
   "prizes": {
-    "champion": 60,
-    "runner": 25,
-    "third": 15,
-    "groupAdvance": 0,
+    "champion": 100,
+    "runner": 50,
+    "third": 25,
+    "groupAdvance": 5,
     "goldenBoot": 10,
-    "bestGD": 0,
-    "worstGD": 10,
+    "bestGD": 10,
+    "worstGD": 15,
     "mostYellow": 0,
-    "mostRed": 0,
-    "firstGoal": 0,
-    "mostCleanSheets": 0,
+    "mostRed": 15,
+    "firstGoal": 5,
+    "mostCleanSheets": 10,
     "topFamily": 0
   },
   "participants": [
@@ -94,5 +94,13 @@
         "Haiti"
       ]
     }
-  ]
+  ],
+  "manualAwards": {
+    "firstGoal": "livia",
+    "goldenBoot": "livia",
+    "bestGD": "livia",
+    "worstGD": "lachlan",
+    "mostCleanSheets": "livia"
+  },
+  "manualOverrides": {}
 }
