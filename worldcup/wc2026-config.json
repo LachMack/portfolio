@@ -125,6 +125,14 @@
     "mostCleanSheets": 10,
     "topFamily": 0
   },
+  "manualAwards": {
+    "firstGoal": "livia",
+    "goldenBoot": "livia",
+    "bestGD": "livia",
+    "worstGD": "lachlan",
+    "mostCleanSheets": "livia"
+  },
+  "manualOverrides": {},
   "pot0Cost": 15,
   "pot1Cost": 10,
   "pot2Cost": 5,
