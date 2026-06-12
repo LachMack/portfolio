@@ -223,7 +223,7 @@ var ELO_LIVE_LOADED=false;
 var ELO_NAME_MAP={
   'Czech Republic':'Czechia','Czechia':'Czechia',
   'Turkey':'Türkiye','Turkiye':'Türkiye','Türkiye':'Türkiye',
-  'Ivory Coast':'Ivory Coast',"Cote d'Ivoire":'Ivory Coast','Côte d\'Ivoire':'Ivory Coast',
+  'Ivory Coast':'Ivory Coast',"Cote d'Ivoire":'Ivory Coast',
   'Bosnia and Herzegovina':'Bosnia & Herzegovina',
   'Bosnia & Herzegovina':'Bosnia & Herzegovina',
   'DR Congo':'DR Congo','Congo DR':'DR Congo','Congo, DR':'DR Congo',
@@ -507,6 +507,10 @@ const DEFAULT_CFG={
     mostYellow:10,mostRed:10,firstGoal:5,
     mostCleanSheets:10,topFamily:0
   },
+  // Manual prize awards: { prizeKey: memberId }
+  // e.g. { firstGoal: 'lachlan', goldenBoot: 'jasper' }
+  manualAwards:{},
+  manualOverrides:{},
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -522,16 +526,16 @@ let activeTab='sweep';
 
 // Name mapping: openfootball → our names
 const OFB_NAMES={
-  'Czech Republic':'Czechia',  // placeholder until confirmed
-  'Czechia':'Czechia',
-  'Turkey':'Turkey',
-  'Iraq':'Iraq',
-  'DR Congo':'DR Congo',
-  'Sweden':'Sweden',
-  'Bosnia & Herzegovina':'Bosnia & Herzegovina',
+  'Czech Republic':'Czechia','Czechia':'Czechia',
+  'Turkey':'Türkiye','Turkiye':'Türkiye',
+  'Curacao':'Curaçao',
+  "Cote d'Ivoire":'Ivory Coast',
   'Bosnia and Herzegovina':'Bosnia & Herzegovina',
-  'USA':'USA',
+  'Korea Republic':'South Korea',
+  'Congo DR':'DR Congo',
+  'Cabo Verde':'Cape Verde',
   'United States':'USA',
+  'IR Iran':'Iran'
 };
 function normTeam(n){return OFB_NAMES[n]||n;}
 let scoreFilter='group';
@@ -544,6 +548,144 @@ try{SCORES=JSON.parse(localStorage.getItem('wc26_sc')||'{}');}catch(e){}
 // GITHUB SYNC
 // ═══════════════════════════════════════════════════════════
 const OFB_URL='https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+
+// ── Auto-compute prize awards from live match data ────────────────────
+function calcAutoAwards(){
+  var matches=getMatches();
+  var sm=buildStandings(matches);
+  var allocs=CFG.allocations||{};
+
+  // Build reverse lookup: team -> memberId
+  var teamOwner={};
+  CFG.families.forEach(function(fam){
+    fam.members.forEach(function(mem){
+      (allocs[mem.id]||[]).forEach(function(t){teamOwner[t]=mem.id;});
+    });
+  });
+
+  // Collect all goals across all matches
+  var allGoals=[]; // {team, name, minute, penalty, matchDate, matchKey}
+  matches.forEach(function(m){
+    if(!m.goals||!m.goals.length)return;
+    m.goals.forEach(function(g){
+      allGoals.push(Object.assign({},g,{matchDate:m.d,matchKey:m.key}));
+    });
+  });
+  // Sort by date then minute for chronological order
+  allGoals.sort(function(a,b){
+    return a.matchDate<b.matchDate?-1:a.matchDate>b.matchDate?1:a.minute-b.minute;
+  });
+
+  // Collect per-team stats from standings
+  var teamStats={}; // team -> {gf, ga, gd, yellows, reds, cleanSheets}
+  // We get GF/GA from buildStandings, but yellows/reds/cleanSheets not tracked by OFB
+  // For what OFB does provide: goals per player, scores per team
+  Object.entries(sm).forEach(function(e){
+    Object.entries(e[1]).forEach(function(te){
+      var t=te[0],s=te[1];
+      teamStats[t]={gf:s.gf,ga:s.ga,gd:s.gf-s.ga,p:s.p};
+    });
+  });
+
+  // Goal tally per player (for golden boot)
+  var playerGoals={}; // "name|team" -> {name, team, goals, pens}
+  allGoals.forEach(function(g){
+    if(g.penalty)return; // exclude own goals if needed
+    var key=g.name+'|'+g.team;
+    if(!playerGoals[key])playerGoals[key]={name:g.name,team:g.team,goals:0,pens:0};
+    playerGoals[key].goals++;
+    if(g.penalty)playerGoals[key].pens++;
+  });
+
+  var newAwards=Object.assign({},CFG.manualAwards||{});
+
+  // ── firstGoal: owner of the team that scored the first goal ──────────
+  if(allGoals.length>0){
+    var firstGoalTeam=allGoals[0].team;
+    var firstGoalOwner=teamOwner[firstGoalTeam];
+    if(firstGoalOwner)newAwards.firstGoal=firstGoalOwner;
+  }
+
+  // ── goldenBoot: owner of team with most goals scored ────────────────
+  // (by top individual scorer when OFB has player data, else by team goals)
+  var topScorer=null,topGoals=0;
+  Object.values(playerGoals).forEach(function(p){
+    if(p.goals>topGoals){topGoals=p.goals;topScorer=p;}
+    else if(p.goals===topGoals&&topScorer){
+      // tiebreak: fewer penalties
+      if(p.pens<topScorer.pens)topScorer=p;
+    }
+  });
+  if(topScorer){
+    var gbOwner=teamOwner[topScorer.team];
+    if(gbOwner)newAwards.goldenBoot=gbOwner;
+  }
+
+  // ── bestGD: owner of team with best goal difference ──────────────────
+  // Only count after at least 2 matches played to avoid 1-game noise
+  var bestGD=null,bestGDVal=-999;
+  Object.entries(teamStats).forEach(function(e){
+    var t=e[0],s=e[1];
+    if(s.p<1)return;
+    if(s.gd>bestGDVal||(s.gd===bestGDVal&&bestGD&&s.gf>(teamStats[bestGD]||{}).gf)){
+      bestGDVal=s.gd;bestGD=t;
+    }
+  });
+  if(bestGD&&teamOwner[bestGD])newAwards.bestGD=teamOwner[bestGD];
+
+  // ── worstGD: owner of team with worst goal difference ────────────────
+  var worstGD=null,worstGDVal=999;
+  Object.entries(teamStats).forEach(function(e){
+    var t=e[0],s=e[1];
+    if(s.p<1)return;
+    if(s.gd<worstGDVal||(s.gd===worstGDVal&&worstGD&&s.ga>(teamStats[worstGD]||{}).ga)){
+      worstGDVal=s.gd;worstGD=t;
+    }
+  });
+  if(worstGD&&teamOwner[worstGD])newAwards.worstGD=teamOwner[worstGD];
+
+  // ── mostCleanSheets: team that conceded 0 in most games ──────────────
+  var cleanSheets={};
+  matches.forEach(function(m){
+    if(m.s1==null)return;
+    if(m.s2===0&&teamOwner[m.t1])cleanSheets[m.t1]=(cleanSheets[m.t1]||0)+1;
+    if(m.s1===0&&teamOwner[m.t2])cleanSheets[m.t2]=(cleanSheets[m.t2]||0)+1;
+  });
+  var topCS=null,topCSVal=0;
+  Object.entries(cleanSheets).forEach(function(e){
+    if(e[1]>topCSVal){topCSVal=e[1];topCS=e[0];}
+  });
+  if(topCS&&teamOwner[topCS])newAwards.mostCleanSheets=teamOwner[topCS];
+
+  // ── topFamily: family with most total points (auto-calc) ─────────────
+  // We skip this one as it needs the full leaderboard calc - handle in renderSweep
+
+  // Only update auto keys — never overwrite manual overrides
+  var overrides=CFG.manualOverrides||{};
+  var autoKeys=['firstGoal','goldenBoot','bestGD','worstGD','mostCleanSheets'];
+  var changed=false;
+  autoKeys.forEach(function(k){
+    if(overrides[k])return; // skip — admin manually set this
+    if(newAwards[k]!==(CFG.manualAwards||{})[k]){
+      changed=true;
+    }
+  });
+  if(changed){
+    // Merge: keep manual overrides, apply auto values for non-overridden keys
+    if(!CFG.manualAwards)CFG.manualAwards={};
+    autoKeys.forEach(function(k){
+      if(overrides[k])return;
+      if(newAwards[k]){
+        CFG.manualAwards[k]=newAwards[k];
+      }else{
+        delete CFG.manualAwards[k];
+      }
+    });
+    pushToGitHub(CFG);
+    console.log('Auto awards updated');
+  }
+}
+
 
 async function loadFromOpenFootball(){
   // Only refetch if >5 mins since last fetch
@@ -576,8 +718,11 @@ async function loadFromOpenFootball(){
       if(goals.length)OFB_GOALS[key]=goals;
     });
     OFB_LAST_FETCH=now;
+    // Recompute auto prize awards now that scores are fresh
+    calcAutoAwards();
+    render();
   }catch(e){
-    // Silently fail - manual scores still work
+    console.log('OFB fetch failed:', e.message);
   }
 }
 
@@ -622,6 +767,8 @@ async function loadFromGitHub(){
     }
     if(data.familyBuys)   CFG.familyBuys   = data.familyBuys;
     if(data.prizes)       CFG.prizes       = data.prizes;
+    if(data.manualAwards)   CFG.manualAwards   = data.manualAwards;
+    if(data.manualOverrides)CFG.manualOverrides = data.manualOverrides;
     if(data.pot0Cost)     CFG.pot0Cost     = data.pot0Cost;
     if(data.pot1Cost)     CFG.pot1Cost     = data.pot1Cost;
     if(data.pot2Cost)     CFG.pot2Cost     = data.pot2Cost;
@@ -653,13 +800,15 @@ async function pushToGitHub(cfg){
     const sha=meta.sha;
     // Only persist mutable state — families/pots live in the HTML as source of truth
     var mutable={
-      allocations: cfg.allocations||{},
-      familyBuys:  cfg.familyBuys||{},
-      prizes:      cfg.prizes||{},
-      pot0Cost:    cfg.pot0Cost||15,
-      pot1Cost:    cfg.pot1Cost||10,
-      pot2Cost:    cfg.pot2Cost||5,
-      pot3Cost:    cfg.pot3Cost||5,
+      allocations:   cfg.allocations||{},
+      familyBuys:    cfg.familyBuys||{},
+      prizes:        cfg.prizes||{},
+      manualAwards:    cfg.manualAwards||{},
+      manualOverrides: cfg.manualOverrides||{},
+      pot0Cost:      cfg.pot0Cost||15,
+      pot1Cost:      cfg.pot1Cost||10,
+      pot2Cost:      cfg.pot2Cost||5,
+      pot3Cost:      cfg.pot3Cost||5,
     };
     const content=btoa(unescape(encodeURIComponent(JSON.stringify(mutable,null,2))));
     const putRes=await fetch(GH_API,{
@@ -825,6 +974,17 @@ function renderSweep(){
   var prizeColor=prizeTotal===pool?'#00d4aa':prizeTotal<pool?'#fbbf24':'#ff4757';
 
   // Leaderboard
+  var awards=CFG.manualAwards||{};
+  var MANUAL_PRIZE_DEFS=[
+    {k:'goldenBoot',    icon:'⚽',label:'Golden Boot'},
+    {k:'bestGD',        icon:'📈',label:'Best GD'},
+    {k:'worstGD',       icon:'📉',label:'Wooden Spoon'},
+    {k:'mostYellow',    icon:'🟨',label:'Most Yellows'},
+    {k:'mostRed',       icon:'🟥',label:'Most Reds'},
+    {k:'firstGoal',     icon:'💥',label:'First Goal'},
+    {k:'mostCleanSheets',icon:'🧤',label:'Clean Sheets'},
+    {k:'topFamily',     icon:'👨‍👩‍👧',label:'Top Family'},
+  ];
   var lb=allMembers.map(function(m){
     var teams=allocs[m.id]||[];
     var pts=0,notes=[];
@@ -834,6 +994,13 @@ function renderSweep(){
       else if(r==='runner'){pts+=prz.runner||0;notes.push(t+' 🥈');}
       else if(r==='third'){pts+=prz.third||0;notes.push(t+' 🥉');}
       else if(r==='advanced'){pts+=prz.groupAdvance||0;notes.push(t+' ✓');}
+    });
+    // Manual prizes awarded to this member
+    MANUAL_PRIZE_DEFS.forEach(function(pd){
+      if(awards[pd.k]===m.id&&(prz[pd.k]||0)>0){
+        pts+=prz[pd.k];
+        notes.push(pd.icon+' '+pd.label);
+      }
     });
     return Object.assign({},m,{pts:pts,notes:notes,teams:teams});
   }).sort(function(a,b){return b.pts-a.pts;});
@@ -1570,6 +1737,53 @@ function renderAdmin(){
       '</div>';
   });
 
+  // ── Manual Prize Awards ──────────────────────────────────
+  var awards=CFG.manualAwards||{};
+  var allMembersList=[];
+  CFG.families.forEach(function(fam){
+    fam.members.filter(function(m){return m.active!==false;}).forEach(function(m){
+      allMembersList.push({id:m.id,name:m.name,famColor:fam.color,famName:fam.name});
+    });
+  });
+
+  var manualDefs=[
+    {k:'firstGoal',     icon:'💥', label:'First Goal Scorer (tournament)'},
+    {k:'goldenBoot',    icon:'⚽', label:'Golden Boot (top scorer)'},
+    {k:'bestGD',        icon:'📈', label:'Best Goal Difference'},
+    {k:'worstGD',       icon:'📉', label:'Wooden Spoon (worst GD)'},
+    {k:'mostYellow',    icon:'🟨', label:'Most Yellow Cards'},
+    {k:'mostRed',       icon:'🟥', label:'Most Red Cards'},
+    {k:'mostCleanSheets',icon:'🧤',label:'Most Clean Sheets'},
+    {k:'topFamily',     icon:'👨‍👩‍👧', label:'Top Family Bonus'},
+  ];
+
+  var awardsRows=manualDefs.map(function(pd){
+    var prizeAmt=CFG.prizes[pd.k]||0;
+    if(!prizeAmt)return ''; // skip if prize is $0
+    var currentAward=awards[pd.k]||'';
+    var opts='<option value="">— not awarded —</option>';
+    allMembersList.forEach(function(mem){
+      opts+='<option value="'+h(mem.id)+'"'+(currentAward===mem.id?' selected':'')+'>'+
+        h(mem.name)+' ('+h(mem.famName)+')</option>';
+    });
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #ffffff08;font-size:13px">'+
+      '<span style="min-width:22px">'+pd.icon+'</span>'+
+      '<span style="flex:1;color:#8b9ab8">'+pd.label+'</span>'+
+      '<span class="font-display" style="color:#00d4aa;font-weight:700;min-width:36px;text-align:right">$'+prizeAmt+'</span>'+
+      '<select id="award-'+pd.k+'" data-prize="'+pd.k+'" onchange="setManualAward(this.getAttribute(\'data-prize\'),this.value)" style="max-width:200px;font-size:12px">'+opts+'</select>'+
+      '</div>';
+  }).filter(Boolean).join('');
+
+  out+='<div class="card-pad">';
+  out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:4px">🏅 Manual Prize Awards</div>';
+  out+='<div style="font-size:11px;color:#5a6a88;margin-bottom:12px">Assign prizes that cannot be determined automatically. Changes save immediately.</div>';
+  if(awardsRows){
+    out+=awardsRows;
+  }else{
+    out+='<div style="font-size:13px;color:#5a6a88;padding:8px 0">No manual prizes configured — set prize amounts above to enable awards</div>';
+  }
+  out+='</div>';
+
   // ── Save / Reset ──────────────────────────────────────────
   out+='<div style="display:flex;gap:10px">'+
     '<button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button>'+
@@ -1698,16 +1912,17 @@ function updatePrizeTotals(){
     var mult=k==='groupAdvance'?24:1;
     return s+(val*mult);
   },0);
-  // Get pool from current admin inputs if available, else from CFG
-  var cp=CFG.pot1Cost||10;
-  var cs=CFG.pot2Cost||5;
-  var totalP=0,totalS=0;
-  CFG.families.forEach(function(fam){
-    var p=+(document.getElementById('buys-'+fam.id+'-p')||{value:CFG.familyBuys[fam.id]&&CFG.familyBuys[fam.id].primaries||0}).value;
-    var s=+(document.getElementById('buys-'+fam.id+'-s')||{value:CFG.familyBuys[fam.id]&&CFG.familyBuys[fam.id].secondaries||0}).value;
-    totalP+=p; totalS+=s;
-  });
-  var pool=(totalP*cp)+(totalS*cs);
+  // Pool from CFG.familyBuys + pot costs (read live inputs if available, else CFG)
+  var costs=[
+    +(document.getElementById('pot0Cost')||{value:CFG.pot0Cost||15}).value||CFG.pot0Cost||15,
+    +(document.getElementById('pot1Cost')||{value:CFG.pot1Cost||10}).value||CFG.pot1Cost||10,
+    +(document.getElementById('pot2Cost')||{value:CFG.pot2Cost||5}).value||CFG.pot2Cost||5,
+    +(document.getElementById('pot3Cost')||{value:CFG.pot3Cost||5}).value||CFG.pot3Cost||5,
+  ];
+  var pool=[0,1,2,3].reduce(function(s,p){
+    var t=Object.values(CFG.familyBuys||{}).reduce(function(ss,b){return ss+(b['p'+p]||0);},0);
+    return s+(t*costs[p]);
+  },0);
   var color=total===pool?'#00d4aa':total<pool?'#fbbf24':'#ff4757';
   var status=total===pool?'✓ Balanced':total<pool?'$'+(pool-total)+' unallocated':'$'+(total-pool)+' over budget';
   var badge=document.getElementById('prize-total-badge');
@@ -1719,6 +1934,28 @@ function updatePrizeTotals(){
   var lbl=document.getElementById('prize-bar-label');
   if(lbl){lbl.textContent=Math.round(total/Math.max(pool,1)*100)+'% of pool allocated · '+status;lbl.style.color=color;}
 }
+
+function setManualAward(prizeKey, memberId){
+  if(!CFG.manualAwards)CFG.manualAwards={};
+  if(!CFG.manualOverrides)CFG.manualOverrides={};
+  if(memberId){
+    CFG.manualAwards[prizeKey]=memberId;
+    CFG.manualOverrides[prizeKey]=true;  // protect from auto-overwrite
+  }else{
+    delete CFG.manualAwards[prizeKey];
+    delete CFG.manualOverrides[prizeKey];  // un-protect, allow auto again
+  }
+  pushToGitHub(CFG);
+  // Re-render sweep leaderboard immediately
+  renderSweep();
+  // Show quick feedback
+  var msg=document.getElementById('admin-msg');
+  if(msg){
+    msg.innerHTML='<div style="padding:8px 14px;background:#00d4aa14;border:1px solid #00d4aa30;border-radius:6px;color:#00d4aa;font-size:13px;margin-top:8px">✓ Award saved</div>';
+    setTimeout(function(){if(msg)msg.innerHTML='';},3000);
+  }
+}
+
 
 async function saveAdmin(){
   [0,1,2,3].forEach(function(p){
