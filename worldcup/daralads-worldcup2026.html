@@ -971,7 +971,6 @@ async function loadFromGitHub(){
     const text=await r.text();
     let data;
     try{data=JSON.parse(text);}catch(e){throw new Error('Invalid JSON in config');}
-    // Daralads: sync all mutable fields from remote
     if(data.sweepName)      CFG.sweepName      = data.sweepName;
     if(data.buyIn!=null)    CFG.buyIn          = data.buyIn;
     if(data.prizes)         CFG.prizes         = Object.assign({},DEFAULT_CFG.prizes,data.prizes);
@@ -981,20 +980,11 @@ async function loadFromGitHub(){
     if(!CFG.prizes)         CFG.prizes         = Object.assign({},DEFAULT_CFG.prizes);
     var nd=document.getElementById('sweep-name-display');
     if(nd&&CFG.sweepName)nd.textContent=CFG.sweepName;
-    render();;
-    // Then load remote config + live scores
-    loadFromGitHub();
-    // Load live Elo ratings
-    loadLiveElo();
-    // Auto-refresh live scores every 5 minutes
-    setInterval(function(){
-      loadFromOpenFootball().then(function(){render();});
-    },5*60*1000);
-    // Refresh Elo every 30 minutes
-    setInterval(function(){loadLiveElo();},30*60*1000);
+    setStatus('ok','✓ Synced','#00d4aa');
+    render();
   }catch(e){
-    console.error('WC2026 init error:',e);
-    document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#ff4757;font-family:sans-serif"><h2>Error loading dashboard</h2><p style="color:#8b9ab8;margin-top:8px">'+e.message+'</p></div>';
+    setStatus('warn','Offline mode','#fbbf24');
+    console.log('GitHub load failed:',e.message);
   }
 }
 // Run after DOM is ready, regardless of other scripts
@@ -1809,19 +1799,20 @@ function resetDraws(){
 }
 
 function init(){
-  // Always render immediately with defaults — never blank
+  // Always render immediately with defaults
   try{render();}catch(e){console.error('render error:',e);}
-  // Async loads — failures don't break the page
-  loadFromGitHub().catch(function(e){
-    console.log('GitHub load failed, using defaults:',e.message);
-    setStatus('warn','Offline mode','#fbbf24');
-  });
+  // Load config from GitHub
+  loadFromGitHub();
+  // Load OFB scores immediately on startup
+  loadFromOpenFootball();
+  // Load live Elo
   loadLiveElo();
-  setInterval(function(){
-    loadFromOpenFootball().catch(function(){});
-  },5*60*1000);
+  // Refresh scores every 5 minutes
+  setInterval(function(){loadFromOpenFootball();},5*60*1000);
+  // Refresh Elo every 30 minutes
   setInterval(function(){loadLiveElo();},30*60*1000);
 }
+
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
 
 </script>
