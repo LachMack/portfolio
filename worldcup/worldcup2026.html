@@ -178,25 +178,30 @@ const GH_USER='LachMack',GH_REPO='portfolio',GH_PATH='worldcup/wc2026-config.jso
 const GH_API=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_PATH}`;
 const CONFIG_URL='https://raw.githubusercontent.com/LachMack/portfolio/main/worldcup/wc2026-config.json';
 
-const FLAGS={
-  'Argentina':'🇦🇷','France':'🇫🇷','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Brazil':'🇧🇷',
-  'Spain':'🇪🇸','Portugal':'🇵🇹','Germany':'🇩🇪','Netherlands':'🇳🇱',
-  'Belgium':'🇧🇪','Croatia':'🇭🇷','Colombia':'🇨🇴','Senegal':'🇸🇳',
-  'Morocco':'🇲🇦','Mexico':'🇲🇽','USA':'🇺🇸','Uruguay':'🇺🇾',
-  'Japan':'🇯🇵','Switzerland':'🇨🇭','Iran':'🇮🇷','Austria':'🇦🇹',
-  'Ecuador':'🇪🇨','Australia':'🇦🇺','South Korea':'🇰🇷','Egypt':'🇪🇬',
-  'Canada':'🇨🇦','Ivory Coast':'🇨🇮','Qatar':'🇶🇦','Algeria':'🇩🇿',
-  'Sweden':'🇸🇪','Tunisia':'🇹🇳','Czechia':'🇨🇿','Türkiye':'🇹🇷',
-  'Norway':'🇳🇴','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','DR Congo':'🇨🇩','Bosnia & Herzegovina':'🇧🇦',
-  'Panama':'🇵🇦','Saudi Arabia':'🇸🇦','South Africa':'🇿🇦','Iraq':'🇮🇶',
-  'Uzbekistan':'🇺🇿','Paraguay':'🇵🇾','Ghana':'🇬🇭','Jordan':'🇯🇴',
-  'Cape Verde':'🇨🇻','Curaçao':'🇨🇼','Haiti':'🇭🇹','New Zealand':'🇳🇿'
+const CCODES={
+  'Argentina':'ar','Australia':'au','Austria':'at','Belgium':'be',
+  'Bosnia & Herzegovina':'ba','Brazil':'br','Canada':'ca','Cape Verde':'cv',
+  'Colombia':'co','Croatia':'hr','Curaçao':'cw','Czechia':'cz',
+  'DR Congo':'cd','Ecuador':'ec','Egypt':'eg','England':'gb-eng',
+  'France':'fr','Germany':'de','Ghana':'gh','Haiti':'ht',
+  'Iran':'ir','Iraq':'iq','Ivory Coast':'ci','Japan':'jp',
+  'Jordan':'jo','Mexico':'mx','Morocco':'ma','Netherlands':'nl',
+  'New Zealand':'nz','Norway':'no','Panama':'pa','Paraguay':'py',
+  'Portugal':'pt','Qatar':'qa','Saudi Arabia':'sa','Scotland':'gb-sct',
+  'Senegal':'sn','South Africa':'za','South Korea':'kr','Spain':'es',
+  'Sweden':'se','Switzerland':'ch','Tunisia':'tn','Türkiye':'tr',
+  'Uruguay':'uy','USA':'us','Uzbekistan':'uz','Algeria':'dz',
+  'Uruguay':'uy','Morocco':'ma','USA':'us'
 };
-const f=n=>FLAGS[n]||'🏳️';
+const f=function(n){
+  var cc=CCODES[n];
+  if(!cc)return '<img src="https://flagcdn.com/16x12/xx.png" style="width:16px;height:12px;vertical-align:-1px;border-radius:1px" alt="">';
+  return '<img src="https://flagcdn.com/16x12/'+cc+'.png" style="width:16px;height:12px;vertical-align:-1px;border-radius:1px" alt="'+n+'">';
+};
 
 
 // ── Prediction data (Elo: Hicruben/world-cup-2026-prediction-model MIT, Odds: Polymarket) ──
-const ELO={
+const ELO_BASE={
   "France":2089,"Spain":2056,"Argentina":2064,"England":2041,"Portugal":2038,
   "Brazil":1994,"Netherlands":1987,"Belgium":1971,"Germany":1951,"Croatia":1934,
   "Colombia":1928,"Uruguay":1918,"Senegal":1912,"Mexico":1908,"Morocco":1923,
@@ -208,6 +213,62 @@ const ELO={
   "Panama":1743,"Iraq":1731,"Cape Verde":1721,"DR Congo":1712,"New Zealand":1672,
   "South Africa":1695,"Uzbekistan":1688,"Jordan":1634,"Haiti":1567,"Curaçao":1598
 };
+
+// Live Elo — starts as baseline, updated from Hicruben repo
+var ELO=Object.assign({},ELO_BASE);
+var ELO_LAST_FETCH=0;
+var ELO_LIVE_LOADED=false;
+
+// Name mapping: Hicruben repo names → our names
+var ELO_NAME_MAP={
+  'Czech Republic':'Czechia','Czechia':'Czechia',
+  'Turkey':'Türkiye','Turkiye':'Türkiye','Türkiye':'Türkiye',
+  'Ivory Coast':'Ivory Coast',"Cote d'Ivoire":'Ivory Coast','Côte d\'Ivoire':'Ivory Coast',
+  'Bosnia and Herzegovina':'Bosnia & Herzegovina',
+  'Bosnia & Herzegovina':'Bosnia & Herzegovina',
+  'DR Congo':'DR Congo','Congo DR':'DR Congo','Congo, DR':'DR Congo',
+  'South Korea':'South Korea','Korea Republic':'South Korea','Korea DPR':'South Korea',
+  'USA':'USA','United States':'USA',
+  'New Zealand':'New Zealand',
+  'Cape Verde':'Cape Verde','Cabo Verde':'Cape Verde',
+  'Curacao':'Curaçao','Curaçao':'Curaçao',
+};
+
+async function loadLiveElo(){
+  var now=Date.now();
+  if(now-ELO_LAST_FETCH<30*60*1000&&ELO_LAST_FETCH>0)return; // cache 30 min
+  var ELO_URL='https://raw.githubusercontent.com/Hicruben/world-cup-2026-prediction-model/main/data/elo-calibrated.json';
+  try{
+    var r=await fetch(ELO_URL+'?t='+now);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    var data=await r.json();
+    // data is an object: { "France": 2089, ... } or array — handle both
+    var newElo={};
+    if(Array.isArray(data)){
+      data.forEach(function(entry){
+        var name=ELO_NAME_MAP[entry.team||entry.name]||(entry.team||entry.name);
+        if(name&&entry.elo)newElo[name]=Math.round(entry.elo);
+      });
+    }else{
+      Object.entries(data).forEach(function(e){
+        var name=ELO_NAME_MAP[e[0]]||e[0];
+        newElo[name]=Math.round(e[1]);
+      });
+    }
+    // Only apply if we got reasonable data (at least 40 teams)
+    if(Object.keys(newElo).length>=40){
+      ELO=newElo;
+      ELO_LIVE_LOADED=true;
+      ELO_LAST_FETCH=now;
+      console.log('Live Elo loaded: '+Object.keys(newElo).length+' teams');
+      // Re-render predictions if it's the active tab
+      if(activeTab==='predictions')renderPredictions();
+    }
+  }catch(e){
+    console.log('Live Elo unavailable, using baseline:',e.message);
+  }
+}
+
 const ODDS={
   "Spain":16.0,"France":12.5,"England":12.0,"Argentina":9.2,"Brazil":8.7,
   "Portugal":6.5,"Germany":5.8,"Netherlands":3.6,"Norway":3.1,"Belgium":2.1,
@@ -231,6 +292,55 @@ const POT={
 
 const isKnown=n=>n&&!n.match(/^[12WL]/)&&!n.includes('Path')&&!n.includes('Best')&&!n.includes('winner')&&!n.includes('/');
 function isPot0Elite(team){return CFG.pot0&&CFG.pot0.includes(team);}
+
+var VENUE_UTC_OFFSET={
+  'Mexico City':-6,'Guadalajara':-6,'Guadalajara (Zapopan)':-6,'Monterrey':-6,'Monterrey (Guadalupe)':-6,
+  'Los Angeles':-7,'Los Angeles (Inglewood)':-7,'San Francisco':-7,'San Francisco Bay Area (Santa Clara)':-7,'Seattle':-7,'Vancouver':-7,
+  'Toronto':-4,'Atlanta':-4,'New York':-4,'New York/New Jersey (East Rutherford)':-4,'Boston':-4,'Boston (Foxborough)':-4,'Miami':-4,'Miami (Miami Gardens)':-4,'Philadelphia':-4,'Kansas City':-5,'Kansas City (Kansas City)':-5,
+  'Dallas':-5,'Houston':-5
+};
+
+function venueToAEST(ofbTimeObj, venue, dateStr){
+  // ofbTimeObj: {timeStr: "13:00 UTC-6", venue: "Mexico City"} OR plain string
+  // Handles OFB's "HH:MM UTC±X" format which includes offset directly
+  if(!ofbTimeObj||!dateStr)return'';
+  var timeStr=typeof ofbTimeObj==='object'?(ofbTimeObj.timeStr||''):ofbTimeObj;
+  var ofbVenue=typeof ofbTimeObj==='object'?(ofbTimeObj.venue||venue||''):(venue||'');
+  if(!timeStr)return'';
+
+  var utcH, mn;
+  // Try parsing "HH:MM UTC±X" (OFB format — offset embedded in string)
+  var m=timeStr.match(/(\d+):(\d+)\s*UTC([+-]\d+(?:\.\d+)?)/);
+  if(m){
+    var localH=parseInt(m[1]);
+    mn=parseInt(m[2]);
+    var offset=parseFloat(m[3]);
+    utcH=localH-offset; // local → UTC
+  }else{
+    // Plain "HH:MM" — look up venue offset
+    var parts=timeStr.split(':');
+    localH=parseInt(parts[0]);mn=parseInt(parts[1]||0);
+    // Try matching venue name (partial match)
+    var off=null;
+    Object.keys(VENUE_UTC_OFFSET).forEach(function(k){
+      if(ofbVenue.indexOf(k)>=0||k.indexOf(ofbVenue)>=0)off=VENUE_UTC_OFFSET[k];
+    });
+    if(off===null)return'';
+    utcH=localH-off;
+  }
+
+  var aestH=utcH+10;
+  var d=new Date(dateStr+'T12:00:00');
+  var dayAdj=0;
+  if(aestH>=24){aestH-=24;dayAdj=1;}
+  if(aestH<0){aestH+=24;dayAdj=-1;}
+  d.setDate(d.getDate()+dayAdj);
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var mn2=mn<10?'0'+mn:''+mn;
+  var h2=aestH<10?'0'+aestH:''+aestH;
+  return days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()]+' '+h2+':'+mn2+' AEST';
+}
 const fmtDate=d=>{if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('en-AU',{month:'short',day:'numeric'});};
 function fmtDateAEST(isoDate,utcTime){
   if(!isoDate)return'';
@@ -407,6 +517,7 @@ let SCORES={};       // manual overrides keyed by match index
 let OFB={};          // openfootball scores keyed by match index
 let OFB_GOALS={};    // openfootball goal scorers keyed by match index
 let OFB_LAST_FETCH=0;
+let OFB_TIMES={}; // kickoff times from openfootball keyed by match index
 let activeTab='sweep';
 
 // Name mapping: openfootball → our names
@@ -443,13 +554,18 @@ async function loadFromOpenFootball(){
     if(!r.ok)return;
     var data=await r.json();
     var matches=data.matches||[];
-    OFB={};OFB_GOALS={};
+    OFB={};OFB_GOALS={};OFB_TIMES={};
     matches.forEach(function(m,i){
       // Match by date + team names
       var t1=normTeam(m.team1||'');
       var t2=normTeam(m.team2||'');
       var key=findMatchKey(t1,t2,m.date||'');
       if(key===null)return;
+      // Store kickoff time + venue from OFB
+      // OFB time format: "13:00 UTC-6" (local time with UTC offset)
+      if(m.time&&key!==null){
+        OFB_TIMES[key]={timeStr:m.time, venue:m.ground||''};
+      }
       if(m.score&&m.score.ft){
         OFB[key]={s1:m.score.ft[0],s2:m.score.ft[1],ht1:m.score.ht?m.score.ht[0]:null,ht2:m.score.ht?m.score.ht[1]:null};
       }
@@ -574,6 +690,7 @@ function getMatches(){
     var auto=OFB[key];
     var sc=manual||auto||null;
     var goals=OFB_GOALS[key]||null;
+    var ofbTime=OFB_TIMES[key]||null;
     return Object.assign({},m,{
       key:key,
       s1:sc?sc.s1:null,
@@ -582,7 +699,8 @@ function getMatches(){
       ht2:sc?sc.ht2:null,
       goals:goals,
       isManual:!!manual,
-      isAuto:!manual&&!!auto
+      isAuto:!manual&&!!auto,
+      ofbTime:ofbTime
     });
   });
 }
@@ -651,6 +769,8 @@ function showTab(id){
   document.getElementById('tab-'+id).style.display='block';
   document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
   event.target.classList.add('active');
+  // Trigger fresh Elo fetch when predictions tab opens
+  if(id==='predictions')loadLiveElo().then(function(){renderPredictions();});
 }
 
 var sweepView='leaderboard';
@@ -934,7 +1054,8 @@ function renderGroups(){
       var done=m.s1!=null;
       out+='<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:4px;font-size:11px;padding:3px 0">';
       out+='<span style="text-align:right;font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+'">'+(isKnown(m.t1)?f(m.t1):'')+' '+h(m.t1)+'</span>';
-      var aestLbl=(!done&&m.t)?'<div style="font-size:9px;color:#5a6a88;text-align:center;line-height:1.3;margin-top:2px">'+fmtDateAEST(m.d,m.t)+'</div>':'';
+      var aestTime=m.ofbTime?venueToAEST(m.ofbTime,m.gr,m.d):'';
+      var aestLbl=aestTime?'<div style="font-size:9px;color:#5a6a88;text-align:center;line-height:1.3;margin-top:2px">'+aestTime+'</div>':'';
       out+='<div style="text-align:center;min-width:70px"><span class="font-display" style="font-weight:700;font-size:'+(done?14:11)+'px;color:'+(done?'#f0f4ff':'#5a6a88')+'">'+(done?m.s1+'–'+m.s2:fmtDate(m.d))+'</span>'+aestLbl+'</div>';
       out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+'">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+'</span>';
       out+='</div>';
@@ -965,7 +1086,8 @@ function renderKnockout(){
           '<span class="score" style="color:'+(side.w?'#00d4aa':'#f0f4ff')+'">'+(done?side.s:'')+'</span>'+
           '</div>';
       });
-      var koAest=m.t?'<br><span style="font-size:9px">'+fmtDateAEST(m.d,m.t)+'</span>':'';
+      var koAestStr=m.ofbTime?venueToAEST(m.ofbTime,m.gr,m.d):'';
+      var koAest=koAestStr?'<br><span style="font-size:9px">'+koAestStr+'</span>':'';
       out+='<div class="ko-meta">'+fmtDate(m.d)+' · '+h(m.gr)+koAest+'</div></div>';
     });
     out+='</div>';
@@ -1069,8 +1191,8 @@ function renderScores(){
     out+='<div class="score-row-grid" style="display:grid;grid-template-columns:90px 1fr '+(isEdit?'240px':'auto')+' 1fr 80px;align-items:center;gap:8px">';
     var metaLabel=grpL?'<span class="font-display" style="font-size:10px;font-weight:700;color:'+c+';background:'+c+'18;padding:2px 5px;border-radius:3px">'+h(m.g)+'</span>':
       '<span class="font-display" style="font-size:10px;color:#5a6a88;font-weight:600;letter-spacing:.04em;text-transform:uppercase">'+roundShort+'</span>';
-    var aestTime=m.t?fmtDateAEST(m.d,m.t):'';
-    out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:3px;color:#5a6a88">'+fmtDate(m.d)+'</div>'+(aestTime?'<div style="margin-top:1px;font-size:9px;color:#5a6a88">'+aestTime+'</div>':'')+'</div>';
+    var aestTimeStr=m.ofbTime?venueToAEST(m.ofbTime,m.gr,m.d):'';
+    out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:3px;color:#5a6a88">'+fmtDate(m.d)+(aestTimeStr?' <span style="color:#5a6a88">·</span> '+aestTimeStr:'')+'</div></div>';
     out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+'</span>';
     out+='<div style="text-align:center;min-width:80px">';
     if(isEdit){
@@ -1412,7 +1534,7 @@ function renderAdmin(){
         ?'text-decoration:line-through;color:#5a6a88;opacity:.6'
         :'color:#e8eeff';
       var eliteStar=isElite?'<span style="color:#fbbf24;margin-right:4px;font-size:10px">★</span>':'';
-      var flagStr=FLAGS[team]||'🏳️';
+      var flagStr=f(team);
       var ownerHtml='';
       if(isAllocated){
         // Find who owns this team
@@ -1838,10 +1960,14 @@ function init(){
     render();
     // Then load remote config + live scores
     loadFromGitHub();
+    // Load live Elo ratings
+    loadLiveElo();
     // Auto-refresh live scores every 5 minutes
     setInterval(function(){
       loadFromOpenFootball().then(function(){render();});
     },5*60*1000);
+    // Refresh Elo every 30 minutes
+    setInterval(function(){loadLiveElo();},30*60*1000);
   }catch(e){
     console.error('WC2026 init error:',e);
     document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#ff4757;font-family:sans-serif"><h2>Error loading dashboard</h2><p style="color:#8b9ab8;margin-top:8px">'+e.message+'</p></div>';
@@ -1870,7 +1996,7 @@ function renderPredictions(){
   // Sweepstake value: sum of Elo for each person's teams
   var personElo=Object.entries(memberTeams).map(function(e){
     var id=e[0],info=e[1];
-    var totalElo=info.teams.reduce(function(s,t){return s+(ELO[t]||1700);},0);
+    var totalElo=info.teams.reduce(function(s,t){return s+(ELO[t]||ELO_BASE[t]||1700);},0);
     var totalOdds=info.teams.reduce(function(s,t){return s+(ODDS[t]||0);},0);
     return{id:id,name:info.name,famName:info.famName,famColor:info.famColor,
       teams:info.teams,totalElo:totalElo,avgElo:info.teams.length?Math.round(totalElo/info.teams.length):0,
@@ -1884,7 +2010,7 @@ function renderPredictions(){
       .flatMap(function(m){return[m.t1,m.t2];})
       .filter(function(t){return isKnown(t);});
     var uniq=[...new Set(gTeams)];
-    var avg=uniq.length?Math.round(uniq.reduce(function(s,t){return s+(ELO[t]||1700);},0)/uniq.length):0;
+    var avg=uniq.length?Math.round(uniq.reduce(function(s,t){return s+(ELO[t]||ELO_BASE[t]||1700);},0)/uniq.length):0;
     groupElo[g]={avg:avg,teams:uniq};
   });
 
@@ -1896,9 +2022,12 @@ function renderPredictions(){
   });
   out+='</div>';
 
-  out+='<div style="font-size:11px;color:#5a6a88;margin-bottom:14px">'+
-    'Elo ratings: <a href="https://github.com/Hicruben/world-cup-2026-prediction-model" target="_blank" style="color:#60a5fa">Hicruben/world-cup-2026-prediction-model</a> (MIT) · '+
-    'Win odds: Polymarket (pre-tournament) · Data as of June 2026'+
+  var eloSourceLabel=ELO_LIVE_LOADED
+    ?'<span style="color:#00d4aa">✓ Live Elo</span> from Hicruben · Δ vs pre-tournament baseline'
+    :'<span style="color:#fbbf24">⚠ Using pre-tournament baseline</span> (live fetch unavailable)';
+  out+='<div style="font-size:11px;color:#5a6a88;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'+
+    '<span>Elo: <a href="https://github.com/Hicruben/world-cup-2026-prediction-model" target="_blank" style="color:#60a5fa">Hicruben/world-cup-2026-prediction-model</a> (MIT) · Win odds: Polymarket (pre-tournament)</span>'+
+    '<span>'+eloSourceLabel+'</span>'+
     '</div>';
 
   // ── STRENGTH VIEW ───────────────────────────────────────────────
@@ -1917,7 +2046,9 @@ function renderPredictions(){
 
     var allTeamsSorted=Object.keys(ELO).sort(function(a,b){return ELO[b]-ELO[a];});
     allTeamsSorted.forEach(function(team,rank){
-      var elo=ELO[team]||1700;
+      var elo=ELO[team]||ELO_BASE[team]||1700;
+      var eloBase=ELO_BASE[team]||elo;
+      var eloDelta=elo-eloBase;
       var odds=ODDS[team]||0;
       var pot=CFG.pot0.includes(team)?0:CFG.pot1.includes(team)?1:CFG.pot2.includes(team)?2:3;
       var potColor=POT[pot].color;
@@ -2075,7 +2206,7 @@ function renderPredictions(){
     out+='</div>';
 
     if(h2hTeamA&&h2hTeamB&&h2hTeamA!==h2hTeamB){
-      var eloA=ELO[h2hTeamA]||1700,eloB=ELO[h2hTeamB]||1700;
+      var eloA=ELO[h2hTeamA]||ELO_BASE[h2hTeamA]||1700,eloB=ELO[h2hTeamB]||ELO_BASE[h2hTeamB]||1700;
       // Dixon-Coles simplified: logistic + draw adjustment
       var eloDiff=eloA-eloB;
       var pWinA=1/(1+Math.pow(10,-eloDiff/400));
