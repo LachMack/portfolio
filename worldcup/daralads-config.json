@@ -2,27 +2,105 @@
   "sweepName": "World Cup 2026 — Daralads Sweep",
   "buyIn": 20,
   "prizes": {
-    "champion": 0,
-    "runner": 0,
-    "third": 0,
-    "groupAdvance": 0,
-    "goldenBoot": 0,
-    "bestGD": 0,
-    "worstGD": 0,
+    "champion": 100,
+    "runner": 50,
+    "third": 25,
+    "groupAdvance": 5,
+    "goldenBoot": 10,
+    "bestGD": 10,
+    "worstGD": 15,
     "mostYellow": 0,
-    "mostRed": 0,
-    "firstGoal": 0,
-    "mostCleanSheets": 0,
+    "mostRed": 15,
+    "firstGoal": 5,
+    "mostCleanSheets": 10,
     "topFamily": 0
   },
   "participants": [
-    {"name": "Jasper", "teams": ["Colombia","England","USA","Uruguay","Jordan","Paraguay","Qatar","Cape Verde"]},
-    {"name": "Cooper", "teams": ["Netherlands","Argentina","Türkiye","Austria","Canada","Scotland","DR Congo","Iraq"]},
-    {"name": "Archie", "teams": ["Belgium","Brazil","Japan","South Korea","Norway","Czechia","Panama","New Zealand"]},
-    {"name": "Blake",  "teams": ["France","Spain","Australia","Mexico","Ivory Coast","Algeria","Saudi Arabia","Bosnia & Herzegovina"]},
-    {"name": "Cael",   "teams": ["Morocco","Germany","Iran","Switzerland","Tunisia","Sweden","Uzbekistan","Curaçao"]},
-    {"name": "Riley",  "teams": ["Portugal","Croatia","Senegal","Ecuador","Ghana","Egypt","South Africa","Haiti"]}
+    {
+      "name": "Jasper",
+      "teams": [
+        "Colombia",
+        "England",
+        "USA",
+        "Uruguay",
+        "Jordan",
+        "Paraguay",
+        "Qatar",
+        "Cape Verde"
+      ]
+    },
+    {
+      "name": "Cooper",
+      "teams": [
+        "Netherlands",
+        "Argentina",
+        "Türkiye",
+        "Austria",
+        "Canada",
+        "Scotland",
+        "DR Congo",
+        "Iraq"
+      ]
+    },
+    {
+      "name": "Archie",
+      "teams": [
+        "Belgium",
+        "Brazil",
+        "Japan",
+        "South Korea",
+        "Norway",
+        "Czechia",
+        "Panama",
+        "New Zealand"
+      ]
+    },
+    {
+      "name": "Blake",
+      "teams": [
+        "France",
+        "Spain",
+        "Australia",
+        "Mexico",
+        "Ivory Coast",
+        "Algeria",
+        "Saudi Arabia",
+        "Bosnia & Herzegovina"
+      ]
+    },
+    {
+      "name": "Cael",
+      "teams": [
+        "Morocco",
+        "Germany",
+        "Iran",
+        "Switzerland",
+        "Tunisia",
+        "Sweden",
+        "Uzbekistan",
+        "Curaçao"
+      ]
+    },
+    {
+      "name": "Riley",
+      "teams": [
+        "Portugal",
+        "Croatia",
+        "Senegal",
+        "Ecuador",
+        "Ghana",
+        "Egypt",
+        "South Africa",
+        "Haiti"
+      ]
+    }
   ],
-  "manualAwards": {},
+  "manualAwards": {
+    "firstGoal": "Blake",
+    "goldenBoot": "Jasper",
+    "bestGD": "Jasper",
+    "worstGD": "Jasper",
+    "mostCleanSheets": "Blake"
+  },
   "manualOverrides": {}
 }
