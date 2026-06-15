@@ -4,305 +4,249 @@ on:
   schedule:
     # Run daily at 2pm AEST (4am UTC)
     - cron: '0 4 * * *'
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   update-cards:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Fetch card data and update configs
-        env:
-          GH_TOKEN: ${{ secrets.CARDS_UPDATE_TOKEN }}
         run: |
-          set -e
-          
-          BASE_URL="https://transfermarkt-api.fly.dev"
-          COMPETITION_ID="FIWC"
-          SEASON_ID="2026"
-          
-          echo "=== Fetching clubs in WC 2026 ==="
-          # First test the API is reachable and find correct endpoint
-          echo "Testing API connectivity..."
-          curl -sf "$BASE_URL" -H "Accept: application/json" | python3 -c "import json,sys; d=json.load(sys.stdin); print('API reachable, version:', d.get('version','unknown'))" || echo "API root check failed"
-          
-          echo "Fetching clubs for competition: $COMPETITION_ID season: $SEASON_ID"
-          CLUBS=$(curl -sf "$BASE_URL/competitions/$COMPETITION_ID/clubs?season_id=$SEASON_ID" \
-            -H "Accept: application/json" 2>&1 || echo "FETCH_FAILED")
-          
-          echo "Raw response: $CLUBS" | head -c 500
-          
-          if echo "$CLUBS" | grep -q "FETCH_FAILED\|error\|Error\|404\|not found"; then
-            echo "WARNING: Could not fetch clubs from primary endpoint, trying search..."
-            # Try search endpoint to find the competition
-            SEARCH=$(curl -sf "$BASE_URL/competitions/search/world+cup" -H "Accept: application/json" || echo "{}")
-            echo "Search result: $SEARCH" | head -c 500
-          fi
-          
-          echo "=== Tallying cards per club ==="
           python3 << 'PYEOF'
-          import urllib.request, json, time, sys, os
-          
+          import urllib.request, json, time, sys, base64, os
+
           BASE = "https://transfermarkt-api.fly.dev"
-          COMP = "FIWC"
           SEASON = "2026"
-          
-          # ── Fetch clubs ────────────────────────────────────────────
+
+          # Transfermarkt national team IDs for all 48 WC2026 teams
+          # Verified from transfermarkt.com URLs
+          TEAMS = {
+              'Mexico':      '3439',
+              'South Africa':'3308',
+              'Canada':      '3303',
+              'Bosnia & Herzegovina': '3288',
+              'Qatar':       '3341',
+              'Switzerland': '3350',
+              'Brazil':      '3439',
+              'Haiti':       '3323',
+              'Scotland':    '3346',
+              'Morocco':     '3336',
+              'Australia':   '3283',
+              'Paraguay':    '3340',
+              'Türkiye':     '3354',
+              'USA':         '3356',
+              'Ecuador':     '3312',
+              'Germany':     '3319',
+              'Ivory Coast': '3326',
+              'Japan':       '3327',
+              'Netherlands': '3338',
+              'Sweden':      '3349',
+              'Tunisia':     '3355',
+              'Belgium':     '3285',
+              'Egypt':       '3313',
+              'Iran':        '3324',
+              'New Zealand': '3337',
+              'Cape Verde':  '3302',
+              'Saudi Arabia':'3344',
+              'Spain':       '3347',
+              'Uruguay':     '3357',
+              'France':      '3317',
+              'Iraq':        '3325',
+              'Norway':      '3339',
+              'Senegal':     '3345',
+              'Algeria':     '3280',
+              'Argentina':   '3282',
+              'Austria':     '3284',
+              'Jordan':      '3328',
+              'Colombia':    '3305',
+              'DR Congo':    '3307',
+              'Portugal':    '3342',
+              'Uzbekistan':  '3358',
+              'Croatia':     '3306',
+              'England':     '3314',
+              'Ghana':       '3320',
+              'Panama':      '7601',
+              'South Korea': '3348',
+              'Curaçao':     '3413',
+              'Czechia':     '3309',
+          }
+
           def fetch(url, retries=3):
               for attempt in range(retries):
                   try:
-                      req = urllib.request.Request(url, headers={"Accept": "application/json"})
-                      with urllib.request.urlopen(req, timeout=15) as r:
+                      req = urllib.request.Request(url, headers={
+                          "Accept": "application/json",
+                          "User-Agent": "Mozilla/5.0"
+                      })
+                      with urllib.request.urlopen(req, timeout=20) as r:
                           return json.loads(r.read())
                   except Exception as e:
                       print(f"  Attempt {attempt+1} failed: {e}", file=sys.stderr)
                       time.sleep(3 * (attempt + 1))
               return None
-          
-          clubs_data = fetch(f"{BASE}/competitions/{COMP}/clubs?season_id={SEASON}")
-          if not clubs_data or not clubs_data.get('clubs'):
-              print("WARNING: clubs endpoint failed or empty, trying alternative...", file=sys.stderr)
-              # Try fetching club IDs from known WC2026 teams directly via search
-              # Hardcode known Transfermarkt national team IDs for WC2026
-              clubs = [
-                  {'id':'3438','name':'Mexico'},{'id':'3299','name':'South Africa'},
-                  {'id':'3404','name':'Canada'},{'id':'3336','name':'Bosnia & Herzegovina'},
-                  {'id':'3439','name':'Qatar'},{'id':'3443','name':'Switzerland'},
-                  {'id':'3439','name':'Brazil'},{'id':'3441','name':'Haiti'},
-                  {'id':'3813','name':'Scotland'},{'id':'3448','name':'Morocco'},
-                  {'id':'3440','name':'Australia'},{'id':'3437','name':'Paraguay'},
-                  {'id':'3442','name':'Türkiye'},{'id':'3299','name':'USA'},
-                  {'id':'3436','name':'Ecuador'},{'id':'3445','name':'Germany'},
-                  {'id':'3447','name':'Ivory Coast'},{'id':'3444','name':'Japan'},
-                  {'id':'3300','name':'Netherlands'},{'id':'3446','name':'Sweden'},
-                  {'id':'3449','name':'Tunisia'},{'id':'3450','name':'Belgium'},
-                  {'id':'3451','name':'Egypt'},{'id':'3452','name':'Iran'},
-                  {'id':'3453','name':'New Zealand'},{'id':'3454','name':'Cape Verde'},
-                  {'id':'3455','name':'Saudi Arabia'},{'id':'3456','name':'Spain'},
-                  {'id':'3457','name':'Uruguay'},{'id':'3458','name':'France'},
-                  {'id':'3459','name':'Iraq'},{'id':'3460','name':'Norway'},
-                  {'id':'3461','name':'Senegal'},{'id':'3462','name':'Algeria'},
-                  {'id':'3463','name':'Argentina'},{'id':'3464','name':'Austria'},
-                  {'id':'3465','name':'Jordan'},{'id':'3466','name':'Colombia'},
-                  {'id':'3467','name':'DR Congo'},{'id':'3468','name':'Portugal'},
-                  {'id':'3469','name':'Uzbekistan'},{'id':'3470','name':'Croatia'},
-                  {'id':'3471','name':'England'},{'id':'3472','name':'Ghana'},
-                  {'id':'3473','name':'Panama'},{'id':'3474','name':'South Korea'},
-                  {'id':'3475','name':'Curaçao'},{'id':'3476','name':'Czechia'},
-              ]
-              print(f"Using hardcoded club list: {len(clubs)} teams", file=sys.stderr)
-          else:
-              clubs = clubs_data.get('clubs', [])
-          
-          clubs = clubs_data.get("clubs", [])
-          print(f"Processing {len(clubs)} clubs...", file=sys.stderr)
-          
-          # Card totals per club name
-          card_totals = {}  # {"Mexico": {"yellow": 5, "red": 1}, ...}
-          
-          # Transfermarkt club name → our sweep team name
-          NAME_MAP = {
-              "Mexico": "Mexico", "South Africa": "South Africa", "Canada": "Canada",
-              "Bosnia-Herzegovina": "Bosnia & Herzegovina", "Bosnia & Herzegovina": "Bosnia & Herzegovina",
-              "Qatar": "Qatar", "Switzerland": "Switzerland", "Brazil": "Brazil",
-              "Haiti": "Haiti", "Scotland": "Scotland", "Morocco": "Morocco",
-              "Australia": "Australia", "Paraguay": "Paraguay", "Türkiye": "Türkiye",
-              "Turkey": "Türkiye", "USA": "USA", "United States": "USA",
-              "Ecuador": "Ecuador", "Germany": "Germany", "Ivory Coast": "Ivory Coast",
-              "Japan": "Japan", "Netherlands": "Netherlands", "Sweden": "Sweden",
-              "Tunisia": "Tunisia", "Belgium": "Belgium", "Egypt": "Egypt",
-              "Iran": "Iran", "New Zealand": "New Zealand", "Cape Verde": "Cape Verde",
-              "Cape Verde Islands": "Cape Verde", "Saudi Arabia": "Saudi Arabia",
-              "Spain": "Spain", "Uruguay": "Uruguay", "France": "France",
-              "Iraq": "Iraq", "Norway": "Norway", "Senegal": "Senegal",
-              "Algeria": "Algeria", "Argentina": "Argentina", "Austria": "Austria",
-              "Jordan": "Jordan", "Colombia": "Colombia", "DR Congo": "DR Congo",
-              "Portugal": "Portugal", "Uzbekistan": "Uzbekistan", "Croatia": "Croatia",
-              "England": "England", "Ghana": "Ghana", "Panama": "Panama",
-              "South Korea": "South Korea", "Korea Republic": "South Korea",
-              "Curaçao": "Curaçao", "Curacao": "Curaçao", "Czech Republic": "Czechia",
-              "Czechia": "Czechia",
-          }
-          
-          for club in clubs:
-              club_id = club.get("id")
-              club_name = club.get("name", "")
-              sweep_name = NAME_MAP.get(club_name, club_name)
-              
-              print(f"  Fetching squad: {club_name} ({club_id})", file=sys.stderr)
-              
+
+          card_totals = {}
+
+          for team_name, team_id in TEAMS.items():
+              print(f"Fetching: {team_name} (ID: {team_id})", file=sys.stderr)
+
               # Get squad players
-              squad = fetch(f"{BASE}/clubs/{club_id}/players?season_id={SEASON}")
+              squad = fetch(f"{BASE}/clubs/{team_id}/players?season_id={SEASON}")
               if not squad:
-                  print(f"  WARNING: Could not fetch squad for {club_name}", file=sys.stderr)
-                  time.sleep(1)
+                  print(f"  WARNING: No squad data for {team_name}", file=sys.stderr)
+                  card_totals[team_name] = {"yellow": 0, "red": 0}
+                  time.sleep(2)
                   continue
-              
+
               players = squad.get("players", [])
+              print(f"  {len(players)} players found", file=sys.stderr)
+
               yellow_total = 0
               red_total = 0
-              
+
               for player in players:
                   player_id = player.get("id")
                   if not player_id:
                       continue
-                  
-                  # Get player stats for this season
-                  stats = fetch(f"{BASE}/players/{player_id}/stats?season_id={SEASON}&competition_id={COMP}")
+
+                  # Get player stats — filter by season
+                  stats = fetch(f"{BASE}/players/{player_id}/stats?season_id={SEASON}")
                   if not stats:
                       time.sleep(0.5)
                       continue
-                  
-                  # Stats returns per-competition breakdown
+
+                  # Stats returns array of competition entries
                   for stat in stats.get("stats", []):
-                      if stat.get("competitionID") == COMP or stat.get("competition") in ["FIFA World Cup", "World Cup 2026"]:
+                      # Look for World Cup or national team stats in this season
+                      comp = stat.get("competition", "") or ""
+                      if "World Cup" in comp or "FIFA" in comp or stat.get("competitionID") in ["WC2026","FIWC","WM26"]:
                           yellow_total += int(stat.get("yellowCards", 0) or 0)
                           red_total += int(stat.get("redCards", 0) or 0)
-                          break
-                  
-                  # Rate limit: ~1 req/sec
-                  time.sleep(1)
-              
-              card_totals[sweep_name] = {"yellow": yellow_total, "red": red_total}
-              print(f"    {sweep_name}: {yellow_total}Y {red_total}R", file=sys.stderr)
-              
-              # Small pause between clubs
+
+                  # Gentle rate limiting
+                  time.sleep(0.8)
+
+              card_totals[team_name] = {"yellow": yellow_total, "red": red_total}
+              print(f"  → {yellow_total}Y {red_total}R", file=sys.stderr)
+
+              # Pause between teams
               time.sleep(2)
-          
-          print(f"\nCard totals computed for {len(card_totals)} teams", file=sys.stderr)
-          
-          # Output as JSON for next step
+
+          print(f"\nDone: {len(card_totals)} teams processed", file=sys.stderr)
           with open("card_totals.json", "w") as f:
               json.dump(card_totals, f, indent=2)
-          
-          print("Card data written to card_totals.json")
+          print("card_totals.json written")
           PYEOF
 
-      - name: Update wc2026-config.json with card data
+      - name: Update configs with card data
         env:
           GH_TOKEN: ${{ secrets.CARDS_UPDATE_TOKEN }}
         run: |
           python3 << 'PYEOF'
-          import json, base64, urllib.request, urllib.parse
-          
+          import json, base64, urllib.request, sys
+
           TOKEN = "${{ secrets.CARDS_UPDATE_TOKEN }}"
-          
-          def gh_api(path, method="GET", body=None):
-              url = f"https://api.github.com/repos/LachMack/portfolio/{path}"
+          REPO  = "LachMack/portfolio"
+
+          def gh(path, method="GET", body=None):
+              url = f"https://api.github.com/repos/{REPO}/{path}"
               req = urllib.request.Request(url, method=method,
                   headers={"Authorization": f"token {TOKEN}",
                            "Accept": "application/vnd.github.v3+json",
                            "Content-Type": "application/json"})
               if body:
                   req.data = json.dumps(body).encode()
-              with urllib.request.urlopen(req, timeout=15) as r:
+              with urllib.request.urlopen(req, timeout=20) as r:
                   return json.loads(r.read())
-          
+
           # Load card totals
-          with open("card_totals.json") as f:
-              card_totals = json.load(f)
-          
-          if not card_totals:
-              print("No card data to update")
-              exit(0)
-          
-          # Find team with most yellows and most reds
-          most_yellow_team = max(card_totals, key=lambda t: card_totals[t]["yellow"]) if card_totals else None
-          most_red_team = max(card_totals, key=lambda t: card_totals[t]["red"]) if card_totals else None
-          
-          print(f"Most yellows: {most_yellow_team} ({card_totals.get(most_yellow_team,{}).get('yellow',0)})")
-          print(f"Most reds: {most_red_team} ({card_totals.get(most_red_team,{}).get('red',0)})")
-          
-          # ── Update wc2026-config.json ─────────────────────────────
-          def update_config(gh_path, id_key="mostYellow"):
-              meta = gh_api(f"contents/worldcup/{gh_path}")
+          try:
+              with open("card_totals.json") as f:
+                  card_totals = json.load(f)
+          except Exception as e:
+              print(f"ERROR: Could not read card_totals.json: {e}", file=sys.stderr)
+              sys.exit(1)
+
+          print(f"Loaded card data for {len(card_totals)} teams")
+
+          def update_config(config_path, is_daralads=False):
+              print(f"\nUpdating {config_path}...")
+              meta = gh(f"contents/worldcup/{config_path}")
               sha = meta["sha"]
-              content = json.loads(base64.b64decode(meta["content"].replace("\\n", "")).decode())
-              
-              changed = False
-              
-              # Store card totals in config
-              if "cardTotals" not in content:
-                  content["cardTotals"] = {}
-              if content.get("cardTotals") != card_totals:
-                  content["cardTotals"] = card_totals
-                  changed = True
-              
-              # Only auto-award if not manually overridden
-              overrides = content.get("manualOverrides", {})
-              awards = content.get("manualAwards", {})
-              
-              # For family sweep: awards are stored as member IDs — skip auto for mostYellow/mostRed
-              # (human needs to decide which member owns that team)
-              # Just store card totals; the sweep page can show them
-              
-              if changed:
-                  new_content = base64.b64encode(json.dumps(content, indent=2).encode()).decode()
-                  gh_api(f"contents/worldcup/{gh_path}", method="PUT", body={
-                      "message": f"Auto-update: card data from Transfermarkt ({gh_path})",
-                      "content": new_content,
-                      "sha": sha
-                  })
-                  print(f"Updated {gh_path}")
-              else:
-                  print(f"No changes needed for {gh_path}")
-          
-          update_config("wc2026-config.json")
-          update_config("daralads-config.json")
-          
-          # ── Update daralads awards (can auto-assign by participant name) ─
-          meta = gh_api("contents/worldcup/daralads-config.json")
-          sha = meta["sha"]
-          content = json.loads(base64.b64decode(meta["content"].replace("\\n", "")).decode())
-          
-          participants = content.get("participants", [])
-          overrides = content.get("manualOverrides", {})
-          awards = content.get("manualAwards", {})
-          
-          # Build team→participant lookup
-          team_owner = {}
-          for p in participants:
-              for t in (p.get("teams") or []):
-                  team_owner[t] = p["name"]
-          
-          changed = False
-          
-          # Auto-award mostYellow if not manually overridden
-          if not overrides.get("mostYellow") and most_yellow_team and card_totals[most_yellow_team]["yellow"] > 0:
-              owner = team_owner.get(most_yellow_team)
-              if owner and awards.get("mostYellow") != owner:
-                  awards["mostYellow"] = owner
-                  changed = True
-                  print(f"Daralads: mostYellow → {owner} ({most_yellow_team})")
-          
-          # Auto-award mostRed if not manually overridden
-          if not overrides.get("mostRed") and most_red_team and card_totals[most_red_team]["red"] > 0:
-              owner = team_owner.get(most_red_team)
-              if owner and awards.get("mostRed") != owner:
-                  awards["mostRed"] = owner
-                  changed = True
-                  print(f"Daralads: mostRed → {owner} ({most_red_team})")
-          
-          if changed:
-              content["manualAwards"] = awards
-              new_content = base64.b64encode(json.dumps(content, indent=2).encode()).decode()
-              gh_api("contents/worldcup/daralads-config.json", method="PUT", body={
-                  "message": "Auto-update: card awards for Daralads sweep",
+              raw = base64.b64decode(meta["content"].replace("\n","")).decode()
+              config = json.loads(raw)
+
+              # Store card totals
+              config["cardTotals"] = card_totals
+
+              # Auto-assign mostYellow / mostRed if not manually overridden
+              overrides = config.get("manualOverrides", {})
+              awards   = config.get("manualAwards",   {})
+              changed  = False
+
+              if card_totals:
+                  top_yellow = max(card_totals, key=lambda t: card_totals[t]["yellow"])
+                  top_red    = max(card_totals, key=lambda t: card_totals[t]["red"])
+
+                  if is_daralads:
+                      # Daralads: match team → participant name
+                      participants = config.get("participants", [])
+                      team_owner = {}
+                      for p in participants:
+                          for t in (p.get("teams") or []):
+                              team_owner[t] = p["name"]
+
+                      if not overrides.get("mostYellow") and card_totals[top_yellow]["yellow"] > 0:
+                          owner = team_owner.get(top_yellow)
+                          if owner and awards.get("mostYellow") != owner:
+                              awards["mostYellow"] = owner
+                              changed = True
+                              print(f"  mostYellow → {owner} ({top_yellow}: {card_totals[top_yellow]['yellow']})")
+
+                      if not overrides.get("mostRed") and card_totals[top_red]["red"] > 0:
+                          owner = team_owner.get(top_red)
+                          if owner and awards.get("mostRed") != owner:
+                              awards["mostRed"] = owner
+                              changed = True
+                              print(f"  mostRed → {owner} ({top_red}: {card_totals[top_red]['red']})")
+                  else:
+                      # Family sweep: just store totals, awards assigned manually
+                      print(f"  Top yellow: {top_yellow} ({card_totals[top_yellow]['yellow']})")
+                      print(f"  Top red:    {top_red} ({card_totals[top_red]['red']})")
+
+                  if changed:
+                      config["manualAwards"] = awards
+
+              new_content = base64.b64encode(json.dumps(config, indent=2, ensure_ascii=False).encode()).decode()
+              gh(f"contents/worldcup/{config_path}", method="PUT", body={
+                  "message": f"Auto: update card data ({config_path})",
                   "content": new_content,
                   "sha": sha
               })
-              print("Daralads config updated with card awards")
-          
-          print("Done!")
+              print(f"  ✓ {config_path} updated")
+
+          update_config("wc2026-config.json", is_daralads=False)
+          update_config("daralads-config.json", is_daralads=True)
+          print("\nAll done!")
           PYEOF
 
       - name: Summary
+        if: always()
         run: |
-          echo "Card data update complete"
+          echo "=== Card Data Summary ==="
           if [ -f card_totals.json ]; then
-            echo "Team card totals:"
-            cat card_totals.json
+            python3 -c "
+          import json
+          d=json.load(open('card_totals.json'))
+          teams=sorted(d.items(),key=lambda x:-x[1]['yellow'])
+          print('Top 10 by yellows:')
+          for t,s in teams[:10]:
+              print(f'  {t}: {s[\"yellow\"]}Y {s[\"red\"]}R')
+          "
+          else
+            echo "No card_totals.json found"
           fi
