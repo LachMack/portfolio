@@ -22,24 +22,11 @@ jobs:
           import requests, json, sys
           from bs4 import BeautifulSoup
 
-          NAME_MAP = {
-              "United States":           "USA",
-              "Bosnia-Herzegovina":      "Bosnia & Herzegovina",
-              "Korea Republic":          "South Korea",
-              "Ivory Coast":             "Ivory Coast",
-              "IR Iran":                 "Iran",
-              "Curacao":                 "Curaçao",
-              "Cabo Verde":              "Cape Verde",
-              "Congo DR":                "DR Congo",
-              "Czech Republic":          "Czechia",
-          }
-
           SESSION = requests.Session()
           SESSION.headers.update({
               "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
               "Accept-Language": "en-US,en;q=0.9",
-              "Accept-Encoding": "gzip, deflate, br",
               "Referer": "https://www.transfermarkt.us/",
           })
 
@@ -47,39 +34,19 @@ jobs:
           resp = SESSION.get(URL, timeout=30)
           print(f"Status: {resp.status_code}, Length: {len(resp.text)}", file=sys.stderr)
 
-          if resp.status_code != 200:
-              print(f"ERROR: HTTP {resp.status_code}", file=sys.stderr)
-              sys.exit(1)
-
           soup = BeautifulSoup(resp.text, "lxml")
 
-          # DEBUG: print all tables found and their classes/ids
+          # Print the full table HTML (first 3000 chars)
           tables = soup.find_all("table")
-          print(f"\nFound {len(tables)} tables:", file=sys.stderr)
+          print(f"\nTotal tables: {len(tables)}", file=sys.stderr)
           for i, t in enumerate(tables):
-              cls = t.get("class", [])
-              tid = t.get("id", "")
-              rows = t.find_all("tr")
-              print(f"  Table {i}: class={cls} id={tid} rows={len(rows)}", file=sys.stderr)
-              # Print first row of each table to understand structure
-              if rows:
-                  first = rows[0]
-                  cells = first.find_all(["th","td"])
-                  print(f"    First row cells: {[c.get_text(strip=True)[:20] for c in cells[:8]]}", file=sys.stderr)
+              print(f"\n=== TABLE {i} (class={t.get('class')} id={t.get('id')}) ===", file=sys.stderr)
+              print(str(t)[:3000], file=sys.stderr)
 
-          # DEBUG: print all element classes that contain "fair" or "table"
-          print("\nKey divs/sections:", file=sys.stderr)
-          for el in soup.find_all(class_=True):
-              cls = " ".join(el.get("class",[]))
-              if any(k in cls.lower() for k in ["fair","card","discipline","yellow","red","table","responsive"]):
-                  print(f"  <{el.name} class='{cls}'> text={el.get_text(strip=True)[:50]}", file=sys.stderr)
-
-          print("\nNot extracting data yet - debug run only", file=sys.stderr)
-          # Write empty file so workflow doesn't fail
           with open("card_totals.json", "w") as f:
               json.dump({}, f)
           PYEOF
 
       - name: Summary
         if: always()
-        run: echo "Debug run complete - check logs above for table structure"
+        run: echo "Debug run - check logs for table HTML"
