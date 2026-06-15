@@ -1054,33 +1054,6 @@ function renderSweep(){
     '<div style="font-size:11px;color:#5a6a88;margin-top:2px">across '+CFG.families.length+' families</div></div>';
   out+='</div>';
 
-  // ── Card Standings (from Transfermarkt nightly data) ────────────────
-  var cardTotals=CFG.cardTotals||{};
-  if(Object.keys(cardTotals).length>0){
-    var cardTeams=Object.entries(cardTotals).map(function(e){
-      return{team:e[0],yellow:e[1].yellow||0,red:e[1].red||0};
-    }).filter(function(ct){return ct.yellow>0||ct.red>0;})
-      .sort(function(a,b){return b.yellow!==a.yellow?b.yellow-a.yellow:b.red-a.red;}).slice(0,12);
-    if(cardTeams.length>0){
-      out+='<div class="card-pad" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
-        '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟨🟥 Card Standings</div>'+
-        '<div style="font-size:10px;color:#5a6a88">Transfermarkt · updated nightly</div></div>'+
-        '<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px 16px;align-items:center">'+
-        '<div style="font-size:10px;color:#5a6a88;text-transform:uppercase;letter-spacing:.05em">Team</div>'+
-        '<div style="font-size:10px;color:#fbbf24;text-align:center">🟨 Yellow</div>'+
-        '<div style="font-size:10px;color:#ff4757;text-align:center">🟥 Red</div>';
-      cardTeams.forEach(function(ct){
-        var owner=allMembers.find(function(m){return (allocs[m.id]||[]).includes(ct.team);});
-        out+='<div style="font-size:12px;display:flex;align-items:center;gap:5px">'+f(ct.team)+' '+h(ct.team)+
-          (owner?'<span style="font-size:10px;color:'+owner.famColor+';margin-left:3px">'+h(owner.name.split(' ')[0])+'</span>':'')+
-          '</div>'+
-          '<div class="font-display" style="font-size:14px;font-weight:700;color:#fbbf24;text-align:center">'+ct.yellow+'</div>'+
-          '<div class="font-display" style="font-size:14px;font-weight:700;color:#ff4757;text-align:center">'+ct.red+'</div>';
-      });
-      out+='</div></div>';
-    }
-  }
-
   // ── View toggle ─────────────────────────────────────────
   out+='<div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">'+
     '<span class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.06em;text-transform:uppercase;margin-right:4px">View</span>'+
