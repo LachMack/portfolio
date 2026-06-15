@@ -1,4 +1,4 @@
-name: Update Card Data (Transfermarkt scraper)
+name: Update Card Data (API-Football)
 
 on:
   schedule:
@@ -13,40 +13,195 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: pip install beautifulsoup4 requests lxml
-
-      - name: Scrape Transfermarkt fair play table
+      - name: Fetch card data from API-Football
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
           python3 << 'PYEOF'
-          import requests, json, sys
-          from bs4 import BeautifulSoup
+          import urllib.request, json, sys, os
 
-          SESSION = requests.Session()
-          SESSION.headers.update({
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-              "Accept-Language": "en-US,en;q=0.9",
-              "Referer": "https://www.transfermarkt.us/",
-          })
+          KEY    = os.environ["API_FOOTBALL_KEY"]
+          BASE   = "https://v3.football.api-sports.io"
+          LEAGUE = "1"     # FIFA World Cup
+          SEASON = "2026"
 
-          URL = "https://www.transfermarkt.us/mundial/fairnesstabelle/pokalwettbewerb/FIWC/saison_id/2026"
-          resp = SESSION.get(URL, timeout=30)
-          print(f"Status: {resp.status_code}, Length: {len(resp.text)}", file=sys.stderr)
+          NAME_MAP = {
+              "United States":          "USA",
+              "Bosnia And Herzegovina": "Bosnia & Herzegovina",
+              "Korea Republic":         "South Korea",
+              "Ivory Coast":            "Ivory Coast",
+              "IR Iran":                "Iran",
+              "Curacao":                "Curaçao",
+              "Cabo Verde":             "Cape Verde",
+              "Congo DR":               "DR Congo",
+              "Czech Republic":         "Czechia",
+          }
 
-          soup = BeautifulSoup(resp.text, "lxml")
+          def fetch(endpoint, params=""):
+              url = f"{BASE}/{endpoint}?league={LEAGUE}&season={SEASON}{params}"
+              req = urllib.request.Request(url, headers={
+                  "x-apisports-key": KEY,
+                  "Accept": "application/json"
+              })
+              print(f"GET {url}", file=sys.stderr)
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  data = json.loads(r.read())
+                  remaining = r.headers.get("x-ratelimit-requests-remaining", "?")
+                  print(f"  → {r.status}, remaining requests today: {remaining}", file=sys.stderr)
+                  return data
 
-          # Print the full table HTML (first 3000 chars)
-          tables = soup.find_all("table")
-          print(f"\nTotal tables: {len(tables)}", file=sys.stderr)
-          for i, t in enumerate(tables):
-              print(f"\n=== TABLE {i} (class={t.get('class')} id={t.get('id')}) ===", file=sys.stderr)
-              print(str(t)[:3000], file=sys.stderr)
+          # Single call: fixtures with events (includes cards)
+          # This returns all matches — we pick FINISHED ones and tally card events
+          print("Fetching all WC2026 fixtures...", file=sys.stderr)
+          data = fetch("fixtures", "&status=FT")  # FT = Full Time only
+
+          if data.get("errors"):
+              print(f"API error: {data['errors']}", file=sys.stderr)
+              sys.exit(1)
+
+          matches = data.get("response", [])
+          print(f"Found {len(matches)} finished matches", file=sys.stderr)
+
+          # Now fetch card events for each match
+          card_totals = {}
+
+          for match in matches:
+              fixture_id = match["fixture"]["id"]
+              home       = match["teams"]["home"]["name"]
+              away       = match["teams"]["away"]["name"]
+
+              # Fetch events for this fixture
+              eq = urllib.request.Request(
+                  f"{BASE}/fixtures/events?fixture={fixture_id}&type=Card",
+                  headers={"x-apisports-key": KEY, "Accept": "application/json"}
+              )
+              with urllib.request.urlopen(eq, timeout=30) as r:
+                  events_data = json.loads(r.read())
+
+              for ev in events_data.get("response", []):
+                  team_name = ev["team"]["name"]
+                  team_name = NAME_MAP.get(team_name, team_name)
+                  detail    = ev["detail"]  # "Yellow Card", "Red Card", "Yellow Red Card"
+
+                  if team_name not in card_totals:
+                      card_totals[team_name] = {"yellow": 0, "red": 0}
+
+                  if detail == "Yellow Card":
+                      card_totals[team_name]["yellow"] += 1
+                  elif detail in ("Red Card", "Yellow Red Card"):
+                      card_totals[team_name]["red"] += 1
+
+              home_n = NAME_MAP.get(home, home)
+              away_n = NAME_MAP.get(away, away)
+              for n in [home_n, away_n]:
+                  if n not in card_totals:
+                      card_totals[n] = {"yellow": 0, "red": 0}
+
+          print(f"\nCard totals for {len(card_totals)} teams:", file=sys.stderr)
+          for t, s in sorted(card_totals.items(), key=lambda x: -x[1]["yellow"]):
+              if s["yellow"] > 0 or s["red"] > 0:
+                  print(f"  {t}: {s['yellow']}Y {s['red']}R", file=sys.stderr)
 
           with open("card_totals.json", "w") as f:
-              json.dump({}, f)
+              json.dump(card_totals, f, indent=2, ensure_ascii=False)
+          print("\ncard_totals.json written")
+          PYEOF
+
+      - name: Update GitHub configs
+        env:
+          GH_TOKEN: ${{ secrets.CARDS_UPDATE_TOKEN }}
+        run: |
+          python3 << 'PYEOF'
+          import json, base64, urllib.request, sys
+
+          TOKEN = "${{ secrets.CARDS_UPDATE_TOKEN }}"
+          REPO  = "LachMack/portfolio"
+
+          def gh(path, method="GET", body=None):
+              url = f"https://api.github.com/repos/{REPO}/{path}"
+              req = urllib.request.Request(url, method=method,
+                  headers={"Authorization": f"token {TOKEN}",
+                           "Accept": "application/vnd.github.v3+json",
+                           "Content-Type": "application/json"})
+              if body:
+                  req.data = json.dumps(body).encode()
+              with urllib.request.urlopen(req, timeout=20) as r:
+                  return json.loads(r.read())
+
+          with open("card_totals.json") as f:
+              card_totals = json.load(f)
+
+          if not card_totals:
+              print("No data — skipping")
+              sys.exit(0)
+
+          print(f"Updating configs with {len(card_totals)} teams")
+
+          def update_config(config_path, is_daralads=False):
+              print(f"\n{config_path}...")
+              meta   = gh(f"contents/worldcup/{config_path}")
+              sha    = meta["sha"]
+              raw    = base64.b64decode(meta["content"].replace("\n","")).decode()
+              config = json.loads(raw)
+              config["cardTotals"] = card_totals
+
+              overrides = config.get("manualOverrides", {})
+              awards    = config.get("manualAwards", {})
+              has_cards = any(v["yellow"] > 0 or v["red"] > 0 for v in card_totals.values())
+
+              if has_cards:
+                  top_y = max(card_totals, key=lambda t: card_totals[t]["yellow"])
+                  top_r = max(card_totals, key=lambda t: card_totals[t]["red"])
+                  print(f"  Top yellow: {top_y} ({card_totals[top_y]['yellow']})")
+                  print(f"  Top red:    {top_r} ({card_totals[top_r]['red']})")
+
+                  if is_daralads:
+                      team_owner = {t: p["name"]
+                          for p in config.get("participants", [])
+                          for t in (p.get("teams") or [])}
+
+                      if not overrides.get("mostYellow") and card_totals[top_y]["yellow"] > 0:
+                          owner = team_owner.get(top_y)
+                          if owner and awards.get("mostYellow") != owner:
+                              awards["mostYellow"] = owner
+                              config["manualAwards"] = awards
+                              print(f"  mostYellow → {owner}")
+
+                      if not overrides.get("mostRed") and card_totals[top_r]["red"] > 0:
+                          owner = team_owner.get(top_r)
+                          if owner and awards.get("mostRed") != owner:
+                              awards["mostRed"] = owner
+                              config["manualAwards"] = awards
+                              print(f"  mostRed → {owner}")
+
+              new_content = base64.b64encode(
+                  json.dumps(config, indent=2, ensure_ascii=False).encode()
+              ).decode()
+              gh(f"contents/worldcup/{config_path}", method="PUT", body={
+                  "message": "Auto: card data from API-Football",
+                  "content": new_content,
+                  "sha": sha
+              })
+              print(f"  ✓ Done")
+
+          update_config("wc2026-config.json",   is_daralads=False)
+          update_config("daralads-config.json", is_daralads=True)
+          print("\nAll done!")
           PYEOF
 
       - name: Summary
         if: always()
-        run: echo "Debug run - check logs for table HTML"
+        run: |
+          if [ -f card_totals.json ]; then
+            python3 -c "
+          import json
+          d = json.load(open('card_totals.json'))
+          teams = sorted(d.items(), key=lambda x: -x[1]['yellow'])
+          print(f'=== {len(d)} teams ===')
+          for t, s in teams:
+              if s['yellow'] > 0 or s['red'] > 0:
+                  print(f'{t:25} {s[\"yellow\"]:2}Y {s[\"red\"]}R')
+          "
+          else
+            echo "No card_totals.json"
+          fi
