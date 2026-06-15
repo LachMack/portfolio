@@ -1475,6 +1475,76 @@ function clearScore(key){
 
 // NEW ADMIN TAB
 // ═══════════════════════════════════════════════════════════
+async function refreshCardData(){
+  var btn=document.getElementById('card-refresh-btn');
+  if(btn){btn.disabled=true;btn.textContent='Fetching...';}
+  var msg=document.getElementById('card-refresh-msg');
+  if(msg)msg.innerHTML='<span style="color:#fbbf24">Fetching from FBref...</span>';
+
+  // Use allorigins CORS proxy to fetch FBref misc stats
+  var fbrefUrl='https://fbref.com/en/comps/1/misc/World-Cup-Miscellaneous-Stats';
+  var proxyUrl='https://api.allorigins.win/get?url='+encodeURIComponent(fbrefUrl);
+
+  try{
+    var r=await fetch(proxyUrl,{signal:AbortSignal.timeout(20000)});
+    if(!r.ok)throw new Error('Proxy HTTP '+r.status);
+    var j=await r.json();
+    var html=j.contents;
+    if(!html)throw new Error('Empty response from proxy');
+
+    // Parse the HTML table with DOMParser
+    var parser=new DOMParser();
+    var doc=parser.parseFromString(html,'text/html');
+
+    // FBref misc table id: stats_squads_misc_for
+    var table=doc.getElementById('stats_squads_misc_for')||doc.querySelector('table.stats_table');
+    if(!table)throw new Error('Could not find FBref stats table in response');
+
+    var NAME_MAP={
+      'United States':'USA','Bosnia and Herzegovina':'Bosnia & Herzegovina',
+      "Côte d'Ivoire":'Ivory Coast','Korea Republic':'South Korea',
+      'Curaçao':'Curaçao','Cabo Verde':'Cape Verde','DR Congo':'DR Congo',
+      'Czechia':'Czechia'
+    };
+
+    var cardTotals={};
+    var rows=table.querySelectorAll('tbody tr');
+    rows.forEach(function(row){
+      if(row.classList.contains('thead'))return;
+      var teamTd=row.querySelector('[data-stat="team"],[data-stat="squad"]');
+      if(!teamTd)return;
+      var a=teamTd.querySelector('a');
+      var team=(a?a.textContent:teamTd.textContent).trim();
+      team=NAME_MAP[team]||team;
+      var ycTd=row.querySelector('[data-stat="cards_yellow"]');
+      var rcTd=row.querySelector('[data-stat="cards_red"]');
+      if(!ycTd||!rcTd)return;
+      var yc=parseInt(ycTd.textContent.trim())||0;
+      var rc=parseInt(rcTd.textContent.trim())||0;
+      if(team)cardTotals[team]={yellow:yc,red:rc};
+    });
+
+    var count=Object.keys(cardTotals).length;
+    if(count===0)throw new Error('Parsed 0 teams — FBref table structure may have changed');
+
+    // Store in CFG and push
+    CFG.cardTotals=cardTotals;
+    calcAutoAwards();
+    var ok=await pushToGitHub(CFG);
+
+    if(msg)msg.innerHTML='<span style="color:#00d4aa">✓ Card data updated — '+count+' teams ('+
+      Object.values(cardTotals).reduce(function(s,v){return s+v.yellow;},0)+' yellows, '+
+      Object.values(cardTotals).reduce(function(s,v){return s+v.red;},0)+' reds)</span>';
+    renderSweep();
+
+  }catch(e){
+    console.error('Card refresh failed:',e);
+    if(msg)msg.innerHTML='<span style="color:#ff4757">✗ Failed: '+e.message+'</span>';
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🟨🟥 Refresh Card Data';}
+  }
+}
+
 function renderAdmin(){
   var allocs=CFG.allocations||{};
   var allocated=new Set(Object.values(allocs).flat());
@@ -1865,9 +1935,13 @@ function renderAdmin(){
   out+='</div>';
 
   // ── Save / Reset ──────────────────────────────────────────
-  out+='<div style="display:flex;gap:10px">'+
+  out+='<div style="display:flex;gap:10px;flex-wrap:wrap">'+
     '<button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button>'+
     '<button class="btn btn-lg" style="color:#ff4757;border-color:#ff475730;padding:12px 20px" onclick="resetDraws()">RESET ALL DRAWS</button>'+
+    '</div>';
+  out+='<div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+    '<button id="card-refresh-btn" class="btn btn-lg" style="border-color:#fbbf2450;color:#fbbf24" onclick="refreshCardData()">🟨🟥 Refresh Card Data from FBref</button>'+
+    '<span id="card-refresh-msg" style="font-size:12px;color:#5a6a88">Fetches live card totals — requires GitHub token</span>'+
     '</div>';
   out+='<div id="admin-msg"></div>';
   out+='</div>';
