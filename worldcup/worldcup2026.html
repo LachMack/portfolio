@@ -1483,14 +1483,27 @@ async function refreshCardData(){
 
   // Use allorigins CORS proxy to fetch FBref misc stats
   var fbrefUrl='https://fbref.com/en/comps/1/misc/World-Cup-Miscellaneous-Stats';
-  var proxyUrl='https://api.allorigins.win/get?url='+encodeURIComponent(fbrefUrl);
+
+  // Try multiple CORS proxies in order
+  var proxies=[
+    {url:'https://corsproxy.io/?'+encodeURIComponent(fbrefUrl), parse:function(r){return r.text();}},
+    {url:'https://api.allorigins.win/get?url='+encodeURIComponent(fbrefUrl), parse:function(r){return r.json().then(function(j){return j.contents;});}},
+    {url:'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(fbrefUrl), parse:function(r){return r.text();}},
+  ];
 
   try{
-    var r=await fetch(proxyUrl,{signal:AbortSignal.timeout(20000)});
-    if(!r.ok)throw new Error('Proxy HTTP '+r.status);
-    var j=await r.json();
-    var html=j.contents;
-    if(!html)throw new Error('Empty response from proxy');
+    var html=null;
+    for(var i=0;i<proxies.length;i++){
+      try{
+        if(msg)msg.innerHTML='<span style="color:#fbbf24">Trying proxy '+(i+1)+'/'+proxies.length+'...</span>';
+        var r=await fetch(proxies[i].url,{signal:AbortSignal.timeout(15000)});
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        html=await proxies[i].parse(r);
+        if(html&&html.length>1000){console.log('Proxy '+(i+1)+' succeeded');break;}
+        html=null;
+      }catch(pe){console.warn('Proxy '+(i+1)+' failed:',pe.message);}
+    }
+    if(!html)throw new Error('All CORS proxies failed — try again later');
 
     // Parse the HTML table with DOMParser
     var parser=new DOMParser();
