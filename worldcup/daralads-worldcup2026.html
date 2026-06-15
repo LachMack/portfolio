@@ -499,7 +499,8 @@ const DEFAULT_CFG={
     {name:'Riley',  teams:['Portugal','Croatia','Senegal','Ecuador','Ghana','Egypt','South Africa','Haiti']}
   ],
   manualAwards:{},
-  manualOverrides:{}
+  manualOverrides:{},
+  cardTotals:{}
 };
 
 // ═══
@@ -873,9 +874,21 @@ function calcAutoAwards(){
   // ── topFamily: family with most total points (auto-calc) ─────────────
   // We skip this one as it needs the full leaderboard calc - handle in renderSweep
 
+  // Card awards from Transfermarkt (nightly GitHub Action)
+  var cardTotals=CFG.cardTotals||{};
+  if(Object.keys(cardTotals).length>0){
+    var topY=null,topYc=0,topR=null,topRc=0;
+    Object.entries(cardTotals).forEach(function(e){
+      if((e[1].yellow||0)>topYc){topYc=e[1].yellow;topY=e[0];}
+      if((e[1].red||0)>topRc){topRc=e[1].red;topR=e[0];}
+    });
+    if(topY&&teamOwner[topY])newAwards.mostYellow=teamOwner[topY];
+    if(topR&&teamOwner[topR])newAwards.mostRed=teamOwner[topR];
+  }
+
   // Only update auto keys — never overwrite manual overrides
   var overrides=CFG.manualOverrides||{};
-  var autoKeys=['firstGoal','goldenBoot','bestGD','worstGD','mostCleanSheets'];
+  var autoKeys=['firstGoal','goldenBoot','bestGD','worstGD','mostCleanSheets','mostYellow','mostRed'];
   var changed=false;
   autoKeys.forEach(function(k){
     if(overrides[k])return; // skip — admin manually set this
@@ -977,6 +990,7 @@ async function loadFromGitHub(){
     if(data.participants&&data.participants.length) CFG.participants = data.participants;
     if(data.manualAwards)   CFG.manualAwards   = data.manualAwards;
     if(data.manualOverrides)CFG.manualOverrides = data.manualOverrides;
+    if(data.cardTotals)     CFG.cardTotals      = data.cardTotals;
     if(!CFG.prizes)         CFG.prizes         = Object.assign({},DEFAULT_CFG.prizes);
     var nd=document.getElementById('sweep-name-display');
     if(nd&&CFG.sweepName)nd.textContent=CFG.sweepName;
@@ -1050,7 +1064,7 @@ function renderGroups(){
 
 function renderScores(){
   var matches=getMatches();
-  var filters=[['group','Group'],['knockout','Knockout'],['pending','Pending'],['done','Played'],['all','All']];
+  var filters=[['group','By Group'],['date','By Date'],['done','Played'],['pending','Upcoming'],['all','All']];
   var filtered=matches.filter(function(m){
     if(scoreFilter==='group')return!!m.g;
     if(scoreFilter==='knockout')return!m.g;
@@ -1058,6 +1072,15 @@ function renderScores(){
     if(scoreFilter==='done')return m.s1!=null;
     return true;
   });
+  var sortByDate=(scoreFilter==='date');
+  if(sortByDate){
+    filtered=filtered.slice().sort(function(a,b){
+      if(a.d!==b.d)return a.d<b.d?-1:1;
+      var ta=(a.ofbTime&&typeof a.ofbTime==='object'?a.ofbTime.timeStr:a.ofbTime)||'';
+      var tb=(b.ofbTime&&typeof b.ofbTime==='object'?b.ofbTime.timeStr:b.ofbTime)||'';
+      return ta<tb?-1:ta>tb?1:0;
+    });
+  }
   var autoCount=matches.filter(function(m){return m.isAuto;}).length;
   var manualCount=matches.filter(function(m){return m.isManual;}).length;
   var filterBtns=filters.map(function(fv){
@@ -1072,7 +1095,18 @@ function renderScores(){
     '<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#60a5fa;margin-right:4px;vertical-align:-1px"></span>Manual override ('+manualCount+')</span>'+
     '<span style="color:#5a6a88;font-style:italic">Click any row to enter manually</span></div>';
   out+='<div style="display:flex;flex-direction:column;gap:4px">';
+  var lastDateHeader='';
   filtered.forEach(function(m){
+    if(sortByDate&&m.d!==lastDateHeader){
+      lastDateHeader=m.d;
+      var played=filtered.filter(function(x){return x.d===m.d&&x.s1!=null;}).length;
+      var total=filtered.filter(function(x){return x.d===m.d;}).length;
+      out+='<div style="display:flex;align-items:center;gap:10px;margin-top:10px;margin-bottom:4px">'+
+        '<div class="font-display" style="font-size:12px;font-weight:700;color:#f0f4ff;letter-spacing:.04em">'+fmtDate(m.d)+'</div>'+
+        '<div style="font-size:10px;color:#5a6a88">'+played+'/'+total+' played</div>'+
+        '<div style="flex:1;height:1px;background:#ffffff0a"></div>'+
+        '</div>';
+    }
     var done=m.s1!=null,isEdit=editScoreKey===m.key;
     var grpL=m.g?m.g.replace('Group ',''):'';
     var c=GC[grpL]||'#60a5fa';
@@ -1170,6 +1204,7 @@ async function pushToGitHub(cfg){
       participants:    cfg.participants||[],
       manualAwards:    cfg.manualAwards||{},
       manualOverrides: cfg.manualOverrides||{},
+      cardTotals:      cfg.cardTotals||{},
     };
     const content=btoa(unescape(encodeURIComponent(JSON.stringify(mutable,null,2))));
     const putRes=await fetch(GH_API,{
@@ -1523,6 +1558,31 @@ function renderSweep(){
   out+='<div class="card-pad"><div style="font-size:10px;color:#5a6a88;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Teams</div><div class="font-display" style="font-weight:800;font-size:28px;color:#a78bfa">'+teamsOwned+'/48</div></div>';
   out+='</div>';
 
+  // Card standings
+  (function(){
+    var ct=CFG.cardTotals||{};
+    if(!Object.keys(ct).length)return;
+    var teams=Object.entries(ct).map(function(e){return{team:e[0],y:e[1].yellow||0,r:e[1].red||0};})
+      .filter(function(x){return x.y>0||x.r>0;}).sort(function(a,b){return b.y!==a.y?b.y-a.y:b.r-a.r;}).slice(0,12);
+    if(!teams.length)return;
+    var byOwner={};(CFG.participants||[]).forEach(function(p){(p.teams||[]).forEach(function(t){byOwner[t]=p.name;});});
+    out+='<div class="card-pad" style="margin-bottom:14px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+      '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟨🟥 Card Standings</div>'+
+      '<div style="font-size:10px;color:#5a6a88">Transfermarkt · nightly</div></div>'+
+      '<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px 16px">'+
+      '<div style="font-size:10px;color:#5a6a88">Team</div>'+
+      '<div style="font-size:10px;color:#fbbf24;text-align:center">🟨</div>'+
+      '<div style="font-size:10px;color:#ff4757;text-align:center">🟥</div>';
+    teams.forEach(function(c){
+      var own=byOwner[c.team]||'';
+      out+='<div style="font-size:12px;display:flex;align-items:center;gap:5px">'+f(c.team)+' '+h(c.team)+(own?'<span style="font-size:10px;color:#8b9ab8;margin-left:3px">'+h(own)+'</span>':'')+
+        '</div><div class="font-display" style="font-weight:700;color:#fbbf24;text-align:center">'+c.y+'</div>'+
+        '<div class="font-display" style="font-weight:700;color:#ff4757;text-align:center">'+c.r+'</div>';
+    });
+    out+='</div></div>';
+  })();
+
   if(sweepView==='leaderboard'){
     out+='<div class="grid-2"><div>';
     out+='<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8;margin-bottom:10px">Standings</div>';
@@ -1667,7 +1727,11 @@ function renderAdmin(){
   var awardsRows=manualDefs.map(function(pd){
     var prizeAmt=CFG.prizes[pd.k]||0;if(!prizeAmt)return '';
     var isAuto=AUTO_AWARD_KEYS.indexOf(pd.k)>=0;
+    var ct2=CFG.cardTotals||{};var ch='';
+    if(pd.k==='mostYellow'&&Object.keys(ct2).length>0){var ty=Object.entries(ct2).filter(function(e){return e[1].yellow>0;}).sort(function(a,b){return b[1].yellow-a[1].yellow;})[0];if(ty)ch='<div style="font-size:10px;color:#fbbf24;margin-top:2px">📊 Leader: '+f(ty[0])+' '+h(ty[0])+' — '+ty[1].yellow+' yellows</div>';}
+    if(pd.k==='mostRed'&&Object.keys(ct2).length>0){var tr=Object.entries(ct2).filter(function(e){return e[1].red>0;}).sort(function(a,b){return b[1].red-a[1].red;})[0];if(tr)ch='<div style="font-size:10px;color:#ff4757;margin-top:2px">📊 Leader: '+f(tr[0])+' '+h(tr[0])+' — '+tr[1].red+' reds</div>';}
     var autoLabel=isAuto?'<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#00d4aa18;color:#00d4aa;border:1px solid #00d4aa30;margin-left:4px">AUTO</span>':'<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#fbbf2418;color:#fbbf24;border:1px solid #fbbf2430;margin-left:4px">MANUAL</span>';
+    autoLabel+=ch;
     var currentAward=awards[pd.k]||'';
     var opts='<option value="">— not yet awarded —</option>';
     participantNames.forEach(function(name){opts+='<option value="'+h(name)+'"'+(currentAward===name?' selected':'')+'>'+h(name)+'</option>';});
