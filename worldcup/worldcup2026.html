@@ -1429,7 +1429,12 @@ function renderScores(){
       '<span class="font-display" style="font-size:10px;color:#5a6a88;font-weight:600;letter-spacing:.04em;text-transform:uppercase">'+roundShort+'</span>';
     var aestTimeStr=m.ofbTime?venueToAEST(m.ofbTime,m.gr,m.d):'';
     out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:3px;color:#5a6a88">'+fmtDate(m.d)+(aestTimeStr?' <span style="color:#5a6a88">·</span> '+aestTimeStr:'')+'</div></div>';
-    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+'</span>';
+    var ct=CFG.cardTotals||{};
+    var t1y=(ct[m.t1]||{}).yellow||0,t1r=(ct[m.t1]||{}).red||0;
+    var t2y=(ct[m.t2]||{}).yellow||0,t2r=(ct[m.t2]||{}).red||0;
+    var t1cards=(t1y>0||t1r>0)?'<span style="font-size:9px;opacity:.7;margin-left:3px">'+(t1y>0?t1y+'🟨':'')+' '+(t1r>0?t1r+'🟥':'')+'</span>':'';
+    var t2cards=(t2y>0||t2r>0)?'<span style="font-size:9px;opacity:.7;margin-left:3px">'+(t2y>0?t2y+'🟨':'')+' '+(t2r>0?t2r+'🟥':'')+'</span>':'';
+    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;justify-content:flex-end;gap:3px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+t1cards+'</span>';
     out+='<div style="text-align:center;min-width:80px">';
     if(isEdit){
       var v1=m.s1!=null?m.s1:'',v2=m.s2!=null?m.s2:'';
@@ -1448,7 +1453,7 @@ function renderScores(){
       out+='<span style="font-size:11px;color:#5a6a88;border:1px dashed #ffffff14;padding:3px 8px;border-radius:4px;white-space:nowrap">click to enter</span>';
     }
     out+='</div>';
-    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+'</span>';
+    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;gap:3px">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+t2cards+'</span>';
     out+='<span style="font-size:10px;color:#5a6a88;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(m.gr)+'</span>';
     out+='</div>';
     if(goalsHtml)out+=goalsHtml;
