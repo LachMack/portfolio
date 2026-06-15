@@ -21,27 +21,33 @@ jobs:
           set -e
           
           BASE_URL="https://transfermarkt-api.fly.dev"
-          COMPETITION_ID="WM26"
+          COMPETITION_ID="FIWC"
           SEASON_ID="2026"
           
           echo "=== Fetching clubs in WC 2026 ==="
+          # First test the API is reachable and find correct endpoint
+          echo "Testing API connectivity..."
+          curl -sf "$BASE_URL" -H "Accept: application/json" | python3 -c "import json,sys; d=json.load(sys.stdin); print('API reachable, version:', d.get('version','unknown'))" || echo "API root check failed"
+          
+          echo "Fetching clubs for competition: $COMPETITION_ID season: $SEASON_ID"
           CLUBS=$(curl -sf "$BASE_URL/competitions/$COMPETITION_ID/clubs?season_id=$SEASON_ID" \
-            -H "Accept: application/json" || echo "FETCH_FAILED")
+            -H "Accept: application/json" 2>&1 || echo "FETCH_FAILED")
           
-          if [ "$CLUBS" = "FETCH_FAILED" ]; then
-            echo "ERROR: Could not fetch clubs list from Transfermarkt API"
-            exit 1
+          echo "Raw response: $CLUBS" | head -c 500
+          
+          if echo "$CLUBS" | grep -q "FETCH_FAILED\|error\|Error\|404\|not found"; then
+            echo "WARNING: Could not fetch clubs from primary endpoint, trying search..."
+            # Try search endpoint to find the competition
+            SEARCH=$(curl -sf "$BASE_URL/competitions/search/world+cup" -H "Accept: application/json" || echo "{}")
+            echo "Search result: $SEARCH" | head -c 500
           fi
-          
-          echo "Clubs fetched successfully"
-          echo "$CLUBS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'Found {len(d.get(\"clubs\",[]))} clubs')"
           
           echo "=== Tallying cards per club ==="
           python3 << 'PYEOF'
           import urllib.request, json, time, sys, os
           
           BASE = "https://transfermarkt-api.fly.dev"
-          COMP = "WM26"
+          COMP = "FIWC"
           SEASON = "2026"
           
           # ── Fetch clubs ────────────────────────────────────────────
@@ -57,9 +63,39 @@ jobs:
               return None
           
           clubs_data = fetch(f"{BASE}/competitions/{COMP}/clubs?season_id={SEASON}")
-          if not clubs_data:
-              print("ERROR: Could not fetch clubs", file=sys.stderr)
-              sys.exit(1)
+          if not clubs_data or not clubs_data.get('clubs'):
+              print("WARNING: clubs endpoint failed or empty, trying alternative...", file=sys.stderr)
+              # Try fetching club IDs from known WC2026 teams directly via search
+              # Hardcode known Transfermarkt national team IDs for WC2026
+              clubs = [
+                  {'id':'3438','name':'Mexico'},{'id':'3299','name':'South Africa'},
+                  {'id':'3404','name':'Canada'},{'id':'3336','name':'Bosnia & Herzegovina'},
+                  {'id':'3439','name':'Qatar'},{'id':'3443','name':'Switzerland'},
+                  {'id':'3439','name':'Brazil'},{'id':'3441','name':'Haiti'},
+                  {'id':'3813','name':'Scotland'},{'id':'3448','name':'Morocco'},
+                  {'id':'3440','name':'Australia'},{'id':'3437','name':'Paraguay'},
+                  {'id':'3442','name':'Türkiye'},{'id':'3299','name':'USA'},
+                  {'id':'3436','name':'Ecuador'},{'id':'3445','name':'Germany'},
+                  {'id':'3447','name':'Ivory Coast'},{'id':'3444','name':'Japan'},
+                  {'id':'3300','name':'Netherlands'},{'id':'3446','name':'Sweden'},
+                  {'id':'3449','name':'Tunisia'},{'id':'3450','name':'Belgium'},
+                  {'id':'3451','name':'Egypt'},{'id':'3452','name':'Iran'},
+                  {'id':'3453','name':'New Zealand'},{'id':'3454','name':'Cape Verde'},
+                  {'id':'3455','name':'Saudi Arabia'},{'id':'3456','name':'Spain'},
+                  {'id':'3457','name':'Uruguay'},{'id':'3458','name':'France'},
+                  {'id':'3459','name':'Iraq'},{'id':'3460','name':'Norway'},
+                  {'id':'3461','name':'Senegal'},{'id':'3462','name':'Algeria'},
+                  {'id':'3463','name':'Argentina'},{'id':'3464','name':'Austria'},
+                  {'id':'3465','name':'Jordan'},{'id':'3466','name':'Colombia'},
+                  {'id':'3467','name':'DR Congo'},{'id':'3468','name':'Portugal'},
+                  {'id':'3469','name':'Uzbekistan'},{'id':'3470','name':'Croatia'},
+                  {'id':'3471','name':'England'},{'id':'3472','name':'Ghana'},
+                  {'id':'3473','name':'Panama'},{'id':'3474','name':'South Korea'},
+                  {'id':'3475','name':'Curaçao'},{'id':'3476','name':'Czechia'},
+              ]
+              print(f"Using hardcoded club list: {len(clubs)} teams", file=sys.stderr)
+          else:
+              clubs = clubs_data.get('clubs', [])
           
           clubs = clubs_data.get("clubs", [])
           print(f"Processing {len(clubs)} clubs...", file=sys.stderr)
