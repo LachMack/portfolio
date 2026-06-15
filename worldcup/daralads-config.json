@@ -102,5 +102,6 @@
     "worstGD": "Jasper",
     "mostCleanSheets": "Blake"
   },
-  "manualOverrides": {}
+  "manualOverrides": {},
+  "cardTotals": {}
 }
