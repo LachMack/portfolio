@@ -1485,25 +1485,32 @@ async function refreshCardData(){
   var fbrefUrl='https://fbref.com/en/comps/1/misc/World-Cup-Miscellaneous-Stats';
 
   // Try multiple CORS proxies in order
-  var proxies=[
-    {url:'https://corsproxy.io/?'+encodeURIComponent(fbrefUrl), parse:function(r){return r.text();}},
-    {url:'https://api.allorigins.win/get?url='+encodeURIComponent(fbrefUrl), parse:function(r){return r.json().then(function(j){return j.contents;});}},
-    {url:'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(fbrefUrl), parse:function(r){return r.text();}},
-  ];
+  // Try direct fetch first (works if FBref allows CORS from this origin)
+  // then fall back to proxies
+  // ScrapingBee API — stored in localStorage alongside GitHub token
+  var sbKey='';try{sbKey=localStorage.getItem('wc26_sb_key')||'';}catch(e){}
+  if(!sbKey){
+    var k=prompt('Enter your ScrapingBee API key (stored locally, never sent to GitHub):');
+    if(!k){if(btn){btn.disabled=false;btn.textContent='🟨🟥 Refresh Card Data';}return;}
+    try{localStorage.setItem('wc26_sb_key',k);}catch(e){}
+    sbKey=k;
+  }
 
   try{
-    var html=null;
-    for(var i=0;i<proxies.length;i++){
-      try{
-        if(msg)msg.innerHTML='<span style="color:#fbbf24">Trying proxy '+(i+1)+'/'+proxies.length+'...</span>';
-        var r=await fetch(proxies[i].url,{signal:AbortSignal.timeout(15000)});
-        if(!r.ok)throw new Error('HTTP '+r.status);
-        html=await proxies[i].parse(r);
-        if(html&&html.length>1000){console.log('Proxy '+(i+1)+' succeeded');break;}
-        html=null;
-      }catch(pe){console.warn('Proxy '+(i+1)+' failed:',pe.message);}
+    if(msg)msg.innerHTML='<span style="color:#fbbf24">Fetching via ScrapingBee...</span>';
+    // ScrapingBee: render_js=false (FBref is static HTML), premium_proxy=false (not needed for FBref)
+    var sbUrl='https://app.scrapingbee.com/api/v1/?api_key='+encodeURIComponent(sbKey)+
+      '&url='+encodeURIComponent(fbrefUrl)+
+      '&render_js=false&block_resources=true';
+    var r=await fetch(sbUrl,{signal:AbortSignal.timeout(30000)});
+    if(r.status===401){
+      try{localStorage.removeItem('wc26_sb_key');}catch(e){}
+      throw new Error('ScrapingBee API key invalid — key cleared, try again');
     }
-    if(!html)throw new Error('All CORS proxies failed — try again later');
+    if(!r.ok)throw new Error('ScrapingBee HTTP '+r.status);
+    var html=await r.text();
+    if(!html||html.length<5000)throw new Error('Response too short ('+html.length+' chars) — try again');
+    console.log('ScrapingBee succeeded: '+html.length+' chars');
 
     // Parse the HTML table with DOMParser
     var parser=new DOMParser();
