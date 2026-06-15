@@ -1499,9 +1499,10 @@ async function refreshCardData(){
   try{
     if(msg)msg.innerHTML='<span style="color:#fbbf24">Fetching via ScrapingBee...</span>';
     // ScrapingBee: render_js=false (FBref is static HTML), premium_proxy=false (not needed for FBref)
+    // stealth_proxy bypasses Cloudflare — costs 75 credits but works on protected sites
     var sbUrl='https://app.scrapingbee.com/api/v1/?api_key='+encodeURIComponent(sbKey)+
       '&url='+encodeURIComponent(fbrefUrl)+
-      '&render_js=false&block_resources=true';
+      '&render_js=false&block_resources=true&stealth_proxy=true';
     var r=await fetch(sbUrl,{signal:AbortSignal.timeout(30000)});
     if(r.status===401){
       try{localStorage.removeItem('wc26_sb_key');}catch(e){}
