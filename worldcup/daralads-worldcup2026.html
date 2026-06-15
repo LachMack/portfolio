@@ -877,11 +877,12 @@ function calcAutoAwards(){
   // Card awards from Transfermarkt (nightly GitHub Action)
   var cardTotals=CFG.cardTotals||{};
   if(Object.keys(cardTotals).length>0){
-    var topY=null,topYc=0,topR=null,topRc=0;
-    Object.entries(cardTotals).forEach(function(e){
-      if((e[1].yellow||0)>topYc){topYc=e[1].yellow;topY=e[0];}
-      if((e[1].red||0)>topRc){topRc=e[1].red;topR=e[0];}
-    });
+    var redSorted=Object.entries(cardTotals).filter(function(e){return e[1].red>0||e[1].yellow>0;})
+      .sort(function(a,b){return b[1].red!==a[1].red?b[1].red-a[1].red:b[1].yellow-a[1].yellow;});
+    var yelSorted=Object.entries(cardTotals).filter(function(e){return e[1].yellow>0||e[1].red>0;})
+      .sort(function(a,b){return b[1].yellow!==a[1].yellow?b[1].yellow-a[1].yellow:b[1].red-a[1].red;});
+    var topR=redSorted.length?redSorted[0][0]:null;
+    var topY=yelSorted.length?yelSorted[0][0]:null;
     if(topY&&teamOwner[topY])newAwards.mostYellow=teamOwner[topY];
     if(topR&&teamOwner[topR])newAwards.mostRed=teamOwner[topR];
   }
@@ -1564,29 +1565,6 @@ function renderSweep(){
   out+='</div>';
 
   // Card standings
-  (function(){
-    var ct=CFG.cardTotals||{};
-    if(!Object.keys(ct).length)return;
-    var teams=Object.entries(ct).map(function(e){return{team:e[0],y:e[1].yellow||0,r:e[1].red||0};})
-      .filter(function(x){return x.y>0||x.r>0;}).sort(function(a,b){return b.y!==a.y?b.y-a.y:b.r-a.r;}).slice(0,12);
-    if(!teams.length)return;
-    var byOwner={};(CFG.participants||[]).forEach(function(p){(p.teams||[]).forEach(function(t){byOwner[t]=p.name;});});
-    out+='<div class="card-pad" style="margin-bottom:14px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
-      '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟨🟥 Card Standings</div>'+
-      '<div style="font-size:10px;color:#5a6a88">Transfermarkt · nightly</div></div>'+
-      '<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px 16px">'+
-      '<div style="font-size:10px;color:#5a6a88">Team</div>'+
-      '<div style="font-size:10px;color:#fbbf24;text-align:center">🟨</div>'+
-      '<div style="font-size:10px;color:#ff4757;text-align:center">🟥</div>';
-    teams.forEach(function(c){
-      var own=byOwner[c.team]||'';
-      out+='<div style="font-size:12px;display:flex;align-items:center;gap:5px">'+f(c.team)+' '+h(c.team)+(own?'<span style="font-size:10px;color:#8b9ab8;margin-left:3px">'+h(own)+'</span>':'')+
-        '</div><div class="font-display" style="font-weight:700;color:#fbbf24;text-align:center">'+c.y+'</div>'+
-        '<div class="font-display" style="font-weight:700;color:#ff4757;text-align:center">'+c.r+'</div>';
-    });
-    out+='</div></div>';
-  })();
 
   if(sweepView==='leaderboard'){
     out+='<div class="grid-2"><div>';
@@ -1653,6 +1631,29 @@ function renderSweep(){
     });
     out+='</div>';
   }
+  // ── Card Standings (bottom) ─────────────────────────────────────────
+  (function(){
+    var ct=CFG.cardTotals||{};
+    if(!Object.keys(ct).length)return;
+    var teams=Object.entries(ct).map(function(e){return{team:e[0],yellow:e[1].yellow||0,red:e[1].red||0};})
+      .filter(function(x){return x.yellow>0||x.red>0;})
+      .sort(function(a,b){return b.red!==a.red?b.red-a.red:b.yellow-a.yellow;}).slice(0,12);
+    if(!teams.length)return;
+    var byOwner={};(CFG.participants||[]).forEach(function(p){(p.teams||[]).forEach(function(t){byOwner[t]=p.name;});});
+    out+='<div class="card-pad" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+      '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟥🟨 Card Standings</div>'+
+      '<div style="font-size:10px;color:#5a6a88">FBref · refresh in Admin</div></div>'+
+      '<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px 16px">'+
+      '<div style="font-size:10px;color:#5a6a88">Team</div><div style="font-size:10px;color:#ff4757;text-align:center">🟥 Red</div><div style="font-size:10px;color:#fbbf24;text-align:center">🟨 Yellow</div>';
+    teams.forEach(function(c){
+      var own=byOwner[c.team]||'';
+      out+='<div style="font-size:12px;display:flex;align-items:center;gap:5px">'+f(c.team)+' '+h(c.team)+(own?'<span style="font-size:10px;color:#8b9ab8;margin-left:3px">'+h(own)+'</span>':'')+
+        '</div><div class="font-display" style="font-weight:700;color:#ff4757;text-align:center">'+c.red+'</div>'+
+        '<div class="font-display" style="font-weight:700;color:#fbbf24;text-align:center">'+c.yellow+'</div>';
+    });
+    out+='</div></div>';
+  })();
+
   document.getElementById('tab-sweep').innerHTML=out;
 }
 
