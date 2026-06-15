@@ -1,4 +1,4 @@
-name: Update Card Data from football-data.org
+name: Update Card Data (ESPN scraper)
 
 on:
   schedule:
@@ -14,157 +14,119 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Fetch card data from football-data.org
-        env:
-          FD_TOKEN: ${{ secrets.FD_TOKEN }}
+      - name: Install dependencies
+        run: pip install beautifulsoup4 requests lxml
+
+      - name: Scrape card data from ESPN
         run: |
           python3 << 'PYEOF'
-          import urllib.request, json, time, sys, os
+          import requests, json, sys, re
+          from bs4 import BeautifulSoup
 
-          TOKEN = os.environ["FD_TOKEN"]
-          BASE  = "https://api.football-data.org/v4"
-
-          # Name mapping: football-data.org team names → our sweep names
+          # ESPN name → our sweep names
           NAME_MAP = {
-              "Mexico":                  "Mexico",
-              "South Africa":            "South Africa",
-              "Canada":                  "Canada",
-              "Bosnia and Herzegovina":  "Bosnia & Herzegovina",
-              "Bosnia & Herzegovina":    "Bosnia & Herzegovina",
-              "Qatar":                   "Qatar",
-              "Switzerland":             "Switzerland",
-              "Brazil":                  "Brazil",
-              "Haiti":                   "Haiti",
-              "Scotland":                "Scotland",
-              "Morocco":                 "Morocco",
-              "Australia":               "Australia",
-              "Paraguay":                "Paraguay",
-              "Türkiye":                 "Türkiye",
-              "Turkiye":                 "Türkiye",
-              "Turkey":                  "Türkiye",
               "United States":           "USA",
-              "USA":                     "USA",
-              "Ecuador":                 "Ecuador",
-              "Germany":                 "Germany",
-              "Côte d'Ivoire":           "Ivory Coast",
               "Ivory Coast":             "Ivory Coast",
-              "Japan":                   "Japan",
-              "Netherlands":             "Netherlands",
-              "Sweden":                  "Sweden",
-              "Tunisia":                 "Tunisia",
-              "Belgium":                 "Belgium",
-              "Egypt":                   "Egypt",
-              "Iran":                    "Iran",
-              "IR Iran":                 "Iran",
-              "New Zealand":             "New Zealand",
-              "Cabo Verde":              "Cape Verde",
-              "Cape Verde":              "Cape Verde",
-              "Saudi Arabia":            "Saudi Arabia",
-              "Spain":                   "Spain",
-              "Uruguay":                 "Uruguay",
-              "France":                  "France",
-              "Iraq":                    "Iraq",
-              "Norway":                  "Norway",
-              "Senegal":                 "Senegal",
-              "Algeria":                 "Algeria",
-              "Argentina":               "Argentina",
-              "Austria":                 "Austria",
-              "Jordan":                  "Jordan",
-              "Colombia":                "Colombia",
-              "DR Congo":                "DR Congo",
-              "Congo DR":                "DR Congo",
-              "Portugal":                "Portugal",
-              "Uzbekistan":              "Uzbekistan",
-              "Croatia":                 "Croatia",
-              "England":                 "England",
-              "Ghana":                   "Ghana",
-              "Panama":                  "Panama",
+              "Côte d'Ivoire":           "Ivory Coast",
+              "Bosnia-Herzegovina":      "Bosnia & Herzegovina",
+              "Bosnia and Herzegovina":  "Bosnia & Herzegovina",
               "Korea Republic":          "South Korea",
-              "South Korea":             "South Korea",
-              "Curaçao":                 "Curaçao",
+              "IR Iran":                 "Iran",
+              "Türkiye":                 "Türkiye",
               "Curacao":                 "Curaçao",
-              "Czechia":                 "Czechia",
               "Czech Republic":          "Czechia",
+              "Cabo Verde":              "Cape Verde",
+              "Congo DR":                "DR Congo",
           }
 
-          def fetch(url):
-              req = urllib.request.Request(url, headers={
-                  "X-Auth-Token": TOKEN,
-                  "Accept": "application/json"
-              })
-              try:
-                  with urllib.request.urlopen(req, timeout=30) as r:
-                      # Respect rate limit headers
-                      remaining = r.headers.get("X-RequestCounter-Reset", "")
-                      data = json.loads(r.read())
-                      return data
-              except urllib.error.HTTPError as e:
-                  if e.code == 429:
-                      print("Rate limited — sleeping 60s", file=sys.stderr)
-                      time.sleep(60)
-                      return fetch(url)
-                  print(f"HTTP error {e.code}: {url}", file=sys.stderr)
-                  return None
-              except Exception as e:
-                  print(f"Error fetching {url}: {e}", file=sys.stderr)
-                  return None
+          headers = {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.5",
+          }
 
-          print("Fetching all WC matches...", file=sys.stderr)
-          data = fetch(f"{BASE}/competitions/WC/matches?season=2026")
-          if not data:
-              print("ERROR: Could not fetch matches", file=sys.stderr)
+          URL = "https://www.espn.com/soccer/stats/_/league/FIFA.WORLD/season/2026/view/discipline/team"
+
+          print(f"Fetching: {URL}", file=sys.stderr)
+          resp = requests.get(URL, headers=headers, timeout=30)
+          print(f"Status: {resp.status_code}", file=sys.stderr)
+
+          if resp.status_code != 200:
+              print(f"ERROR: HTTP {resp.status_code}", file=sys.stderr)
               sys.exit(1)
 
-          matches = data.get("matches", [])
-          print(f"Found {len(matches)} matches", file=sys.stderr)
+          soup = BeautifulSoup(resp.text, "lxml")
 
-          # Tally cards per team from bookings in each match
+          # ESPN renders a table with columns: RK, Team, P, YC, RC, PTS
           card_totals = {}
 
-          for m in matches:
-              status = m.get("status", "")
-              if status not in ("FINISHED", "IN_PLAY", "PAUSED"):
-                  continue  # skip unplayed matches
+          # Find the stats table
+          table = soup.find("table")
+          if not table:
+              # Try finding via class patterns ESPN uses
+              tables = soup.find_all("table")
+              print(f"Found {len(tables)} tables", file=sys.stderr)
+              table = tables[0] if tables else None
 
-              home = m.get("homeTeam", {}).get("name", "")
-              away = m.get("awayTeam", {}).get("name", "")
+          if not table:
+              print("ERROR: No table found in page", file=sys.stderr)
+              # Debug: print first 2000 chars of HTML
+              print(resp.text[:2000], file=sys.stderr)
+              sys.exit(1)
 
-              home_name = NAME_MAP.get(home, home)
-              away_name = NAME_MAP.get(away, away)
+          rows = table.find_all("tr")
+          print(f"Found {len(rows)} rows", file=sys.stderr)
 
-              for name in [home_name, away_name]:
-                  if name not in card_totals:
-                      card_totals[name] = {"yellow": 0, "red": 0}
+          for row in rows[1:]:  # skip header
+              cells = row.find_all("td")
+              if len(cells) < 5:
+                  continue
 
-              # bookings[] has { minute, team: {name}, card: "YELLOW"|"RED", ... }
-              for booking in m.get("bookings", []):
-                  card = booking.get("card", "")
-                  team_name = booking.get("team", {}).get("name", "")
-                  sweep_name = NAME_MAP.get(team_name, team_name)
+              # ESPN table: RK | Team | P | YC | RC | PTS
+              # Sometimes RK is missing for ties, so find team by anchor tag
+              team_cell = None
+              for cell in cells:
+                  if cell.find("a"):
+                      team_cell = cell
+                      break
 
-                  if not sweep_name or sweep_name not in card_totals:
-                      card_totals.setdefault(sweep_name, {"yellow": 0, "red": 0})
+              if not team_cell:
+                  # fallback: second cell
+                  team_cell = cells[1] if len(cells) > 1 else cells[0]
 
-                  if card == "YELLOW":
-                      card_totals[sweep_name]["yellow"] += 1
-                  elif card in ("RED", "YELLOW_RED"):
-                      card_totals[sweep_name]["red"] += 1
+              team_name = team_cell.get_text(strip=True)
+              team_name = NAME_MAP.get(team_name, team_name)
 
-              time.sleep(0.1)  # gentle pacing
+              # Find numeric values — YC and RC columns
+              numeric_cells = [c for c in cells if c.get_text(strip=True).replace("-","").isdigit() or c.get_text(strip=True) == "-"]
+              
+              # ESPN order after team: P, YC, RC, PTS
+              def safe_int(val):
+                  v = val.strip()
+                  return int(v) if v.isdigit() else 0
 
-          # Show results
-          played = len([m for m in matches if m.get("status") == "FINISHED"])
-          print(f"\n{played} finished matches processed", file=sys.stderr)
-          print(f"{len(card_totals)} teams with card data", file=sys.stderr)
+              if len(numeric_cells) >= 3:
+                  yc = safe_int(numeric_cells[1].get_text())  # P=0, YC=1, RC=2
+                  rc = safe_int(numeric_cells[2].get_text())
+              elif len(numeric_cells) >= 2:
+                  yc = safe_int(numeric_cells[0].get_text())
+                  rc = safe_int(numeric_cells[1].get_text())
+              else:
+                  yc, rc = 0, 0
 
-          sorted_teams = sorted(card_totals.items(), key=lambda x: -x[1]["yellow"])
-          print("\nTop teams by yellows:", file=sys.stderr)
-          for team, cards in sorted_teams[:10]:
-              print(f"  {team}: {cards['yellow']}Y {cards['red']}R", file=sys.stderr)
+              if team_name:
+                  card_totals[team_name] = {"yellow": yc, "red": rc}
+                  print(f"  {team_name}: {yc}Y {rc}R", file=sys.stderr)
+
+          print(f"\nScraped {len(card_totals)} teams", file=sys.stderr)
+
+          if not card_totals:
+              print("ERROR: No card data extracted", file=sys.stderr)
+              sys.exit(1)
 
           with open("card_totals.json", "w") as f:
               json.dump(card_totals, f, indent=2, ensure_ascii=False)
-          print("\ncard_totals.json written")
+          print("card_totals.json written")
           PYEOF
 
       - name: Update GitHub configs with card data
@@ -172,7 +134,7 @@ jobs:
           GH_TOKEN: ${{ secrets.CARDS_UPDATE_TOKEN }}
         run: |
           python3 << 'PYEOF'
-          import json, base64, urllib.request, sys, os
+          import json, base64, urllib.request, sys
 
           TOKEN = "${{ secrets.CARDS_UPDATE_TOKEN }}"
           REPO  = "LachMack/portfolio"
@@ -192,71 +154,68 @@ jobs:
               with open("card_totals.json") as f:
                   card_totals = json.load(f)
           except Exception as e:
-              print(f"ERROR: {e}", file=sys.stderr)
+              print(f"ERROR: {e}")
               sys.exit(1)
 
           if not card_totals:
-              print("No card data — skipping update")
+              print("No card data — skipping")
               sys.exit(0)
 
-          print(f"Updating configs with card data for {len(card_totals)} teams")
+          print(f"Updating configs with {len(card_totals)} teams")
 
           def update_config(config_path, is_daralads=False):
               print(f"\nUpdating {config_path}...")
-              meta    = gh(f"contents/worldcup/{config_path}")
-              sha     = meta["sha"]
-              raw     = base64.b64decode(meta["content"].replace("\n","")).decode()
-              config  = json.loads(raw)
+              meta   = gh(f"contents/worldcup/{config_path}")
+              sha    = meta["sha"]
+              raw    = base64.b64decode(meta["content"].replace("\n","")).decode()
+              config = json.loads(raw)
 
               config["cardTotals"] = card_totals
 
               overrides = config.get("manualOverrides", {})
               awards    = config.get("manualAwards",   {})
-              changed   = False
 
-              top_yellow = max(card_totals, key=lambda t: card_totals[t]["yellow"])
-              top_red    = max(card_totals, key=lambda t: card_totals[t]["red"])
-
-              if is_daralads:
-                  participants = config.get("participants", [])
-                  team_owner = {}
-                  for p in participants:
-                      for t in (p.get("teams") or []):
-                          team_owner[t] = p["name"]
-
-                  if not overrides.get("mostYellow") and card_totals[top_yellow]["yellow"] > 0:
-                      owner = team_owner.get(top_yellow)
-                      if owner and awards.get("mostYellow") != owner:
-                          awards["mostYellow"] = owner
-                          changed = True
-                          print(f"  mostYellow → {owner} ({top_yellow}: {card_totals[top_yellow]['yellow']})")
-
-                  if not overrides.get("mostRed") and card_totals[top_red]["red"] > 0:
-                      owner = team_owner.get(top_red)
-                      if owner and awards.get("mostRed") != owner:
-                          awards["mostRed"] = owner
-                          changed = True
-                          print(f"  mostRed → {owner} ({top_red}: {card_totals[top_red]['red']})")
-
-                  if changed:
-                      config["manualAwards"] = awards
+              # Only auto-assign if we have actual card data
+              teams_with_cards = {t: v for t, v in card_totals.items() if v["yellow"] > 0 or v["red"] > 0}
+              if not teams_with_cards:
+                  print("  No cards recorded yet — skipping award assignment")
               else:
+                  top_yellow = max(card_totals, key=lambda t: card_totals[t]["yellow"])
+                  top_red    = max(card_totals, key=lambda t: card_totals[t]["red"])
                   print(f"  Top yellow: {top_yellow} ({card_totals[top_yellow]['yellow']})")
                   print(f"  Top red:    {top_red} ({card_totals[top_red]['red']})")
+
+                  if is_daralads:
+                      participants = config.get("participants", [])
+                      team_owner = {t: p["name"] for p in participants for t in (p.get("teams") or [])}
+
+                      if not overrides.get("mostYellow") and card_totals[top_yellow]["yellow"] > 0:
+                          owner = team_owner.get(top_yellow)
+                          if owner and awards.get("mostYellow") != owner:
+                              awards["mostYellow"] = owner
+                              config["manualAwards"] = awards
+                              print(f"  mostYellow → {owner}")
+
+                      if not overrides.get("mostRed") and card_totals[top_red]["red"] > 0:
+                          owner = team_owner.get(top_red)
+                          if owner and awards.get("mostRed") != owner:
+                              awards["mostRed"] = owner
+                              config["manualAwards"] = awards
+                              print(f"  mostRed → {owner}")
 
               new_content = base64.b64encode(
                   json.dumps(config, indent=2, ensure_ascii=False).encode()
               ).decode()
               gh(f"contents/worldcup/{config_path}", method="PUT", body={
-                  "message": f"Auto: card data from football-data.org",
+                  "message": "Auto: card data from ESPN",
                   "content": new_content,
                   "sha": sha
               })
-              print(f"  ✓ Done")
+              print(f"  ✓ {config_path} updated")
 
-          update_config("wc2026-config.json",    is_daralads=False)
-          update_config("daralads-config.json",  is_daralads=True)
-          print("\nAll done!")
+          update_config("wc2026-config.json",   is_daralads=False)
+          update_config("daralads-config.json", is_daralads=True)
+          print("\nDone!")
           PYEOF
 
       - name: Summary
@@ -268,10 +227,11 @@ jobs:
           import json
           d=json.load(open('card_totals.json'))
           teams=sorted(d.items(),key=lambda x:-x[1]['yellow'])
-          for t,s in teams[:15]:
-              bar='🟨'*s['yellow']+'🟥'*s['red']
-              print(f'{t:25} {s[\"yellow\"]:2}Y {s[\"red\"]:1}R  {bar}')
+          for t,s in teams[:20]:
+              if s['yellow']>0 or s['red']>0:
+                  print(f'{t:25} {s[\"yellow\"]:2}Y {s[\"red\"]}R')
+          print(f'\nTotal teams: {len(d)}')
           "
           else
-            echo "No card data generated"
+            echo "No card_totals.json found"
           fi
