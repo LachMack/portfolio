@@ -1631,6 +1631,41 @@ function renderSweep(){
     });
     out+='</div>';
   }
+  // ── Top Scorers (Golden Boot standings) ─────────────────────────────
+  (function(){
+    var scorers={};
+    Object.values(OFB_GOALS).forEach(function(goals){
+      goals.forEach(function(g){
+        var key=g.name+'|'+g.team;
+        if(!scorers[key])scorers[key]={name:g.name,team:g.team,goals:0,penalties:0};
+        scorers[key].goals++;
+        if(g.penalty)scorers[key].penalties++;
+      });
+    });
+    var topScorers=Object.values(scorers)
+      .sort(function(a,b){return b.goals!==a.goals?b.goals-a.goals:a.penalties-b.penalties;})
+      .slice(0,15);
+    if(!topScorers.length)return;
+
+    var byOwner={};(CFG.participants||[]).forEach(function(p){(p.teams||[]).forEach(function(t){byOwner[t]=p.name;});});
+
+    out+='<div class="card-pad" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+      '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">⚽ Golden Boot Standings</div>'+
+      '<div style="font-size:10px;color:#5a6a88">openfootball · updates nightly</div></div>'+
+      '<div style="display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center">';
+    topScorers.forEach(function(s,i){
+      var own=byOwner[s.team]||'';
+      var pen=s.penalties>0?'<span style="font-size:9px;color:#5a6a88;margin-left:3px">('+s.penalties+' pen)</span>':'';
+      out+='<div class="font-display" style="font-size:13px;font-weight:700;color:#5a6a88;text-align:right">'+(i+1)+'</div>'+
+        '<div style="font-size:12px;display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+
+          f(s.team)+' <span style="font-weight:600">'+h(s.name)+'</span>'+
+          (own?'<span style="font-size:10px;color:#8b9ab8">'+h(own)+'</span>':'')+
+        '</div>'+
+        '<div class="font-display" style="font-size:16px;font-weight:800;color:#00d4aa;text-align:right">'+s.goals+pen+'</div>';
+    });
+    out+='</div></div>';
+  })();
+
   // ── Card Standings (bottom) ─────────────────────────────────────────
   (function(){
     var ct=CFG.cardTotals||{};
