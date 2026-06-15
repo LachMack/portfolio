@@ -511,6 +511,7 @@ const DEFAULT_CFG={
   // e.g. { firstGoal: 'lachlan', goldenBoot: 'jasper' }
   manualAwards:{},
   manualOverrides:{},
+  cardTotals:{},
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -660,9 +661,23 @@ function calcAutoAwards(){
   // ── topFamily: family with most total points (auto-calc) ─────────────
   // We skip this one as it needs the full leaderboard calc - handle in renderSweep
 
+  // ── Card awards from Transfermarkt (updated nightly by GitHub Action) ──────
+  var cardTotals=CFG.cardTotals||{};
+  if(Object.keys(cardTotals).length>0){
+    var topYellowTeam=null,topYellowCount=0;
+    var topRedTeam=null,topRedCount=0;
+    Object.entries(cardTotals).forEach(function(e){
+      var t=e[0],s=e[1];
+      if((s.yellow||0)>topYellowCount){topYellowCount=s.yellow;topYellowTeam=t;}
+      if((s.red||0)>topRedCount){topRedCount=s.red;topRedTeam=t;}
+    });
+    if(topYellowTeam&&teamOwner[topYellowTeam])newAwards.mostYellow=teamOwner[topYellowTeam];
+    if(topRedTeam&&teamOwner[topRedTeam])newAwards.mostRed=teamOwner[topRedTeam];
+  }
+
   // Only update auto keys — never overwrite manual overrides
   var overrides=CFG.manualOverrides||{};
-  var autoKeys=['firstGoal','goldenBoot','bestGD','worstGD','mostCleanSheets'];
+  var autoKeys=['firstGoal','goldenBoot','bestGD','worstGD','mostCleanSheets','mostYellow','mostRed'];
   var changed=false;
   autoKeys.forEach(function(k){
     if(overrides[k])return; // skip — admin manually set this
@@ -769,6 +784,7 @@ async function loadFromGitHub(){
     if(data.prizes)       CFG.prizes       = data.prizes;
     if(data.manualAwards)   CFG.manualAwards   = data.manualAwards;
     if(data.manualOverrides)CFG.manualOverrides = data.manualOverrides;
+    if(data.cardTotals)     CFG.cardTotals      = data.cardTotals;
     if(data.pot0Cost)     CFG.pot0Cost     = data.pot0Cost;
     if(data.pot1Cost)     CFG.pot1Cost     = data.pot1Cost;
     if(data.pot2Cost)     CFG.pot2Cost     = data.pot2Cost;
@@ -805,6 +821,7 @@ async function pushToGitHub(cfg){
       prizes:        cfg.prizes||{},
       manualAwards:    cfg.manualAwards||{},
       manualOverrides: cfg.manualOverrides||{},
+      cardTotals:      cfg.cardTotals||{},
       pot0Cost:      cfg.pot0Cost||15,
       pot1Cost:      cfg.pot1Cost||10,
       pot2Cost:      cfg.pot2Cost||5,
@@ -1035,6 +1052,33 @@ function renderSweep(){
     '<div class="font-display" style="font-weight:800;font-size:26px;color:#f472b6">'+allMembers.length+'</div>'+
     '<div style="font-size:11px;color:#5a6a88;margin-top:2px">across '+CFG.families.length+' families</div></div>';
   out+='</div>';
+
+  // ── Card Standings (from Transfermarkt nightly data) ────────────────
+  var cardTotals=CFG.cardTotals||{};
+  if(Object.keys(cardTotals).length>0){
+    var cardTeams=Object.entries(cardTotals).map(function(e){
+      return{team:e[0],yellow:e[1].yellow||0,red:e[1].red||0};
+    }).filter(function(ct){return ct.yellow>0||ct.red>0;})
+      .sort(function(a,b){return b.yellow!==a.yellow?b.yellow-a.yellow:b.red-a.red;}).slice(0,12);
+    if(cardTeams.length>0){
+      out+='<div class="card-pad" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟨🟥 Card Standings</div>'+
+        '<div style="font-size:10px;color:#5a6a88">Transfermarkt · updated nightly</div></div>'+
+        '<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px 16px;align-items:center">'+
+        '<div style="font-size:10px;color:#5a6a88;text-transform:uppercase;letter-spacing:.05em">Team</div>'+
+        '<div style="font-size:10px;color:#fbbf24;text-align:center">🟨 Yellow</div>'+
+        '<div style="font-size:10px;color:#ff4757;text-align:center">🟥 Red</div>';
+      cardTeams.forEach(function(ct){
+        var owner=allMembers.find(function(m){return (allocs[m.id]||[]).includes(ct.team);});
+        out+='<div style="font-size:12px;display:flex;align-items:center;gap:5px">'+f(ct.team)+' '+h(ct.team)+
+          (owner?'<span style="font-size:10px;color:'+owner.famColor+';margin-left:3px">'+h(owner.name.split(' ')[0])+'</span>':'')+
+          '</div>'+
+          '<div class="font-display" style="font-size:14px;font-weight:700;color:#fbbf24;text-align:center">'+ct.yellow+'</div>'+
+          '<div class="font-display" style="font-size:14px;font-weight:700;color:#ff4757;text-align:center">'+ct.red+'</div>';
+      });
+      out+='</div></div>';
+    }
+  }
 
   // ── View toggle ─────────────────────────────────────────
   out+='<div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">'+
@@ -1314,14 +1358,25 @@ function renderStats(){
 // ── SCORES TAB ────────────────────────────────────────────
 function renderScores(){
   var matches=getMatches();
-  var filters=[['group','Group'],['knockout','Knockout'],['pending','Pending'],['done','Played'],['all','All']];
+  var filters=[['group','By Group'],['date','By Date'],['done','Played'],['pending','Upcoming'],['all','All']];
   var filtered=matches.filter(function(m){
     if(scoreFilter==='group')return!!m.g;
     if(scoreFilter==='knockout')return!m.g;
     if(scoreFilter==='pending')return m.s1==null;
     if(scoreFilter==='done')return m.s1!=null;
-    return true;
+    return true; // 'date' and 'all' show everything
   });
+  // For date view: sort by date then time
+  var sortByDate=(scoreFilter==='date');
+  if(sortByDate){
+    filtered=filtered.slice().sort(function(a,b){
+      if(a.d!==b.d)return a.d<b.d?-1:1;
+      // Sub-sort by kickoff time if available
+      var ta=(a.ofbTime&&typeof a.ofbTime==='object'?a.ofbTime.timeStr:a.ofbTime)||'';
+      var tb=(b.ofbTime&&typeof b.ofbTime==='object'?b.ofbTime.timeStr:b.ofbTime)||'';
+      return ta<tb?-1:ta>tb?1:0;
+    });
+  }
   var autoCount=matches.filter(function(m){return m.isAuto;}).length;
   var manualCount=matches.filter(function(m){return m.isManual;}).length;
   var filterBtns=filters.map(function(fv){
@@ -1336,7 +1391,21 @@ function renderScores(){
     '<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#60a5fa;margin-right:4px;vertical-align:-1px"></span>Manual override ('+manualCount+')</span>'+
     '<span style="color:#5a6a88;font-style:italic">Click any row to enter manually</span></div>';
   out+='<div style="display:flex;flex-direction:column;gap:4px">';
+  var lastDateHeader='';
   filtered.forEach(function(m){
+    // Date grouping header for By Date view
+    if(sortByDate&&m.d!==lastDateHeader){
+      lastDateHeader=m.d;
+      var played=filtered.filter(function(x){return x.d===m.d&&x.s1!=null;}).length;
+      var total=filtered.filter(function(x){return x.d===m.d;}).length;
+      var aestDateStr='';
+      if(m.ofbTime){var ts=venueToAEST(m.ofbTime,m.gr,m.d);if(ts)aestDateStr=' <span style="font-size:10px;color:#5a6a88;font-weight:400">('+ts.split(' ').slice(0,3).join(' ')+' AEST)</span>';}
+      out+='<div style="display:flex;align-items:center;gap:10px;margin-top:10px;margin-bottom:4px">'+
+        '<div class="font-display" style="font-size:12px;font-weight:700;color:#f0f4ff;letter-spacing:.04em">'+fmtDate(m.d)+aestDateStr+'</div>'+
+        '<div style="font-size:10px;color:#5a6a88">'+played+'/'+total+' played</div>'+
+        '<div style="flex:1;height:1px;background:#ffffff0a"></div>'+
+        '</div>';
+    }
     var done=m.s1!=null,isEdit=editScoreKey===m.key;
     var grpL=m.g?m.g.replace('Group ',''):'';
     var c=GC[grpL]||'#60a5fa';
@@ -1761,6 +1830,17 @@ function renderAdmin(){
     var prizeAmt=CFG.prizes[pd.k]||0;
     if(!prizeAmt)return ''; // skip if prize is $0
     var currentAward=awards[pd.k]||'';
+    // Card leader hint for yellow/red prizes
+    var cardTotals=CFG.cardTotals||{};
+    var cardHint='';
+    if(pd.k==='mostYellow'&&Object.keys(cardTotals).length>0){
+      var topY=Object.entries(cardTotals).filter(function(e){return e[1].yellow>0;}).sort(function(a,b){return b[1].yellow-a[1].yellow;})[0];
+      if(topY)cardHint='<div style="font-size:10px;color:#fbbf24;margin-top:2px">📊 Leader: '+f(topY[0])+' '+h(topY[0])+' — '+topY[1].yellow+' yellows</div>';
+    }
+    if(pd.k==='mostRed'&&Object.keys(cardTotals).length>0){
+      var topR=Object.entries(cardTotals).filter(function(e){return e[1].red>0;}).sort(function(a,b){return b[1].red-a[1].red;})[0];
+      if(topR)cardHint='<div style="font-size:10px;color:#ff4757;margin-top:2px">📊 Leader: '+f(topR[0])+' '+h(topR[0])+' — '+topR[1].red+' reds</div>';
+    }
     var opts='<option value="">— not awarded —</option>';
     allMembersList.forEach(function(mem){
       opts+='<option value="'+h(mem.id)+'"'+(currentAward===mem.id?' selected':'')+'>'+
@@ -2192,23 +2272,18 @@ function closeSpin(){
 // INIT
 // ═══════════════════════════════════════════════════════════
 function init(){
-  try{
-    // Render immediately with defaults so page is never blank
-    render();
-    // Then load remote config + live scores
-    loadFromGitHub();
-    // Load live Elo ratings
-    loadLiveElo();
-    // Auto-refresh live scores every 5 minutes
-    setInterval(function(){
-      loadFromOpenFootball().then(function(){render();});
-    },5*60*1000);
-    // Refresh Elo every 30 minutes
-    setInterval(function(){loadLiveElo();},30*60*1000);
-  }catch(e){
-    console.error('WC2026 init error:',e);
-    document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#ff4757;font-family:sans-serif"><h2>Error loading dashboard</h2><p style="color:#8b9ab8;margin-top:8px">'+e.message+'</p></div>';
-  }
+  // Always render immediately with defaults — never blank
+  try{render();}catch(e){console.error('render error:',e);}
+  // Async loads — failures show warnings but never blank the page
+  loadFromGitHub().catch(function(e){
+    console.log('GitHub load failed, using defaults:',e.message);
+    setStatus('warn','Offline mode','#fbbf24');
+  });
+  loadLiveElo();
+  setInterval(function(){
+    loadFromOpenFootball().then(function(){}).catch(function(){});
+  },5*60*1000);
+  setInterval(function(){loadLiveElo();},30*60*1000);
 }
 // Run after DOM is ready, regardless of other scripts
 if(document.readyState==='loading'){
