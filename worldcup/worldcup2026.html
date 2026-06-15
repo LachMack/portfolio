@@ -664,13 +664,14 @@ function calcAutoAwards(){
   // ── Card awards from Transfermarkt (updated nightly by GitHub Action) ──────
   var cardTotals=CFG.cardTotals||{};
   if(Object.keys(cardTotals).length>0){
-    var topYellowTeam=null,topYellowCount=0;
-    var topRedTeam=null,topRedCount=0;
-    Object.entries(cardTotals).forEach(function(e){
-      var t=e[0],s=e[1];
-      if((s.yellow||0)>topYellowCount){topYellowCount=s.yellow;topYellowTeam=t;}
-      if((s.red||0)>topRedCount){topRedCount=s.red;topRedTeam=t;}
-    });
+    // mostRed: most reds wins, yellows as tiebreaker
+    var redSorted=Object.entries(cardTotals).filter(function(e){return e[1].red>0||e[1].yellow>0;})
+      .sort(function(a,b){return b[1].red!==a[1].red?b[1].red-a[1].red:b[1].yellow-a[1].yellow;});
+    // mostYellow: most yellows wins, reds as tiebreaker
+    var yelSorted=Object.entries(cardTotals).filter(function(e){return e[1].yellow>0||e[1].red>0;})
+      .sort(function(a,b){return b[1].yellow!==a[1].yellow?b[1].yellow-a[1].yellow:b[1].red-a[1].red;});
+    var topRedTeam=redSorted.length?redSorted[0][0]:null;
+    var topYellowTeam=yelSorted.length?yelSorted[0][0]:null;
     if(topYellowTeam&&teamOwner[topYellowTeam])newAwards.mostYellow=teamOwner[topYellowTeam];
     if(topRedTeam&&teamOwner[topRedTeam])newAwards.mostRed=teamOwner[topRedTeam];
   }
@@ -1203,6 +1204,31 @@ function renderSweep(){
       });
       out+='</div></div>';
     });
+  }
+
+  // ── Card Standings (bottom of page) ─────────────────────────────────
+  var cardTotals=CFG.cardTotals||{};
+  if(Object.keys(cardTotals).length>0){
+    var cardTeams=Object.entries(cardTotals).map(function(e){
+      return{team:e[0],yellow:e[1].yellow||0,red:e[1].red||0};
+    }).filter(function(ct){return ct.yellow>0||ct.red>0;})
+      .sort(function(a,b){return b.red!==a.red?b.red-a.red:b.yellow-a.yellow;}).slice(0,12);
+    if(cardTeams.length>0){
+      out+='<div class="card-pad" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟥🟨 Card Standings</div>'+
+        '<div style="font-size:10px;color:#5a6a88">FBref · refresh in Admin</div></div>'+
+        '<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px 16px;align-items:center">'+
+        '<div style="font-size:10px;color:#5a6a88;text-transform:uppercase;letter-spacing:.05em">Team</div>'+
+        '<div style="font-size:10px;color:#ff4757;text-align:center">🟥 Red</div>'+
+        '<div style="font-size:10px;color:#fbbf24;text-align:center">🟨 Yellow</div>';
+      cardTeams.forEach(function(ct){
+        var owner=allMembers.find(function(m){return (allocs[m.id]||[]).includes(ct.team);});
+        out+='<div style="font-size:12px;display:flex;align-items:center;gap:6px">'+f(ct.team)+' '+h(ct.team)+(owner?'<span style="font-size:10px;color:'+owner.famColor+';margin-left:4px">'+h(owner.name.split(' ')[0])+'</span>':'')+'</div>';
+        out+='<div class="font-display" style="font-size:14px;font-weight:700;color:#ff4757;text-align:center">'+ct.red+'</div>';
+        out+='<div class="font-display" style="font-size:14px;font-weight:700;color:#fbbf24;text-align:center">'+ct.yellow+'</div>';
+      });
+      out+='</div></div>';
+    }
   }
 
   document.getElementById('tab-sweep').innerHTML=out;
