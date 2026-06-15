@@ -103,5 +103,94 @@
     "mostCleanSheets": "Blake"
   },
   "manualOverrides": {},
-  "cardTotals": {}
+  "cardTotals": {
+    "Mexico": {
+      "yellow": 0,
+      "red": 0
+    },
+    "South Africa": {
+      "yellow": 0,
+      "red": 0
+    },
+    "South Korea": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Czechia": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Canada": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Bosnia-Herzegovina": {
+      "yellow": 0,
+      "red": 0
+    },
+    "USA": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Paraguay": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Qatar": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Switzerland": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Brazil": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Morocco": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Haiti": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Scotland": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Australia": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Türkiye": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Germany": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Curaçao": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Netherlands": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Japan": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Ivory Coast": {
+      "yellow": 0,
+      "red": 0
+    },
+    "Ecuador": {
+      "yellow": 0,
+      "red": 0
+    }
+  }
 }
