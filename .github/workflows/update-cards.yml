@@ -19,10 +19,9 @@ jobs:
       - name: Scrape Transfermarkt fair play table
         run: |
           python3 << 'PYEOF'
-          import requests, json, sys, time
+          import requests, json, sys
           from bs4 import BeautifulSoup
 
-          # Transfermarkt name → sweep name
           NAME_MAP = {
               "United States":           "USA",
               "Bosnia-Herzegovina":      "Bosnia & Herzegovina",
@@ -42,198 +41,45 @@ jobs:
               "Accept-Language": "en-US,en;q=0.9",
               "Accept-Encoding": "gzip, deflate, br",
               "Referer": "https://www.transfermarkt.us/",
-              "Origin": "https://www.transfermarkt.us",
           })
 
           URL = "https://www.transfermarkt.us/mundial/fairnesstabelle/pokalwettbewerb/FIWC/saison_id/2026"
-          print(f"Fetching: {URL}", file=sys.stderr)
-
           resp = SESSION.get(URL, timeout=30)
-          print(f"Status: {resp.status_code}", file=sys.stderr)
-          print(f"Content length: {len(resp.text)}", file=sys.stderr)
+          print(f"Status: {resp.status_code}, Length: {len(resp.text)}", file=sys.stderr)
 
           if resp.status_code != 200:
               print(f"ERROR: HTTP {resp.status_code}", file=sys.stderr)
-              print(resp.text[:500], file=sys.stderr)
               sys.exit(1)
 
           soup = BeautifulSoup(resp.text, "lxml")
 
-          # Transfermarkt fair play table structure:
-          # table.items with rows containing: rank, team, matches, yellow, yellow-red, red, points
-          card_totals = {}
+          # DEBUG: print all tables found and their classes/ids
+          tables = soup.find_all("table")
+          print(f"\nFound {len(tables)} tables:", file=sys.stderr)
+          for i, t in enumerate(tables):
+              cls = t.get("class", [])
+              tid = t.get("id", "")
+              rows = t.find_all("tr")
+              print(f"  Table {i}: class={cls} id={tid} rows={len(rows)}", file=sys.stderr)
+              # Print first row of each table to understand structure
+              if rows:
+                  first = rows[0]
+                  cells = first.find_all(["th","td"])
+                  print(f"    First row cells: {[c.get_text(strip=True)[:20] for c in cells[:8]]}", file=sys.stderr)
 
-          table = soup.find("table", class_="items")
-          if not table:
-              # Try finding any table
-              tables = soup.find_all("table")
-              print(f"No .items table found. Total tables: {len(tables)}", file=sys.stderr)
-              if tables:
-                  table = tables[0]
-              else:
-                  print("ERROR: No table found at all", file=sys.stderr)
-                  print(soup.get_text()[:1000], file=sys.stderr)
-                  sys.exit(1)
+          # DEBUG: print all element classes that contain "fair" or "table"
+          print("\nKey divs/sections:", file=sys.stderr)
+          for el in soup.find_all(class_=True):
+              cls = " ".join(el.get("class",[]))
+              if any(k in cls.lower() for k in ["fair","card","discipline","yellow","red","table","responsive"]):
+                  print(f"  <{el.name} class='{cls}'> text={el.get_text(strip=True)[:50]}", file=sys.stderr)
 
-          rows = table.find_all("tr", class_=["odd", "even"])
-          print(f"Found {len(rows)} data rows", file=sys.stderr)
-
-          for row in rows:
-              cells = row.find_all("td")
-              if len(cells) < 5:
-                  continue
-
-              # Find team name — usually in a td with class "no-border-links"
-              team_td = row.find("td", class_="no-border-links") or row.find("a", {"title": True})
-              if team_td:
-                  team_name = team_td.get_text(strip=True)
-              else:
-                  # fallback: find cell with text that's not a number
-                  team_name = ""
-                  for cell in cells:
-                      txt = cell.get_text(strip=True)
-                      if txt and not txt.isdigit() and txt != "-":
-                          team_name = txt
-                          break
-
-              team_name = NAME_MAP.get(team_name, team_name)
-              if not team_name:
-                  continue
-
-              # Extract numbers from all cells
-              nums = []
-              for cell in cells:
-                  txt = cell.get_text(strip=True)
-                  if txt.isdigit():
-                      nums.append(int(txt))
-                  elif txt == "-":
-                      nums.append(0)
-
-              # Transfermarkt fair play column order (after rank+team+matches):
-              # Yellow | Yellow-Red | Red | Points
-              # So we want nums[-4] = yellow, nums[-3] = yellow-red, nums[-2] = red
-              if len(nums) >= 4:
-                  yellow = nums[-4]
-                  red    = nums[-2]  # skip yellow-red
-              elif len(nums) >= 2:
-                  yellow = nums[0]
-                  red    = nums[1] if len(nums) > 1 else 0
-              else:
-                  yellow, red = 0, 0
-
-              card_totals[team_name] = {"yellow": yellow, "red": red}
-              print(f"  {team_name}: {yellow}Y {red}R", file=sys.stderr)
-
-          print(f"\nScraped {len(card_totals)} teams", file=sys.stderr)
-
-          if not card_totals:
-              print("ERROR: No data extracted", file=sys.stderr)
-              sys.exit(1)
-
+          print("\nNot extracting data yet - debug run only", file=sys.stderr)
+          # Write empty file so workflow doesn't fail
           with open("card_totals.json", "w") as f:
-              json.dump(card_totals, f, indent=2, ensure_ascii=False)
-          print("Written card_totals.json")
-          PYEOF
-
-      - name: Update GitHub configs
-        env:
-          GH_TOKEN: ${{ secrets.CARDS_UPDATE_TOKEN }}
-        run: |
-          python3 << 'PYEOF'
-          import json, base64, urllib.request, sys
-
-          TOKEN = "${{ secrets.CARDS_UPDATE_TOKEN }}"
-          REPO  = "LachMack/portfolio"
-
-          def gh(path, method="GET", body=None):
-              url = f"https://api.github.com/repos/{REPO}/{path}"
-              req = urllib.request.Request(url, method=method,
-                  headers={"Authorization": f"token {TOKEN}",
-                           "Accept": "application/vnd.github.v3+json",
-                           "Content-Type": "application/json"})
-              if body:
-                  req.data = json.dumps(body).encode()
-              with urllib.request.urlopen(req, timeout=20) as r:
-                  return json.loads(r.read())
-
-          try:
-              with open("card_totals.json") as f:
-                  card_totals = json.load(f)
-          except Exception as e:
-              print(f"ERROR: {e}")
-              sys.exit(1)
-
-          if not card_totals:
-              print("No data — skipping")
-              sys.exit(0)
-
-          print(f"Updating with {len(card_totals)} teams")
-
-          def update_config(config_path, is_daralads=False):
-              print(f"\n{config_path}...")
-              meta   = gh(f"contents/worldcup/{config_path}")
-              sha    = meta["sha"]
-              raw    = base64.b64decode(meta["content"].replace("\n","")).decode()
-              config = json.loads(raw)
-              config["cardTotals"] = card_totals
-
-              overrides = config.get("manualOverrides", {})
-              awards    = config.get("manualAwards", {})
-              has_cards = any(v["yellow"] > 0 or v["red"] > 0 for v in card_totals.values())
-
-              if has_cards:
-                  top_y = max(card_totals, key=lambda t: card_totals[t]["yellow"])
-                  top_r = max(card_totals, key=lambda t: card_totals[t]["red"])
-                  print(f"  Top yellow: {top_y} ({card_totals[top_y]['yellow']})")
-                  print(f"  Top red:    {top_r} ({card_totals[top_r]['red']})")
-
-                  if is_daralads:
-                      team_owner = {t: p["name"]
-                          for p in config.get("participants", [])
-                          for t in (p.get("teams") or [])}
-
-                      if not overrides.get("mostYellow") and card_totals[top_y]["yellow"] > 0:
-                          owner = team_owner.get(top_y)
-                          if owner and awards.get("mostYellow") != owner:
-                              awards["mostYellow"] = owner
-                              config["manualAwards"] = awards
-                              print(f"  mostYellow → {owner}")
-
-                      if not overrides.get("mostRed") and card_totals[top_r]["red"] > 0:
-                          owner = team_owner.get(top_r)
-                          if owner and awards.get("mostRed") != owner:
-                              awards["mostRed"] = owner
-                              config["manualAwards"] = awards
-                              print(f"  mostRed → {owner}")
-
-              new_content = base64.b64encode(
-                  json.dumps(config, indent=2, ensure_ascii=False).encode()
-              ).decode()
-              gh(f"contents/worldcup/{config_path}", method="PUT", body={
-                  "message": "Auto: card data from Transfermarkt",
-                  "content": new_content,
-                  "sha": sha
-              })
-              print(f"  ✓ Done")
-
-          update_config("wc2026-config.json",   is_daralads=False)
-          update_config("daralads-config.json", is_daralads=True)
-          print("\nAll done!")
+              json.dump({}, f)
           PYEOF
 
       - name: Summary
         if: always()
-        run: |
-          if [ -f card_totals.json ]; then
-            python3 -c "
-          import json
-          d = json.load(open('card_totals.json'))
-          teams = sorted(d.items(), key=lambda x: -x[1]['yellow'])
-          print(f'=== {len(d)} teams ===')
-          for t, s in teams:
-              if s['yellow'] > 0 or s['red'] > 0:
-                  print(f'{t:25} {s[\"yellow\"]:2}Y {s[\"red\"]}R')
-          "
-          else
-            echo "No card_totals.json"
-          fi
+        run: echo "Debug run complete - check logs above for table structure"
