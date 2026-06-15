@@ -1130,7 +1130,12 @@ function renderScores(){
       '<span class="font-display" style="font-size:10px;color:#5a6a88;font-weight:600;letter-spacing:.04em;text-transform:uppercase">'+roundShort+'</span>';
     var aestTimeStr=m.ofbTime?venueToAEST(m.ofbTime,m.gr,m.d):'';
     out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:3px;color:#5a6a88">'+fmtDate(m.d)+(aestTimeStr?' <span style="color:#5a6a88">·</span> '+aestTimeStr:'')+'</div></div>';
-    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+'</span>';
+    var ct=CFG.cardTotals||{};
+    var t1y=(ct[m.t1]||{}).yellow||0,t1r=(ct[m.t1]||{}).red||0;
+    var t2y=(ct[m.t2]||{}).yellow||0,t2r=(ct[m.t2]||{}).red||0;
+    var t1cards=(t1y>0||t1r>0)?'<span style="font-size:9px;opacity:.7;margin-left:3px">'+(t1y>0?t1y+'🟨':'')+' '+(t1r>0?t1r+'🟥':'')+'</span>':'';
+    var t2cards=(t2y>0||t2r>0)?'<span style="font-size:9px;opacity:.7;margin-left:3px">'+(t2y>0?t2y+'🟨':'')+' '+(t2r>0?t2r+'🟥':'')+'</span>':'';
+    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;justify-content:flex-end;gap:3px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+t1cards+'</span>';
     out+='<div style="text-align:center;min-width:80px">';
     if(isEdit){
       var v1=m.s1!=null?m.s1:'',v2=m.s2!=null?m.s2:'';
@@ -1149,7 +1154,7 @@ function renderScores(){
       out+='<span style="font-size:11px;color:#5a6a88;border:1px dashed #ffffff14;padding:3px 8px;border-radius:4px;white-space:nowrap">click to enter</span>';
     }
     out+='</div>';
-    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+'</span>';
+    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;gap:3px">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+t2cards+'</span>';
     out+='<span style="font-size:10px;color:#5a6a88;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(m.gr)+'</span>';
     out+='</div>';
     if(goalsHtml)out+=goalsHtml;
@@ -1656,6 +1661,39 @@ function setSweepView(v){sweepView=v;renderSweep();}
 // ══════════════════════════════════════════════════════════════════
 // DARALADS ADMIN TAB
 // ══════════════════════════════════════════════════════════════════
+async function refreshCardData(){
+  var btn=document.getElementById('card-refresh-btn');
+  if(btn){btn.disabled=true;btn.textContent='Syncing...';}
+  var msg=document.getElementById('card-refresh-msg');
+  if(msg)msg.innerHTML='<span style="color:#fbbf24">Fetching card data from Family Sweep...</span>';
+
+  // Pull cardTotals directly from family config — no ScrapingBee needed.
+  // Family Sweep Admin fetches from FBref and pushes cardTotals to wc2026-config.json.
+  var familyUrl='https://raw.githubusercontent.com/LachMack/portfolio/main/worldcup/wc2026-config.json?t='+Date.now();
+  try{
+    var r=await fetch(familyUrl,{signal:AbortSignal.timeout(15000)});
+    if(!r.ok)throw new Error('Could not read family config: HTTP '+r.status);
+    var fCfg=await r.json();
+    var cardTotals=fCfg.cardTotals||{};
+    var count=Object.keys(cardTotals).length;
+    if(!count)throw new Error('No card data in family config yet — run Refresh Card Data in the Family Sweep Admin first');
+
+    CFG.cardTotals=cardTotals;
+    calcAutoAwards();
+    var ok=await pushToGitHub(CFG);
+
+    var totalY=Object.values(cardTotals).reduce(function(s,v){return s+(v.yellow||0);},0);
+    var totalR=Object.values(cardTotals).reduce(function(s,v){return s+(v.red||0);},0);
+    if(msg)msg.innerHTML='<span style="color:#00d4aa">✓ Synced — '+count+' teams ('+totalY+' yellows, '+totalR+' reds)</span>';
+    renderSweep();
+  }catch(e){
+    console.error('Card sync failed:',e);
+    if(msg)msg.innerHTML='<span style="color:#ff4757">✗ '+e.message+'</span>';
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🟨🟥 Sync Card Data';}
+  }
+}
+
 function renderAdmin(){
   var allTeamsSorted=['Algeria','Argentina','Australia','Austria','Belgium','Bosnia & Herzegovina',
     'Brazil','Canada','Cape Verde','Colombia','Croatia','Curaçao','Czechia','DR Congo','Ecuador',
@@ -1771,7 +1809,11 @@ function renderAdmin(){
   });
   out+='</div>';
 
-  out+='<div style="display:flex;gap:10px"><button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button></div>';
+  out+='<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button></div>'+
+    '<div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+    '<button id="card-refresh-btn" class="btn btn-lg" style="border-color:#fbbf2450;color:#fbbf24" onclick="refreshCardData()">🟨🟥 Refresh Card Data from FBref</button>'+
+    '<span id="card-refresh-msg" style="font-size:12px;color:#5a6a88">Fetches live card totals — requires GitHub token</span>'+
+    '</div>';
   out+='<div id="admin-msg"></div></div>';
   document.getElementById('tab-admin').innerHTML=out;
   updateTokenStatus();
