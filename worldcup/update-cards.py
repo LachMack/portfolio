@@ -73,78 +73,88 @@ def normalise(name):
 
 
 def parse_summary(data, t1, t2):
-    """Extract card events from ESPN match summary JSON."""
+    """Extract card events from ESPN match summary JSON.
+
+    ESPN uses boolean flags on detail objects:
+      detail.redCard = True  → red card
+      detail.yellowCard = True (implied by type.text) → yellow
+    Each detail has: clock.displayValue, participants[0].athlete.displayName, team.id
+    home team = competitors[0]
+    """
     home_cards, away_cards = [], []
 
-    # ESPN incidents are in data['header']['competitions'][0]['details']
-    # or data['plays'] for play-by-play
-    # Card type IDs: 93=yellow card, 94=red card, 95=second yellow
-
-    # Try header > competitions > details first
     try:
-        details = data['header']['competitions'][0].get('details', [])
-        for d in details:
-            type_id = d.get('type', {}).get('id')
-            type_text = d.get('type', {}).get('text', '').lower()
-            is_yellow = type_id in ('93', 93) or 'yellow' in type_text
-            is_red = type_id in ('94', 94, '95', 95) or 'red card' in type_text or 'second yellow' in type_text
-            if not is_yellow and not is_red:
-                continue
+        comp = data['header']['competitions'][0]
+        home_id = str(comp['competitors'][0]['team']['id'])
+        details = comp.get('details', [])
+    except (KeyError, IndexError):
+        return {'home': [], 'away': []}
 
-            athlete = d.get('athletesInvolved', [{}])
-            name = athlete[0].get('displayName', '') if athlete else ''
-            if not name:
-                continue
+    # Also check keyEvents which has fuller card data
+    key_events = data.get('keyEvents', [])
+    card_events = []
 
-            clock = d.get('clock', {})
-            minute_str = clock.get('displayValue', '0')
-            try:
-                minute = int(minute_str.split(':')[0].split('+')[0])
-            except Exception:
-                continue
+    # Primary: header > competitions > details (has boolean redCard flag)
+    for d in details:
+        is_red = d.get('redCard', False)
+        # Yellow card: not a scoring play, not red card, has participants
+        # ESPN doesn't have a yellowCard boolean in details — use type.text from keyEvents
+        if is_red:
+            card_type = 'red'
+        else:
+            continue  # handle yellows via keyEvents below
 
-            card_type = 'red' if is_red else 'yellow'
-            team_id = d.get('team', {}).get('id', '')
-            home_id = str(data['header']['competitions'][0]['competitors'][0]['team']['id'])
-            event = {'name': name, 'minute': minute, 'type': card_type}
-            if team_id == home_id:
-                home_cards.append(event)
-            else:
-                away_cards.append(event)
+        participants = d.get('participants', [])
+        if not participants:
+            continue
+        name = participants[0].get('athlete', {}).get('displayName', '')
+        if not name:
+            continue
 
-    except (KeyError, IndexError, TypeError):
-        pass
-
-    # Fallback: try plays array
-    if not home_cards and not away_cards:
+        clock = d.get('clock', {})
+        minute_str = clock.get('displayValue', '0')
         try:
-            plays = data.get('plays', [])
-            home_id = str(data['header']['competitions'][0]['competitors'][0]['team']['id'])
-            for play in plays:
-                type_id = str(play.get('type', {}).get('id', ''))
-                type_text = play.get('type', {}).get('text', '').lower()
-                is_yellow = type_id == '93' or 'yellow' in type_text
-                is_red = type_id in ('94','95') or 'red' in type_text
-                if not is_yellow and not is_red:
-                    continue
-                participants = play.get('participants', [{}])
-                name = participants[0].get('athlete', {}).get('displayName', '') if participants else ''
-                if not name:
-                    continue
-                clock = play.get('clock', {})
-                try:
-                    minute = int(clock.get('displayValue','0').split(':')[0].split('+')[0])
-                except Exception:
-                    continue
-                team_id = str(play.get('team', {}).get('id', ''))
-                card_type = 'red' if is_red else 'yellow'
-                event = {'name': name, 'minute': minute, 'type': card_type}
-                if team_id == home_id:
-                    home_cards.append(event)
-                else:
-                    away_cards.append(event)
-        except (KeyError, IndexError, TypeError):
-            pass
+            minute = int(minute_str.replace("'", '').split('+')[0].strip())
+        except (ValueError, AttributeError):
+            continue
+
+        team_id = str(d.get('team', {}).get('id', ''))
+        event = {'name': name, 'minute': minute, 'type': card_type}
+        if team_id == home_id:
+            home_cards.append(event)
+        else:
+            away_cards.append(event)
+
+    # keyEvents has both yellow and red cards with type.id 93=red, 94=yellow
+    for ke in key_events:
+        type_id = str(ke.get('type', {}).get('id', ''))
+        type_text = ke.get('type', {}).get('text', '').lower()
+        is_yellow = type_id == '94' or 'yellow card' in type_text
+        is_red_ke = type_id == '93' or type_text == 'red card'
+        if not is_yellow and not is_red_ke:
+            continue
+
+        card_type = 'red' if is_red_ke else 'yellow'
+        participants = ke.get('participants', [])
+        if not participants:
+            continue
+        name = participants[0].get('athlete', {}).get('displayName', '')
+        if not name:
+            continue
+
+        clock = ke.get('clock', {})
+        minute_str = clock.get('displayValue', '0')
+        try:
+            minute = int(minute_str.replace("'", '').split('+')[0].strip())
+        except (ValueError, AttributeError):
+            continue
+
+        team_id = str(ke.get('team', {}).get('id', ''))
+        event = {'name': name, 'minute': minute, 'type': card_type}
+        if team_id == home_id:
+            home_cards.append(event)
+        else:
+            away_cards.append(event)
 
     def dedup(cards):
         seen, out = set(), []
@@ -229,6 +239,26 @@ def main():
         if not data:
             errors += 1
             continue
+
+        # Debug first match - print raw structure
+        if processed == 1:
+            import json as _json
+            comp = data.get('header',{}).get('competitions',[{}])[0]
+            details = comp.get('details',[])
+            print(f'  DEBUG: details count={len(details)}')
+            if details:
+                print(f'  DEBUG: first detail={_json.dumps(details[0], ensure_ascii=False)[:300]}')
+            # Also check gamepackageJSON key
+            gp = data.get('gamepackageJSON',{})
+            if gp:
+                print(f'  DEBUG: gamepackageJSON keys={list(gp.keys())[:10]}')
+            # Check all top-level keys
+            print(f'  DEBUG: top-level keys={list(data.keys())}')
+            # Look for plays
+            plays = data.get('plays',[])
+            print(f'  DEBUG: plays count={len(plays)}')
+            if plays:
+                print(f'  DEBUG: first play={_json.dumps(plays[0], ensure_ascii=False)[:300]}')
 
         cards = parse_summary(data, t1, t2)
         print(f'  ✓ {len(cards["home"])} home, {len(cards["away"])} away cards')
