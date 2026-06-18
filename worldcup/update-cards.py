@@ -2,6 +2,16 @@
 """
 Fetches card data from AiScore for finished WC2026 matches.
 Updates wc2026-config.json with per-match events + team totals.
+
+AiScore uses SVG icon sprites for card types:
+  <use xlink:href="#icon-yellow-card">  → yellow card
+  <use xlink:href="#icon-red-card">     → red card
+  <use xlink:href="#icon-second-yellow-card"> → second yellow (= red)
+
+Each event row structure (from DOM inspection):
+  <span class="text ml-xs">PLAYER NAME</span>
+  <svg ...><use xlink:href="#icon-yellow-card"></svg>
+  [minute in nearby text]
 """
 
 import json, re, sys, os, time, socket
@@ -9,7 +19,7 @@ from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 
 CONFIG_PATH = os.environ.get('CONFIG_PATH', 'worldcup/wc2026-config.json')
-TIMEOUT = 10  # seconds per request
+TIMEOUT = 10
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -34,80 +44,141 @@ def fetch_html(url):
         print(f'  Error: {type(e).__name__}: {e}')
     return None
 
+
 def parse_cards(html, t1, t2):
-    home_cards, away_cards = [], []
+    """
+    Parse card events using AiScore's SVG icon structure.
 
-    # Find all card image references and surrounding context
-    img_re = re.compile(r'<img[^>]+src=["\']([^"\']*(?:yellow|red)[^"\']*card[^"\']*)["\']', re.I)
+    The timeline HTML looks like:
+      <span class="text ml-xs" ...>César Montes</span>
+      <svg ...><use xlink:href="#icon-red-card" ...></use></svg>
+      ... 90+2' ...
 
-    for m in img_re.finditer(html):
-        src = m.group(1).lower()
-        is_yellow = 'yellow' in src
-        is_red = 'red' in src or 'second' in src
-        if not is_yellow and not is_red:
+    Or reversed for away events:
+      <svg ...><use xlink:href="#icon-yellow-card"></use></svg>
+      <span class="text ml-xs" ...>Brian Gutierrez</span>
+      ... 17' ...
+
+    We find each card icon, then look nearby for:
+    1. The player name in a <span class="text ..."> element
+    2. The minute from the surrounding text
+    3. Home vs away from the position/class context
+    """
+    home_cards = []
+    away_cards = []
+
+    # Find all card icon occurrences
+    # Pattern: xlink:href="#icon-yellow-card" or #icon-red-card or #icon-second-yellow-card
+    card_re = re.compile(
+        r'xlink:href=["\']#icon-(yellow-card|red-card|second-yellow-card)["\']',
+        re.I
+    )
+
+    for m in card_re.finditer(html):
+        icon_type = m.group(1)
+        card_type = 'red' if 'red' in icon_type or 'second' in icon_type else 'yellow'
+
+        # Search window: 800 chars before and 400 chars after the icon
+        ctx_start = max(0, m.start() - 800)
+        ctx_end = min(len(html), m.end() + 400)
+        context = html[ctx_start:ctx_end]
+
+        # ── Extract player name ──────────────────────────────────────
+        # AiScore wraps player names in <span class="text ml-xs"> or similar
+        name = None
+        name_re = re.compile(
+            r'<span[^>]+class=["\'][^"\']*\btext\b[^"\']*["\'][^>]*>([^<]{3,45})</span>',
+            re.I
+        )
+        # Prefer the closest name match (last one before icon, or first after)
+        name_matches = list(name_re.finditer(context))
+        icon_pos = m.start() - ctx_start  # position of icon within context
+
+        if name_matches:
+            # Find closest match to icon position
+            best = min(name_matches, key=lambda x: abs(x.start() - icon_pos))
+            candidate = best.group(1).strip()
+            # Validate: looks like a person name (Title Case, no HTML, reasonable length)
+            if (3 <= len(candidate) <= 45 and
+                not re.search(r'[<>&]', candidate) and
+                re.search(r'[A-Za-záéíóúàèìòùüñčšžćđ]', candidate)):
+                name = candidate
+
+        if not name:
+            # Fallback: look for capitalised words near the icon
+            text = re.sub(r'<[^>]+>', ' ', context)
+            text = re.sub(r'\s+', ' ', text)
+            name_fallback = re.search(
+                r'([A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽĆĐ][a-záéíóúàèìòùüñčšžćđ\-]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽĆĐ][a-záéíóúàèìòùüñčšžćđ\-]+)+)',
+                text
+            )
+            if name_fallback:
+                name = name_fallback.group(1).strip()
+
+        if not name:
             continue
-        card_type = 'red' if is_red else 'yellow'
 
-        # Look at surrounding 600 chars for minute + player name
-        start = max(0, m.start() - 600)
-        context_html = html[start:m.end() + 100]
-        context = re.sub(r'<[^>]+>', ' ', context_html)
-        context = re.sub(r'\s+', ' ', context).strip()
-
-        # Find minute
-        min_match = re.search(r'(\d{1,3})(?:\+\d+)?\s*\'', context)
+        # ── Extract minute ───────────────────────────────────────────
+        text = re.sub(r'<[^>]+>', ' ', context)
+        min_match = re.search(r'(\d{1,3})(?:\+\d+)?\s*\'', text)
         if not min_match:
             continue
         minute = int(min_match.group(1))
-        if minute > 120:
+        if minute > 125:
             continue
 
-        # Extract player name - look for Title Case words
-        cleaned = re.sub(r'\d{1,3}(?:\+\d+)?\s*\'', ' ', context)
-        cleaned = re.sub(r'\b(In|Out|Assist|Goal|Corner|HT|FT|Full Time|Half Time|Substitution|Penalty|VAR)\b', ' ', cleaned, flags=re.I)
-        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        # ── Determine home vs away ───────────────────────────────────
+        # AiScore shows home team events on the left (icon after name)
+        # and away team events on the right (icon before name)
+        # The icon position relative to the name span tells us which side
+        pre_icon = context[:icon_pos]
 
-        name_match = re.search(
-            r'([A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽĆĐ][a-záéíóúàèìòùüñčšžćđ\-]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽĆĐ][a-záéíóúàèìòùüñčšžćđ\-]+)+)',
-            cleaned
-        )
-        if not name_match:
-            continue
-        name = name_match.group(1).strip()
-        if len(name) < 4 or len(name) > 45:
-            continue
+        # Check for 'right' class hint in containing divs
+        is_away = bool(re.search(r'class=["\'][^"\']*\bright\b[^"\']*["\']', pre_icon[-300:], re.I))
+
+        # Secondary check: if player name appears BEFORE the icon, it's home (name then card)
+        # If player name appears AFTER the icon, it's away (card then name)
+        if not is_away and name_matches:
+            best = min(name_matches, key=lambda x: abs(x.start() - icon_pos))
+            if best.start() > icon_pos:
+                is_away = True  # name is after icon → away
 
         event = {'name': name, 'minute': minute, 'type': card_type}
-
-        # Determine home/away from div class context before the img
-        pre = html[start:m.start()]
-        last_300 = pre[-300:]
-        if re.search(r'class=["\'][^"\']*\bright\b[^"\']*["\']', last_300, re.I):
+        if is_away:
             away_cards.append(event)
         else:
             home_cards.append(event)
 
+    # Deduplicate by (name prefix, minute, type)
     def dedup(cards):
         seen, out = set(), []
         for c in sorted(cards, key=lambda x: x['minute']):
-            k = (c['name'][:8], c['minute'], c['type'])
+            k = (c['name'][:6], c['minute'], c['type'])
             if k not in seen:
                 seen.add(k)
                 out.append(c)
         return out
 
-    return {'home': dedup(home_cards), 'away': dedup(away_cards)}
+    result = {'home': dedup(home_cards), 'away': dedup(away_cards)}
+
+    # Sanity check: if we found many more than expected, something went wrong
+    total = len(result['home']) + len(result['away'])
+    if total > 20:
+        print(f'  WARNING: {total} cards found — possible parsing error, capping at 20')
+        result['home'] = result['home'][:10]
+        result['away'] = result['away'][:10]
+
+    return result
 
 
 def build_slug(match_key):
     slug = match_key.lower().replace(' vs ', '-')
-    replacements = [
+    for old, new in [
         ('ü','u'),('ç','c'),('é','e'),('è','e'),('ê','e'),
         ('à','a'),('á','a'),('ã','a'),('â','a'),
         ('ó','o'),('ô','o'),('ú','u'),('ñ','n'),
         ('&',' and '),("'",''),('ş','s'),('ğ','g'),
-    ]
-    for old, new in replacements:
+    ]:
         slug = slug.replace(old, new)
     slug = re.sub(r'[^a-z0-9-]', '-', slug)
     slug = re.sub(r'-+', '-', slug).strip('-')
@@ -131,7 +202,7 @@ def main():
     fetched = 0
     skipped = 0
 
-    for match_key, aid in sorted(ai_ids.items()):
+    for i, (match_key, aid) in enumerate(sorted(ai_ids.items()), 1):
         parts = match_key.split(' vs ')
         if len(parts) != 2:
             continue
@@ -139,7 +210,7 @@ def main():
 
         slug = build_slug(match_key)
         url = f'https://m.aiscore.com/match-{slug}/{aid}'
-        print(f'\n[{fetched+skipped+errors+1}/{len(ai_ids)}] {match_key}')
+        print(f'\n[{i}/{len(ai_ids)}] {match_key}')
 
         html = fetch_html(url)
         if not html:
@@ -152,15 +223,18 @@ def main():
             continue
 
         # Check if finished
-        is_finished = 'Full Time' in html or '>FT<' in html or 'FT 1' in html or 'FT 2' in html or 'FT 0' in html
+        is_finished = bool(re.search(r'Full\s*Time|>FT\s*\d|\bFT\b.*\d-\d', html))
         if not is_finished:
-            print(f'  Not finished yet — skipping')
+            print(f'  Not finished — skipping')
             skipped += 1
             continue
 
         cards = parse_cards(html, t1, t2)
-        total = len(cards['home']) + len(cards['away'])
         print(f'  ✓ {len(cards["home"])} home cards, {len(cards["away"])} away cards')
+        if cards["home"]:
+            print(f'    Home: {[(c["name"], c["minute"], c["type"]) for c in cards["home"]]}')
+        if cards["away"]:
+            print(f'    Away: {[(c["name"], c["minute"], c["type"]) for c in cards["away"]]}')
 
         match_cards[match_key] = {
             'homeTeam': t1, 'awayTeam': t2,
@@ -170,14 +244,14 @@ def main():
         fetched += 1
         time.sleep(0.3)
 
-    # Tally totals
+    # Tally totals from per-match events
     card_totals = {'_updated': int(time.time() * 1000)}
     for mc in match_cards.values():
-        for team_key, events in [('homeTeam', 'home'), ('awayTeam', 'away')]:
+        for team_key, events_key in [('homeTeam', 'home'), ('awayTeam', 'away')]:
             team = mc[team_key]
             if team not in card_totals:
                 card_totals[team] = {'yellow': 0, 'red': 0}
-            for e in mc.get(events, []):
+            for e in mc.get(events_key, []):
                 card_totals[team]['red' if e['type'] == 'red' else 'yellow'] += 1
 
     config['matchCards'] = match_cards
