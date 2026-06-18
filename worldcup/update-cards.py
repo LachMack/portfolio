@@ -222,13 +222,19 @@ def parse_cards_from_text(html, t1, t2):
 def debug_html(html, match_key):
     """Print diagnostic info about what's in the HTML."""
     print(f'  HTML length: {len(html)}')
-    print(f'  Has __NUXT__: {"__NUXT__" in html}')
+    has_nuxt = '__NUXT__' in html
+    print(f'  Has __NUXT__: {has_nuxt}')
     print(f'  Has __NUXT_DATA__: {"__NUXT_DATA__" in html}')
     print(f'  Has icon-yellow-card: {"icon-yellow-card" in html}')
     print(f'  Has xlink: {"xlink" in html}')
     print(f'  Has Full Time: {"Full Time" in html}')
     has_ft = bool(re.search(r"\bFT\b", html))
     print(f'  Has FT: {has_ft}')
+    # Print the raw __NUXT__ assignment so we know the format
+    if has_nuxt:
+        idx = html.find('window.__NUXT__')
+        print(f'  __NUXT__ context (first 300 chars):')
+        print(f'  {repr(html[idx:idx+300])}')
     # Show script tags
     scripts = re.findall(r'<script([^>]*)>', html)
     print(f'  Script tags: {len(scripts)}')
