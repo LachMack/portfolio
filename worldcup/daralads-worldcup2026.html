@@ -15,23 +15,23 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 ::-webkit-scrollbar-track{background:#111827}
 ::-webkit-scrollbar-thumb{background:#ffffff20;border-radius:2px}
 /* Typography */
-.font-display{font-family:'Barlow Condensed',sans-serif}
+.font-display{font-family:Barlow Condensed,sans-serif}
 /* Cards */
 .card{background:#111827;border:1px solid #ffffff10;border-radius:10px;overflow:hidden}
 .card-pad{background:#111827;border:1px solid #ffffff10;border-radius:10px;padding:16px 18px}
 /* Buttons */
-.btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;border-radius:4px;cursor:pointer;border:1px solid #ffffff22;background:transparent;color:#5a6a88;transition:all .15s}
+.btn{font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;border-radius:4px;cursor:pointer;border:1px solid #ffffff22;background:transparent;color:#5a6a88;transition:all .15s}
 .btn:hover{color:#e8eeff;border-color:#ffffff40}
 .btn-accent{background:#00d4aa18;border-color:#00d4aa40;color:#00d4aa}
 .btn-accent:hover{background:#00d4aa28}
 .btn-lg{font-size:16px;padding:12px 24px;border-radius:8px}
 /* Tabs */
 #tabs{display:flex;gap:2px;border-bottom:1px solid #ffffff10;margin-bottom:20px;overflow-x:auto}
-.tab-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 16px;border:none;border-bottom:2px solid transparent;background:none;color:#5a6a88;cursor:pointer;white-space:nowrap;transition:color .15s}
+.tab-btn{font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 16px;border:none;border-bottom:2px solid transparent;background:none;color:#5a6a88;cursor:pointer;white-space:nowrap;transition:color .15s}
 .tab-btn.active{color:#00d4aa;border-bottom-color:#00d4aa}
 /* Tables */
 table{width:100%;border-collapse:collapse}
-th{padding:6px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#5a6a88;border-bottom:1px solid #ffffff0a;text-align:center}
+th{padding:6px 7px;font-family:Barlow Condensed,sans-serif;font-weight:600;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#5a6a88;border-bottom:1px solid #ffffff0a;text-align:center}
 th.left{text-align:left}
 td{padding:7px 7px;font-size:13px;border-bottom:1px solid #ffffff06;text-align:center}
 td.left{text-align:left}
@@ -76,7 +76,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:1}
   .grid-stats{grid-template-columns:1fr}
 }
 /* Status bar */
-#statusbar{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.05em}
+#statusbar{font-family:Barlow Condensed,sans-serif;font-size:11px;letter-spacing:.05em}
 /* Spinner overlay */
 #spin-overlay{display:none;position:fixed;inset:0;background:#080d18ee;z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
 #spin-overlay.show{display:flex}
@@ -87,7 +87,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:1}
 .spin-window::after{bottom:0;background:linear-gradient(transparent,#080d18)}
 .spin-highlight{position:absolute;top:50%;left:0;right:0;height:36px;transform:translateY(-50%);border-top:1px solid #00d4aa60;border-bottom:1px solid #00d4aa60;pointer-events:none;z-index:3}
 .spin-reel{display:flex;flex-direction:column;align-items:center}
-.spin-item{height:36px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;width:100%;white-space:nowrap}
+.spin-item{height:36px;display:flex;align-items:center;justify-content:center;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:20px;width:100%;white-space:nowrap}
 /* Animations */
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes glow{0%{color:#f0f4ff}50%{color:#00d4aa;text-shadow:0 0 20px #00d4aa80}100%{color:#00d4aa}}
@@ -113,13 +113,13 @@ input[type=number]::-webkit-inner-spin-button{opacity:1}
 .ko-rounds{display:flex;gap:8px;min-width:860px;align-items:flex-start}
 .ko-col{display:flex;flex-direction:column;flex:1}
 .ko-col.wide{flex:2}
-.ko-round-hdr{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;color:#5a6a88;text-align:center;padding:4px 0 10px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #ffffff10;margin-bottom:8px}
+.ko-round-hdr{font-family:Barlow Condensed,sans-serif;font-size:10px;font-weight:700;color:#5a6a88;text-align:center;padding:4px 0 10px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #ffffff10;margin-bottom:8px}
 .ko-match{background:#111827;border:1px solid #ffffff10;border-radius:8px;overflow:hidden;font-size:11px;margin-bottom:5px}
 .ko-team{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-bottom:1px solid #ffffff08}
 .ko-team:last-child{border-bottom:none}
 .ko-team.winner{background:#00d4aa0a}
 .ko-team .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:78%}
-.ko-team .score{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;min-width:12px;text-align:right}
+.ko-team .score{font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;min-width:12px;text-align:right}
 .ko-meta{font-size:10px;color:#5a6a88;text-align:center;padding:3px}
 </style>
 </head>
@@ -717,6 +717,34 @@ function renderStats(){
   });
   if(!rows.length) out+='<tr><td colspan="11" style="text-align:center;padding:40px;color:#5a6a88">Stats appear once scores are entered</td></tr>';
   out+='</tbody></table></div>';
+  var ct=CFG.cardTotals||{};
+  if(Object.keys(ct).length>0){
+    var cardTeams=Object.entries(ct).map(function(e){return{team:e[0],y:e[1].yellow||0,r:e[1].red||0};})
+      .filter(function(x){return x.y>0||x.r>0;}).sort(function(a,b){return b.r!==a.r?b.r-a.r:b.y-a.y;});
+    var byOwner={};(CFG.participants||[]).forEach(function(p){(p.teams||[]).forEach(function(t){byOwner[t]=p.name;});});
+    var PCLRS=['#00d4aa','#60a5fa','#f472b6','#fbbf24','#a78bfa','#fb923c'];
+    var pIdx={};(CFG.participants||[]).forEach(function(p,i){pIdx[p.name]=i;});
+    out+='<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+      '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟥🟨 Card Standings</div>'+
+      '<div style="font-size:10px;color:#5a6a88">Reds win · Yellows tiebreak</div></div>';
+    out+='<div class="card"><table><thead><tr style="background:#ffffff05">';
+    ['#','Team','Owner','🟥 Red','🟨 Yellow'].forEach(function(hd){
+      out+='<th style="text-align:'+(hd==='Team'||hd==='Owner'?'left':'center')+';padding:8px 10px;font-size:11px;color:#5a6a88;font-weight:600">'+hd+'</th>';
+    });
+    out+='</tr></thead><tbody>';
+    cardTeams.forEach(function(c,i){
+      var own=byOwner[c.team]||'';
+      var col=own?PCLRS[pIdx[own]%PCLRS.length]:'#5a6a88';
+      out+='<tr style="border-top:1px solid #ffffff06">'+
+        '<td style="padding:7px 10px;text-align:center;color:#5a6a88;font-size:11px">'+(i+1)+'</td>'+
+        '<td style="padding:7px 10px;font-size:12px;white-space:nowrap">'+f(c.team)+' '+h(c.team)+'</td>'+
+        '<td style="padding:7px 10px;font-size:11px;color:'+col+'">'+(own||'—')+'</td>'+
+        '<td style="padding:7px 10px;text-align:center;font-weight:700;color:#ff4757">'+c.r+'</td>'+
+        '<td style="padding:7px 10px;text-align:center;font-weight:700;color:#fbbf24">'+c.y+'</td>'+
+        '</tr>';
+    });
+    out+='</tbody></table></div></div>';
+  }
   document.getElementById('tab-stats').innerHTML=out;
 }
 
@@ -1123,6 +1151,15 @@ function renderScores(){
       });
       goalsHtml='<div style="font-size:10px;color:#5a6a88;margin-top:4px;padding-top:4px;border-top:1px solid #ffffff08;line-height:1.8">'+gLines.join('&nbsp;&nbsp;')+'</div>';
     }
+    var cardsHtml='';
+    var ct=CFG.cardTotals||{};
+    var t1c=ct[m.t1],t2c=ct[m.t2];
+    if((t1c||t2c)&&!isEdit){
+      var cParts=[];
+      if(t1c&&(t1c.yellow>0||t1c.red>0))cParts.push(f(m.t1)+' '+(t1c.yellow>0?t1c.yellow+'🟨 ':'')+( t1c.red>0?t1c.red+'🟥':'').trim());
+      if(t2c&&(t2c.yellow>0||t2c.red>0))cParts.push(f(m.t2)+' '+(t2c.yellow>0?t2c.yellow+'🟨 ':'')+( t2c.red>0?t2c.red+'🟥':'').trim());
+      if(cParts.length)cardsHtml='<div style="font-size:10px;color:#5a6a88;margin-top:3px;padding-top:3px;border-top:1px solid #ffffff06">'+cParts.join('&nbsp;&nbsp;')+'</div>';
+    }
     var htHtml=(m.ht1!=null&&m.ht2!=null&&!isEdit)?'<span style="font-size:10px;color:#5a6a88;margin-left:6px">(HT '+m.ht1+'-'+m.ht2+')</span>':'';
     var onclk=isEdit?'':'onclick="editScore(\''+m.key+'\')"';
     out+='<div '+onclk+' style="padding:10px 14px;background:#111827;border:1px solid '+(isEdit?'#00d4aa40':'#ffffff0e')+';border-radius:8px;cursor:'+(isEdit?'default':'pointer')+'">';
@@ -1131,12 +1168,8 @@ function renderScores(){
       '<span class="font-display" style="font-size:10px;color:#5a6a88;font-weight:600;letter-spacing:.04em;text-transform:uppercase">'+roundShort+'</span>';
     var aestTimeStr=m.ofbTime?venueToAEST(m.ofbTime,m.gr,m.d):'';
     out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:3px;color:#5a6a88">'+fmtDate(m.d)+(aestTimeStr?' <span style="color:#5a6a88">·</span> '+aestTimeStr:'')+'</div></div>';
-    var ct=CFG.cardTotals||{};
-    var t1y=(ct[m.t1]||{}).yellow||0,t1r=(ct[m.t1]||{}).red||0;
-    var t2y=(ct[m.t2]||{}).yellow||0,t2r=(ct[m.t2]||{}).red||0;
-    var t1cards=(t1y>0||t1r>0)?'<span style="font-size:9px;opacity:.7;margin-left:3px">'+(t1y>0?t1y+'🟨':'')+' '+(t1r>0?t1r+'🟥':'')+'</span>':'';
-    var t2cards=(t2y>0||t2r>0)?'<span style="font-size:9px;opacity:.7;margin-left:3px">'+(t2y>0?t2y+'🟨':'')+' '+(t2r>0?t2r+'🟥':'')+'</span>':'';
-    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;justify-content:flex-end;gap:3px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+t1cards+'</span>';
+
+    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;justify-content:flex-end;gap:3px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+'</span>';
     out+='<div style="text-align:center;min-width:80px">';
     if(isEdit){
       var v1=m.s1!=null?m.s1:'',v2=m.s2!=null?m.s2:'';
@@ -1155,10 +1188,11 @@ function renderScores(){
       out+='<span style="font-size:11px;color:#5a6a88;border:1px dashed #ffffff14;padding:3px 8px;border-radius:4px;white-space:nowrap">click to enter</span>';
     }
     out+='</div>';
-    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;gap:3px">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+t2cards+'</span>';
+    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;gap:3px">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+'</span>';
     out+='<span style="font-size:10px;color:#5a6a88;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(m.gr)+'</span>';
     out+='</div>';
     if(goalsHtml)out+=goalsHtml;
+    if(cardsHtml)out+=cardsHtml;
     out+='</div>';
   });
   out+='</div>';
@@ -1714,6 +1748,7 @@ async function refreshCardData(){
     var count=Object.keys(cardTotals).length;
     if(!count)throw new Error('No card data in family config yet — run Refresh Card Data in the Family Sweep Admin first');
 
+    cardTotals._updated=Date.now();
     CFG.cardTotals=cardTotals;
     calcAutoAwards();
     var ok=await pushToGitHub(CFG);
@@ -1731,6 +1766,8 @@ async function refreshCardData(){
 }
 
 function renderAdmin(){
+  var _now=Date.now();
+  function _since(ts){if(!ts)return'never';var m=Math.floor((_now-ts)/60000);if(m<1)return'just now';if(m<60)return m+'m ago';var h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
   var allTeamsSorted=['Algeria','Argentina','Australia','Austria','Belgium','Bosnia & Herzegovina',
     'Brazil','Canada','Cape Verde','Colombia','Croatia','Curaçao','Czechia','DR Congo','Ecuador',
     'Egypt','England','France','Germany','Ghana','Haiti','Iran','Iraq','Ivory Coast','Japan',
@@ -1850,6 +1887,14 @@ function renderAdmin(){
     '<button id="card-refresh-btn" class="btn btn-lg" style="border-color:#fbbf2450;color:#fbbf24" onclick="refreshCardData()">🟨🟥 Refresh Card Data from FBref</button>'+
     '<span id="card-refresh-msg" style="font-size:12px;color:#5a6a88">Fetches live card totals — requires GitHub token</span>'+
     '</div>';
+  var _cardTs=(CFG.cardTotals&&CFG.cardTotals._updated)||0;
+  var _eloTs=(typeof ELO_LAST_FETCH!=='undefined'&&ELO_LAST_FETCH>0)?ELO_LAST_FETCH:0;
+  out+='<div class="card-pad" style="border-color:#ffffff0a"><div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Data Freshness</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:11px">'+
+    '<div><div style="color:#5a6a88">📊 Scores (OFB)</div><div style="color:#e8eeff;margin-top:2px">'+_since(OFB_LAST_FETCH>0?OFB_LAST_FETCH:0)+'</div></div>'+
+    '<div><div style="color:#5a6a88">🟥 Cards (FBref)</div><div style="color:'+(_cardTs?'#00d4aa':'#fbbf24')+';margin-top:2px">'+(_cardTs?_since(_cardTs):'not yet fetched')+'</div></div>'+
+    '<div><div style="color:#5a6a88">📈 Elo</div><div style="color:#e8eeff;margin-top:2px">'+_since(_eloTs)+'</div></div>'+
+    '</div></div>';
   out+='<div id="admin-msg"></div></div>';
   document.getElementById('tab-admin').innerHTML=out;
   updateTokenStatus();
