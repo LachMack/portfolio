@@ -1394,6 +1394,8 @@ function renderStats(){
     var cardTeams=Object.entries(ct).map(function(e){return{team:e[0],y:e[1].yellow||0,r:e[1].red||0};})
       .filter(function(x){return x.y>0||x.r>0;})
       .sort(function(a,b){return b.r!==a.r?b.r-a.r:b.y-a.y;});
+    var _al=CFG.allocations||{},_tOw={};
+    (CFG.families||[]).forEach(function(fam){fam.members.forEach(function(mem){(_al[mem.id]||[]).forEach(function(t){_tOw[t]={name:mem.name,color:fam.color};});});});
     out+='<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
       '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟥🟨 Card Standings</div>'+
       '<div style="font-size:10px;color:#5a6a88">Reds win · Yellows tiebreak</div></div>';
@@ -1405,12 +1407,12 @@ function renderStats(){
     cardTeams.forEach(function(ct,i){
       var owner=allMembers.find(function(m){return (allocs[m.id]||[]).includes(ct.team);});
       out+='<tr style="border-top:1px solid #ffffff06">';
-      out+='<td style="padding:7px 10px;text-align:center;color:#5a6a88;font-size:11px">'+(i+1)+'</td>';
+      var owner=_tOw[ct.team];
       out+='<td style="padding:7px 10px;font-size:12px;white-space:nowrap">'+f(ct.team)+' '+h(ct.team)+'</td>';
       out+='<td style="padding:7px 10px;font-size:11px;color:'+(owner?owner.famColor:'#5a6a88')+'">'+(owner?h(owner.name.split(' ')[0]):'—')+'</td>';
-      out+='<td style="padding:7px 10px;text-align:center;font-weight:700;color:#ff4757;font-family:Barlow Condensed,sans-serif">'+ct.r+'</td>';
-      out+='<td style="padding:7px 10px;text-align:center;font-weight:700;color:#fbbf24;font-family:Barlow Condensed,sans-serif">'+ct.y+'</td>';
-      out+='</tr>';
+      out+='<td style="padding:7px 10px;font-size:11px;color:'+(owner?owner.color:'#5a6a88')+'">'+(owner?h(owner.name.split(' ')[0]):'—')+'</td>';
+      out+='<td style="padding:7px 10px;text-align:center;font-weight:700;color:#ff4757">'+ct.r+'</td>';
+      out+='<td style="padding:7px 10px;text-align:center;font-weight:700;color:#fbbf24">'+ct.y+'</td>';
     });
     out+='</tbody></table></div></div>';
   }
@@ -1487,6 +1489,7 @@ function renderScores(){
       });
       goalsHtml='<div style="font-size:10px;color:#5a6a88;margin-top:4px;padding-top:4px;border-top:1px solid #ffffff08;line-height:1.8">'+gLines.join('&nbsp;&nbsp;')+'</div>';
     }
+    var cardsHtml='';
     // Add card info for this match's teams beneath goals
     var ct=CFG.cardTotals||{};
     var t1c=ct[m.t1],t2c=ct[m.t2];
@@ -1495,7 +1498,7 @@ function renderScores(){
       if(t1c&&(t1c.yellow>0||t1c.red>0))cParts.push(f(m.t1)+' '+(t1c.yellow>0?t1c.yellow+'🟨 ':'')+( t1c.red>0?t1c.red+'🟥':'').trim());
       if(t2c&&(t2c.yellow>0||t2c.red>0))cParts.push(f(m.t2)+' '+(t2c.yellow>0?t2c.yellow+'🟨 ':'')+( t2c.red>0?t2c.red+'🟥':'').trim());
       if(cParts.length){
-        goalsHtml+='<div style="font-size:10px;color:#5a6a88;margin-top:3px;opacity:.8">'+cParts.join('&nbsp;&nbsp;')+'</div>';
+      if(cParts.length)cardsHtml='<div style="font-size:10px;color:#5a6a88;margin-top:3px;padding-top:3px;border-top:1px solid #ffffff06">'+cParts.join('&nbsp;&nbsp;')+'</div>';
       }
     }
     var htHtml=(m.ht1!=null&&m.ht2!=null&&!isEdit)?'<span style="font-size:10px;color:#5a6a88;margin-left:6px">(HT '+m.ht1+'-'+m.ht2+')</span>':'';
@@ -1529,6 +1532,7 @@ function renderScores(){
     out+='<span style="font-size:10px;color:#5a6a88;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(m.gr)+'</span>';
     out+='</div>';
     if(goalsHtml)out+=goalsHtml;
+    if(cardsHtml)out+=cardsHtml;
     out+='</div>';
   });
   out+='</div>';
@@ -1645,6 +1649,8 @@ async function refreshCardData(){
 }
 
 function renderAdmin(){
+  var _now=Date.now();
+  function _since(ts){if(!ts)return'never';var m=Math.floor((_now-ts)/60000);if(m<1)return'just now';if(m<60)return m+'m ago';var h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
   var allocs=CFG.allocations||{};
   var allocated=new Set(Object.values(allocs).flat());
 
@@ -2043,8 +2049,6 @@ function renderAdmin(){
     '<span id="card-refresh-msg" style="font-size:12px;color:#5a6a88">Fetches live card totals — requires GitHub token</span>'+
     '</div>';
   // ── Data freshness ───────────────────────────────────────────────
-  var _now=Date.now();
-  function _since(ts){if(!ts)return'never';var m=Math.floor((_now-ts)/60000);if(m<1)return'just now';if(m<60)return m+'m ago';var h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
   var _cardTs=(CFG.cardTotals&&CFG.cardTotals._updated)||0;
   var _eloTs=(typeof ELO_LAST_FETCH!=='undefined'&&ELO_LAST_FETCH>0)?ELO_LAST_FETCH:0;
   out+='<div class="card-pad" style="border-color:#ffffff0a"><div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Data Freshness</div>'+
