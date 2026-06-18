@@ -1,17 +1,7 @@
 #!/usr/bin/env python3
 """
 Fetches card data from AiScore for finished WC2026 matches.
-Updates wc2026-config.json with per-match events + team totals.
-
-AiScore uses SVG icon sprites for card types:
-  <use xlink:href="#icon-yellow-card">  → yellow card
-  <use xlink:href="#icon-red-card">     → red card
-  <use xlink:href="#icon-second-yellow-card"> → second yellow (= red)
-
-Each event row structure (from DOM inspection):
-  <span class="text ml-xs">PLAYER NAME</span>
-  <svg ...><use xlink:href="#icon-yellow-card"></svg>
-  [minute in nearby text]
+AiScore is a Vue SSR app — card data is in window.__NUXT__ JSON payload.
 """
 
 import json, re, sys, os, time, socket
@@ -23,7 +13,7 @@ TIMEOUT = 10
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept': 'text/html,application/xhtml+xml',
     'Accept-Language': 'en-US,en;q=0.9',
     'Accept-Encoding': 'identity',
     'Connection': 'close',
@@ -45,111 +35,144 @@ def fetch_html(url):
     return None
 
 
-def parse_cards(html, t1, t2):
+def extract_nuxt_data(html):
+    """Extract the __NUXT__ state object embedded by Vue SSR."""
+    # Vue SSR embeds state as: window.__NUXT__={"state":...}
+    # or as a script tag with type application/json and id __NUXT_DATA__
+    
+    # Try __NUXT_DATA__ script tag first (newer Nuxt 3)
+    nuxt_data_match = re.search(
+        r'<script[^>]+id=["\']__NUXT_DATA__["\'][^>]*>(.*?)</script>',
+        html, re.DOTALL | re.I
+    )
+    if nuxt_data_match:
+        try:
+            return json.loads(nuxt_data_match.group(1))
+        except Exception:
+            pass
+
+    # Try window.__NUXT__ assignment (Nuxt 2 / older)
+    nuxt_match = re.search(
+        r'window\.__NUXT__\s*=\s*(\{.+?\});?\s*(?:</script>|window\.)',
+        html, re.DOTALL
+    )
+    if nuxt_match:
+        try:
+            return json.loads(nuxt_match.group(1))
+        except Exception:
+            pass
+
+    # Try any script tag containing NUXT data
+    for script in re.findall(r'<script[^>]*>(.*?)</script>', html, re.DOTALL):
+        if '__NUXT__' in script or 'nuxtState' in script:
+            # Try to extract JSON object
+            obj_match = re.search(r'(\{.{100,}\})', script, re.DOTALL)
+            if obj_match:
+                try:
+                    return json.loads(obj_match.group(1))
+                except Exception:
+                    pass
+
+    return None
+
+
+def find_cards_in_data(data, t1, t2):
     """
-    Parse card events using AiScore's SVG icon structure.
-
-    The timeline HTML looks like:
-      <span class="text ml-xs" ...>César Montes</span>
-      <svg ...><use xlink:href="#icon-red-card" ...></use></svg>
-      ... 90+2' ...
-
-    Or reversed for away events:
-      <svg ...><use xlink:href="#icon-yellow-card"></use></svg>
-      <span class="text ml-xs" ...>Brian Gutierrez</span>
-      ... 17' ...
-
-    We find each card icon, then look nearby for:
-    1. The player name in a <span class="text ..."> element
-    2. The minute from the surrounding text
-    3. Home vs away from the position/class context
+    Recursively search the NUXT data structure for card events.
+    Card events typically have fields like: type, minute, player, team
     """
     home_cards = []
     away_cards = []
 
-    # Find all card icon occurrences
-    # Pattern: xlink:href="#icon-yellow-card" or #icon-red-card or #icon-second-yellow-card
-    card_re = re.compile(
-        r'xlink:href=["\']#icon-(yellow-card|red-card|second-yellow-card)["\']',
-        re.I
-    )
+    # Card type codes used by sports data APIs
+    YELLOW = {1, 'yellow', 'Y', 'YC', 41, '41'}
+    RED = {2, 'red', 'R', 'RC', 42, '42', 'second_yellow', 'SY'}
 
-    for m in card_re.finditer(html):
-        icon_type = m.group(1)
-        card_type = 'red' if 'red' in icon_type or 'second' in icon_type else 'yellow'
+    def walk(obj, depth=0):
+        if depth > 15:
+            return
+        if isinstance(obj, dict):
+            # Look for event objects with card indicators
+            keys = set(str(k).lower() for k in obj.keys())
+            has_minute = any(k in keys for k in ['minute', 'min', 'time', 'match_time'])
+            has_player = any(k in keys for k in ['player', 'name', 'player_name', 'playerName'])
+            has_type = any(k in keys for k in ['type', 'event_type', 'eventType', 'incident_type'])
 
-        # Search window: 800 chars before and 400 chars after the icon
-        ctx_start = max(0, m.start() - 800)
-        ctx_end = min(len(html), m.end() + 400)
-        context = html[ctx_start:ctx_end]
+            if has_minute and has_player:
+                # Try to extract event type
+                event_type = None
+                for k in ['type', 'event_type', 'eventType', 'incident_type', 'incidentType']:
+                    if k in obj:
+                        event_type = obj[k]
+                        break
 
-        # ── Extract player name ──────────────────────────────────────
-        # AiScore wraps player names in <span class="text ml-xs"> or similar
-        name = None
-        name_re = re.compile(
-            r'<span[^>]+class=["\'][^"\']*\btext\b[^"\']*["\'][^>]*>([^<]{3,45})</span>',
-            re.I
-        )
-        # Prefer the closest name match (last one before icon, or first after)
-        name_matches = list(name_re.finditer(context))
-        icon_pos = m.start() - ctx_start  # position of icon within context
+                is_card = False
+                card_type = None
+                if event_type in YELLOW or str(event_type) in {str(x) for x in YELLOW}:
+                    is_card = True
+                    card_type = 'yellow'
+                elif event_type in RED or str(event_type) in {str(x) for x in RED}:
+                    is_card = True
+                    card_type = 'red'
+                elif isinstance(event_type, str) and ('yellow' in event_type.lower() or 'card' in event_type.lower()):
+                    is_card = True
+                    card_type = 'red' if 'red' in event_type.lower() or 'second' in event_type.lower() else 'yellow'
 
-        if name_matches:
-            # Find closest match to icon position
-            best = min(name_matches, key=lambda x: abs(x.start() - icon_pos))
-            candidate = best.group(1).strip()
-            # Validate: looks like a person name (Title Case, no HTML, reasonable length)
-            if (3 <= len(candidate) <= 45 and
-                not re.search(r'[<>&]', candidate) and
-                re.search(r'[A-Za-záéíóúàèìòùüñčšžćđ]', candidate)):
-                name = candidate
+                if is_card and card_type:
+                    # Extract player name
+                    player = None
+                    for k in ['player', 'name', 'player_name', 'playerName', 'fullName']:
+                        if k in obj and isinstance(obj[k], str) and len(obj[k]) > 2:
+                            player = obj[k]
+                            break
+                    if not player:
+                        for k in obj:
+                            if isinstance(obj[k], dict):
+                                for nk in ['name', 'fullName', 'player_name']:
+                                    if nk in obj[k] and isinstance(obj[k][nk], str):
+                                        player = obj[k][nk]
+                                        break
+                            if player:
+                                break
 
-        if not name:
-            # Fallback: look for capitalised words near the icon
-            text = re.sub(r'<[^>]+>', ' ', context)
-            text = re.sub(r'\s+', ' ', text)
-            name_fallback = re.search(
-                r'([A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽĆĐ][a-záéíóúàèìòùüñčšžćđ\-]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽĆĐ][a-záéíóúàèìòùüñčšžćđ\-]+)+)',
-                text
-            )
-            if name_fallback:
-                name = name_fallback.group(1).strip()
+                    # Extract minute
+                    minute = None
+                    for k in ['minute', 'min', 'time', 'match_time', 'matchTime']:
+                        if k in obj:
+                            try:
+                                minute = int(str(obj[k]).split('+')[0].split('.')[0])
+                                break
+                            except Exception:
+                                pass
 
-        if not name:
-            continue
+                    # Determine home/away
+                    is_home = True
+                    for k in ['team', 'team_id', 'teamId', 'side', 'isHome']:
+                        if k in obj:
+                            v = str(obj[k]).lower()
+                            if v in ['away', 'false', '0', t2.lower()]:
+                                is_home = False
+                                break
+                            elif v in ['home', 'true', '1', t1.lower()]:
+                                is_home = True
+                                break
 
-        # ── Extract minute ───────────────────────────────────────────
-        text = re.sub(r'<[^>]+>', ' ', context)
-        min_match = re.search(r'(\d{1,3})(?:\+\d+)?\s*\'', text)
-        if not min_match:
-            continue
-        minute = int(min_match.group(1))
-        if minute > 125:
-            continue
+                    if player and minute is not None and 0 < minute <= 125:
+                        event = {'name': player, 'minute': minute, 'type': card_type}
+                        if is_home:
+                            home_cards.append(event)
+                        else:
+                            away_cards.append(event)
 
-        # ── Determine home vs away ───────────────────────────────────
-        # AiScore shows home team events on the left (icon after name)
-        # and away team events on the right (icon before name)
-        # The icon position relative to the name span tells us which side
-        pre_icon = context[:icon_pos]
+            for v in obj.values():
+                walk(v, depth + 1)
 
-        # Check for 'right' class hint in containing divs
-        is_away = bool(re.search(r'class=["\'][^"\']*\bright\b[^"\']*["\']', pre_icon[-300:], re.I))
+        elif isinstance(obj, list):
+            for item in obj:
+                walk(item, depth + 1)
 
-        # Secondary check: if player name appears BEFORE the icon, it's home (name then card)
-        # If player name appears AFTER the icon, it's away (card then name)
-        if not is_away and name_matches:
-            best = min(name_matches, key=lambda x: abs(x.start() - icon_pos))
-            if best.start() > icon_pos:
-                is_away = True  # name is after icon → away
+    walk(data)
 
-        event = {'name': name, 'minute': minute, 'type': card_type}
-        if is_away:
-            away_cards.append(event)
-        else:
-            home_cards.append(event)
-
-    # Deduplicate by (name prefix, minute, type)
     def dedup(cards):
         seen, out = set(), []
         for c in sorted(cards, key=lambda x: x['minute']):
@@ -159,16 +182,63 @@ def parse_cards(html, t1, t2):
                 out.append(c)
         return out
 
-    result = {'home': dedup(home_cards), 'away': dedup(away_cards)}
+    return {'home': dedup(home_cards), 'away': dedup(away_cards)}
 
-    # Sanity check: if we found many more than expected, something went wrong
-    total = len(result['home']) + len(result['away'])
-    if total > 20:
-        print(f'  WARNING: {total} cards found — possible parsing error, capping at 20')
-        result['home'] = result['home'][:10]
-        result['away'] = result['away'][:10]
 
-    return result
+def parse_cards_from_text(html, t1, t2):
+    """
+    Fallback: parse card events from visible text patterns in HTML.
+    Looks for patterns near known card-related text.
+    """
+    # Strip to text
+    text = re.sub(r'<script[^>]*>.*?</script>', ' ', html, flags=re.DOTALL)
+    text = re.sub(r'<style[^>]*>.*?</style>', ' ', text, flags=re.DOTALL)
+    text = re.sub(r'<[^>]+>', ' ', text)
+    text = re.sub(r'\s+', ' ', text)
+
+    # Look for sequences like: "PlayerName 45'" or "45' PlayerName"
+    # near card-related words
+    home_cards, away_cards = [], []
+
+    # Find "yellow card" or "red card" mentions and surrounding context
+    for card_match in re.finditer(r'(yellow\s+card|red\s+card|second\s+yellow)', text, re.I):
+        card_type = 'red' if 'red' in card_match.group(1).lower() or 'second' in card_match.group(1).lower() else 'yellow'
+        ctx_start = max(0, card_match.start() - 100)
+        ctx_end = min(len(text), card_match.end() + 100)
+        ctx = text[ctx_start:ctx_end]
+
+        min_m = re.search(r'(\d{1,3})(?:\+\d+)?\s*\'', ctx)
+        name_m = re.search(r'([A-Z][a-záéíóúñüç]+ [A-Z][a-záéíóúñüç]+)', ctx)
+
+        if min_m and name_m:
+            minute = int(min_m.group(1))
+            name = name_m.group(1)
+            if 0 < minute <= 125:
+                home_cards.append({'name': name, 'minute': minute, 'type': card_type})
+
+    return {'home': home_cards, 'away': away_cards}
+
+
+def debug_html(html, match_key):
+    """Print diagnostic info about what's in the HTML."""
+    print(f'  HTML length: {len(html)}')
+    print(f'  Has __NUXT__: {"__NUXT__" in html}')
+    print(f'  Has __NUXT_DATA__: {"__NUXT_DATA__" in html}')
+    print(f'  Has icon-yellow-card: {"icon-yellow-card" in html}')
+    print(f'  Has xlink: {"xlink" in html}')
+    print(f'  Has Full Time: {"Full Time" in html}')
+    print(f'  Has FT: {bool(re.search(r"\\bFT\\b", html))}')
+    # Show script tags
+    scripts = re.findall(r'<script([^>]*)>', html)
+    print(f'  Script tags: {len(scripts)}')
+    for s in scripts[:5]:
+        print(f'    <script{s}>')
+    # Show a snippet of body
+    body_m = re.search(r'<body[^>]*>(.*?)</body>', html, re.DOTALL)
+    if body_m:
+        body_text = re.sub(r'<[^>]+>', ' ', body_m.group(1))
+        body_text = re.sub(r'\s+', ' ', body_text).strip()
+        print(f'  Body text preview: {body_text[:300]}')
 
 
 def build_slug(match_key):
@@ -186,16 +256,18 @@ def build_slug(match_key):
 
 
 def main():
+    debug_first = os.environ.get('DEBUG_FIRST', '0') == '1'
+
     print(f'Loading {CONFIG_PATH}...')
     with open(CONFIG_PATH) as f:
         config = json.load(f)
 
     ai_ids = config.get('aiScoreIds', {})
     if not ai_ids:
-        print('No aiScoreIds in config — nothing to do')
+        print('No aiScoreIds in config')
         sys.exit(0)
 
-    print(f'Found {len(ai_ids)} match IDs in config')
+    print(f'Found {len(ai_ids)} match IDs')
 
     match_cards = config.get('matchCards', {})
     errors = 0
@@ -213,27 +285,33 @@ def main():
         print(f'\n[{i}/{len(ai_ids)}] {match_key}')
 
         html = fetch_html(url)
-        if not html:
+        if not html or len(html) < 1000:
             errors += 1
             continue
 
-        if len(html) < 1000:
-            print(f'  Too short ({len(html)} chars) — skipping')
-            skipped += 1
-            continue
+        # Debug first match to understand structure
+        if debug_first and i == 1:
+            debug_html(html, match_key)
 
-        # Check if finished
-        is_finished = bool(re.search(r'Full\s*Time|>FT\s*\d|\bFT\b.*\d-\d', html))
+        is_finished = bool(re.search(r'Full\s*Time|"isFinished"\s*:\s*true|"status"\s*:\s*"finished"', html, re.I))
         if not is_finished:
             print(f'  Not finished — skipping')
             skipped += 1
             continue
 
-        cards = parse_cards(html, t1, t2)
-        print(f'  ✓ {len(cards["home"])} home cards, {len(cards["away"])} away cards')
-        if cards["home"]:
+        # Try NUXT data extraction first
+        cards = {'home': [], 'away': []}
+        nuxt_data = extract_nuxt_data(html)
+        if nuxt_data:
+            cards = find_cards_in_data(nuxt_data, t1, t2)
+            print(f'  NUXT data found, {len(cards["home"])} home, {len(cards["away"])} away cards')
+        else:
+            # Fallback to text parsing
+            cards = parse_cards_from_text(html, t1, t2)
+            print(f'  No NUXT data, text fallback: {len(cards["home"])} home, {len(cards["away"])} away cards')
+
+        if cards['home'] or cards['away']:
             print(f'    Home: {[(c["name"], c["minute"], c["type"]) for c in cards["home"]]}')
-        if cards["away"]:
             print(f'    Away: {[(c["name"], c["minute"], c["type"]) for c in cards["away"]]}')
 
         match_cards[match_key] = {
@@ -244,7 +322,7 @@ def main():
         fetched += 1
         time.sleep(0.3)
 
-    # Tally totals from per-match events
+    # Tally totals
     card_totals = {'_updated': int(time.time() * 1000)}
     for mc in match_cards.values():
         for team_key, events_key in [('homeTeam', 'home'), ('awayTeam', 'away')]:
