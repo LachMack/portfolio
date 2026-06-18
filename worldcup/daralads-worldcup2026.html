@@ -218,6 +218,7 @@ const ELO_BASE={
 var ELO=Object.assign({},ELO_BASE);
 var ELO_LAST_FETCH=0;
 var ELO_LIVE_LOADED=false;
+var ELO_DELTA={};
 
 // Name mapping: Hicruben repo names → our names
 var ELO_NAME_MAP={
@@ -1135,6 +1136,16 @@ async function loadFromGitHub(){
     if(data.manualOverrides)CFG.manualOverrides = data.manualOverrides;
     if(data.cardTotals)     CFG.cardTotals      = data.cardTotals;
     if(data.matchCards)     CFG.matchCards      = data.matchCards||{};
+    if(data.eloRatings){
+      var _er=data.eloRatings;
+      Object.keys(_er).forEach(function(t){
+        if(t==='_updated')return;
+        ELO[t]=_er[t].elo;
+        ELO_DELTA[t]=_er[t].delta||0;
+      });
+      ELO_LAST_FETCH=_er._updated||Date.now();
+      ELO_LIVE_LOADED=true;
+    }
     if(data.aiScoreIds)     CFG.aiScoreIds      = Object.assign({},DEFAULT_CFG.aiScoreIds,data.aiScoreIds||{});
     if(!CFG.prizes)         CFG.prizes         = Object.assign({},DEFAULT_CFG.prizes);
     var nd=document.getElementById('sweep-name-display');
@@ -1829,7 +1840,7 @@ function renderSweep(){
     var byOwner={};(CFG.participants||[]).forEach(function(p){(p.teams||[]).forEach(function(t){byOwner[t]=p.name;});});
     out+='<div class="card-pad" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
       '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟥🟨 Card Standings</div>'+
-      '<div style="font-size:10px;color:#5a6a88">FBref · refresh in Admin</div></div>'+
+      '<div style="font-size:10px;color:#5a6a88">ESPN · refresh in Admin</div></div>'+
       '<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px 16px">'+
       '<div style="font-size:10px;color:#5a6a88">Team</div><div style="font-size:10px;color:#ff4757;text-align:center">🟥 Red</div><div style="font-size:10px;color:#fbbf24;text-align:center">🟨 Yellow</div>';
     teams.forEach(function(c){
@@ -1849,121 +1860,7 @@ function setSweepView(v){sweepView=v;renderSweep();}
 // ══════════════════════════════════════════════════════════════════
 // DARALADS ADMIN TAB
 // ══════════════════════════════════════════════════════════════════
-async function refreshCardData(){
-  var btn=document.getElementById('card-refresh-btn');
-  var msg=document.getElementById('card-refresh-msg');
-  if(btn){btn.disabled=true;btn.textContent='Fetching...';}
-  if(msg)msg.innerHTML='<span style="color:#fbbf24">Starting...</span>';
 
-  var ids=CFG.aiScoreIds||{};
-  var matches=getMatches();
-
-  var toFetch=Object.keys(ids).filter(function(k){
-    var p=k.split(' vs ');
-    if(p.length!==2)return false;
-    return matches.some(function(m){
-      return((m.t1===p[0]&&m.t2===p[1])||(m.t1===p[1]&&m.t2===p[0]))&&m.s1!=null;
-    });
-  });
-
-  if(!toFetch.length){
-    if(msg)msg.innerHTML='<span style="color:#fbbf24">No finished matches with AiScore IDs yet</span>';
-    if(btn){btn.disabled=false;btn.textContent='🟥🟨 Refresh Card Data';}
-    return;
-  }
-
-  var matchCards=Object.assign({},CFG.matchCards||{});
-  var errors=0;
-
-  for(var fi=0;fi<toFetch.length;fi++){
-    var matchKey=toFetch[fi];
-    var aid=ids[matchKey];
-    var parts=matchKey.split(' vs ');
-    var t1=parts[0],t2=parts[1];
-
-    if(msg)msg.innerHTML='<span style="color:#fbbf24">Fetching '+(fi+1)+'/'+toFetch.length+': '+h(matchKey)+'...</span>';
-
-    var slug=matchKey.toLowerCase()
-      .replace(' vs ','-')
-      .replace(/\u00fc/g,'u').replace(/\u00e7/g,'c').replace(/\u00e9/g,'e')
-      .replace(/\u00e8/g,'e').replace(/&/g,'and')
-      .replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-');
-    var url='https://m.aiscore.com/match-'+slug+'/'+aid;
-
-    try{
-      var r=await fetch(url,{signal:AbortSignal.timeout(15000)});
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      var html=await r.text();
-      if(html.length<2000)throw new Error('Response too short ('+html.length+' chars)');
-
-      var doc=(new DOMParser()).parseFromString(html,'text/html');
-      var homeCards=[],awayCards=[];
-
-      // AiScore card events: img tags with 'yellow' or 'red' in src URL
-      // Each img is inside an event row that also contains minute and player name
-      // Home events are left-aligned, away events right-aligned
-      doc.querySelectorAll('img').forEach(function(img){
-        var src=img.getAttribute('src')||'';
-        var isYellow=src.indexOf('yellow')>=0;
-        var isRed=src.indexOf('red')>=0||src.indexOf('second')>=0;
-        if(!isYellow&&!isRed)return;
-        var cardType=isRed?'red':'yellow';
-
-        // Walk up to find the event row with minute + player name
-        var row=img.parentElement;
-        for(var d=0;d<6;d++){
-          if(!row)break;
-          var txt=(row.innerText||row.textContent||'').trim();
-          var minM=txt.match(/(\d{1,3})(?:\+\d+)?'/);
-          if(minM){
-            var minute=parseInt(minM[1]);
-            // Clean player name: remove minute, common labels
-            var name=txt.replace(/\d{1,3}(?:\+\d+)?'/g,'')
-              .replace(/In:|Out:|Assist:|Goal|Corner/g,'')
-              .replace(/\s+/g,' ').trim().split('\n')[0].trim();
-            if(name.length>2&&name.length<50){
-              var cls=(row.className||'')+(row.parentElement?row.parentElement.className||'':'');
-              var event={name:name,minute:minute,type:cardType};
-              if(cls.indexOf('right')>=0)awayCards.push(event);
-              else homeCards.push(event);
-            }
-            break;
-          }
-          row=row.parentElement;
-        }
-      });
-
-      matchCards[matchKey]={homeTeam:t1,awayTeam:t2,home:homeCards,away:awayCards,_fetched:Date.now()};
-      console.log(matchKey+': '+homeCards.length+'H '+awayCards.length+'A cards');
-    }catch(e){
-      console.warn('AiScore failed '+matchKey+':',e.message);
-      errors++;
-    }
-    await new Promise(function(res){setTimeout(res,300);});
-  }
-
-  // Tally totals from per-match events
-  var cardTotals={_updated:Date.now()};
-  Object.values(matchCards).forEach(function(mc){
-    var t1=mc.homeTeam,t2=mc.awayTeam;
-    if(!cardTotals[t1])cardTotals[t1]={yellow:0,red:0};
-    if(!cardTotals[t2])cardTotals[t2]={yellow:0,red:0};
-    (mc.home||[]).forEach(function(e){if(e.type==='red')cardTotals[t1].red++;else cardTotals[t1].yellow++;});
-    (mc.away||[]).forEach(function(e){if(e.type==='red')cardTotals[t2].red++;else cardTotals[t2].yellow++;});
-  });
-
-  CFG.matchCards=matchCards;
-  CFG.cardTotals=cardTotals;
-  calcAutoAwards();
-  var ok=await pushToGitHub(CFG);
-  var total=Object.keys(matchCards).length;
-  if(msg)msg.innerHTML='<span style="color:'+(ok?'#00d4aa':'#fbbf24')+'">'+(ok?'&#x2713;':'&#x26A0;')+' '+total+' matches'+(errors?' ('+errors+' failed)':'')+
-    (Object.values(cardTotals).filter(function(v){return v&&v.yellow;}).length?' &middot; '+Object.values(cardTotals).reduce(function(s,v){return s+(v.yellow||0);},0)+'Y '+Object.values(cardTotals).reduce(function(s,v){return s+(v.red||0);},0)+'R':'')+
-    '</span>';
-  if(btn){btn.disabled=false;btn.textContent='🟥🟨 Refresh Card Data';}
-  renderSweep();
-  renderStats();
-}
 
 function renderAdmin(){
   var _now=Date.now();
@@ -2082,17 +1979,13 @@ function renderAdmin(){
   });
   out+='</div>';
 
-  out+='<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button></div>'+
-    '<div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
-    '<button id="card-refresh-btn" class="btn btn-lg" style="border-color:#fbbf2450;color:#fbbf24" onclick="refreshCardData()">🟨🟥 Refresh Card Data from FBref</button>'+
-    '<span id="card-refresh-msg" style="font-size:12px;color:#5a6a88">Fetches live card totals — requires GitHub token</span>'+
-    '</div>';
-  var _cardTs=(CFG.cardTotals&&CFG.cardTotals._updated)||0;
+  out+='<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-accent btn-lg" style="flex:1" onclick="saveAdmin()">SAVE & PUSH TO GITHUB</button></div>';
+    var _cardTs=(CFG.cardTotals&&CFG.cardTotals._updated)||0;
   var _eloTs=(typeof ELO_LAST_FETCH!=='undefined'&&ELO_LAST_FETCH>0)?ELO_LAST_FETCH:0;
   out+='<div class="card-pad" style="border-color:#ffffff0a"><div class="font-display" style="font-size:11px;color:#5a6a88;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Data Freshness</div>'+
     '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:11px">'+
     '<div><div style="color:#5a6a88">📊 Scores (OFB)</div><div style="color:#e8eeff;margin-top:2px">'+_since(OFB_LAST_FETCH>0?OFB_LAST_FETCH:0)+'</div></div>'+
-    '<div><div style="color:#5a6a88">🟥 Cards (FBref)</div><div style="color:'+(_cardTs?'#00d4aa':'#fbbf24')+';margin-top:2px">'+(_cardTs?_since(_cardTs):'not yet fetched')+'</div></div>'+
+    '<div><div style="color:#5a6a88">🟥 Cards (ESPN)</div><div style="color:'+(_cardTs?'#00d4aa':'#fbbf24')+';margin-top:2px">'+(_cardTs?_since(_cardTs):'not yet fetched')+'</div></div>'+
     '<div><div style="color:#5a6a88">📈 Elo</div><div style="color:#e8eeff;margin-top:2px">'+_since(_eloTs)+'</div></div>'+
     '</div></div>';
   out+='<div id="admin-msg"></div></div>';
