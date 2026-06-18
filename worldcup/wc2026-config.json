@@ -136,7 +136,7 @@
   },
   "manualOverrides": {},
   "cardTotals": {
-    "_updated": 1781796825908,
+    "_updated": 1781814611161,
     "Algeria": {
       "yellow": 0,
       "red": 0
@@ -234,7 +234,7 @@
       "red": 0
     },
     "Czechia": {
-      "yellow": 0,
+      "yellow": 1,
       "red": 0
     },
     "Mexico": {
@@ -242,7 +242,7 @@
       "red": 1
     },
     "South Africa": {
-      "yellow": 2,
+      "yellow": 4,
       "red": 2
     },
     "Uzbekistan": {
@@ -351,7 +351,7 @@
       "awayTeam": "Algeria",
       "home": [],
       "away": [],
-      "_fetched": 1781796815154
+      "_fetched": 1781814600674
     },
     "Argentina vs Austria": {
       "homeTeam": "Argentina",
@@ -371,7 +371,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796815524
+      "_fetched": 1781814601081
     },
     "Austria vs Jordan": {
       "homeTeam": "Austria",
@@ -384,7 +384,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781796815917
+      "_fetched": 1781814601425
     },
     "Belgium vs Egypt": {
       "homeTeam": "Belgium",
@@ -413,7 +413,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796816466
+      "_fetched": 1781814601839
     },
     "Belgium vs Iran": {
       "homeTeam": "Belgium",
@@ -452,7 +452,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781796816846
+      "_fetched": 1781814602290
     },
     "Canada vs Bosnia & Herzegovina": {
       "homeTeam": "Canada",
@@ -513,9 +513,26 @@
     "Czechia vs South Africa": {
       "homeTeam": "Czechia",
       "awayTeam": "South Africa",
-      "home": [],
-      "away": [],
-      "_fetched": 1781756250422
+      "home": [
+        {
+          "name": "Ladislav Krejcí",
+          "minute": 75,
+          "type": "yellow"
+        }
+      ],
+      "away": [
+        {
+          "name": "Teboho Mokoena",
+          "minute": 33,
+          "type": "yellow"
+        },
+        {
+          "name": "Thalente Mbatha",
+          "minute": 40,
+          "type": "yellow"
+        }
+      ],
+      "_fetched": 1781814603060
     },
     "DR Congo vs Uzbekistan": {
       "homeTeam": "DR Congo",
@@ -550,7 +567,7 @@
       "awayTeam": "Croatia",
       "home": [],
       "away": [],
-      "_fetched": 1781796817657
+      "_fetched": 1781814603482
     },
     "England vs Ghana": {
       "homeTeam": "England",
@@ -571,14 +588,14 @@
       "awayTeam": "Senegal",
       "home": [],
       "away": [],
-      "_fetched": 1781796818025
+      "_fetched": 1781814603898
     },
     "Germany vs Curaçao": {
       "homeTeam": "Germany",
       "awayTeam": "Curaçao",
       "home": [],
       "away": [],
-      "_fetched": 1781796818494
+      "_fetched": 1781814604315
     },
     "Germany vs Ivory Coast": {
       "homeTeam": "Germany",
@@ -614,7 +631,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796819525
+      "_fetched": 1781814605098
     },
     "Iran vs New Zealand": {
       "homeTeam": "Iran",
@@ -627,7 +644,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781796819921
+      "_fetched": 1781814605517
     },
     "Iraq vs Norway": {
       "homeTeam": "Iraq",
@@ -640,7 +657,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781796820338
+      "_fetched": 1781814605947
     },
     "Ivory Coast vs Ecuador": {
       "homeTeam": "Ivory Coast",
@@ -669,7 +686,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796820753
+      "_fetched": 1781814606415
     },
     "Japan vs Sweden": {
       "homeTeam": "Japan",
@@ -729,7 +746,7 @@
           "type": "red"
         }
       ],
-      "_fetched": 1781796821160
+      "_fetched": 1781814606976
     },
     "Mexico vs South Korea": {
       "homeTeam": "Mexico",
@@ -766,7 +783,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781796821572
+      "_fetched": 1781814607457
     },
     "Netherlands vs Sweden": {
       "homeTeam": "Netherlands",
@@ -860,7 +877,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796822759
+      "_fetched": 1781814608194
     },
     "Saudi Arabia vs Uruguay": {
       "homeTeam": "Saudi Arabia",
@@ -873,7 +890,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781796823111
+      "_fetched": 1781814608646
     },
     "Scotland vs Brazil": {
       "homeTeam": "Scotland",
@@ -914,7 +931,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781796823505
+      "_fetched": 1781814609189
     },
     "Spain vs Cape Verde": {
       "homeTeam": "Spain",
@@ -933,7 +950,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796824084
+      "_fetched": 1781814609647
     },
     "Spain vs Saudi Arabia": {
       "homeTeam": "Spain",
@@ -953,7 +970,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796824740
+      "_fetched": 1781814610021
     },
     "Switzerland vs Bosnia & Herzegovina": {
       "homeTeam": "Switzerland",
@@ -1041,7 +1058,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796825274
+      "_fetched": 1781814610570
     },
     "Uruguay vs Cape Verde": {
       "homeTeam": "Uruguay",
@@ -1089,7 +1106,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796817215
+      "_fetched": 1781814602644
     },
     "Ghana vs Panama": {
       "homeTeam": "Ghana",
@@ -1113,7 +1130,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796818999
+      "_fetched": 1781814604748
     },
     "Portugal vs Congo DR": {
       "homeTeam": "Portugal",
@@ -1142,7 +1159,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796822066
+      "_fetched": 1781814607810
     },
     "Uzbekistan vs Colombia": {
       "homeTeam": "Uzbekistan",
@@ -1161,7 +1178,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781796825707
+      "_fetched": 1781814610961
     }
   },
   "aiScoreIds": {
@@ -1241,6 +1258,6 @@
   "pot2Cost": 5,
   "pot3Cost": 5,
   "eloRatings": {
-    "_updated": 1781796826158
+    "_updated": 1781814611474
   }
 }
