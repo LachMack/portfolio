@@ -2602,6 +2602,7 @@ function renderPredictions(){
     out+='<th style="text-align:left">Team</th>';
     out+='<th>Pot</th>';
     out+='<th>Elo</th>';
+    out+='<th style="text-align:center">±WC</th>';
     out+='<th>Strength</th>';
     out+='<th>Win %</th>';
     out+='<th style="text-align:left">Owner</th>';
@@ -2611,7 +2612,7 @@ function renderPredictions(){
     allTeamsSorted.forEach(function(team,rank){
       var elo=ELO[team]||ELO_BASE[team]||1700;
       var eloBase=ELO_BASE[team]||elo;
-      var eloDelta=elo-eloBase;
+      var eloDelta=(ELO_DELTA&&ELO_DELTA[team]!==undefined)?ELO_DELTA[team]:(elo-eloBase);
       var odds=ODDS[team]||0;
       var pot=CFG.pot0.includes(team)?0:CFG.pot1.includes(team)?1:CFG.pot2.includes(team)?2:3;
       var potColor=POT[pot].color;
@@ -2631,6 +2632,10 @@ function renderPredictions(){
       out+='<td style="text-align:left;font-weight:500;font-size:13px">'+f(team)+' '+h(team)+(isElite?' <span style="color:#fbbf24;font-size:10px">★</span>':'')+'</td>';
       out+='<td style="text-align:center"><span class="font-display" style="font-size:10px;font-weight:700;color:'+potColor+';background:'+potColor+'18;padding:1px 6px;border-radius:3px">P'+pot+'</span></td>';
       out+='<td style="text-align:center"><span class="font-display" style="font-weight:700;font-size:13px">'+elo+'</span></td>';
+      var _dSign=eloDelta>0?'+':'';
+      var _dCol=eloDelta>0?'#00d4aa':eloDelta<0?'#ff4757':'#5a6a88';
+      var _dArrow=eloDelta>0?' ▲':eloDelta<0?' ▼':'';
+      out+='<td style="text-align:center;font-size:11px;font-weight:700;color:'+_dCol+'">'+(eloDelta!==0?_dSign+eloDelta+_dArrow:'—')+'</td>';
       out+='<td style="width:120px;padding:0 8px">';
       out+='<div style="height:6px;background:#ffffff10;border-radius:3px;overflow:hidden">';
       out+='<div style="height:100%;width:'+barPct+'%;background:'+potColor+';border-radius:3px"></div>';
