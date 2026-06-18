@@ -512,6 +512,79 @@ const DEFAULT_CFG={
   manualAwards:{},
   manualOverrides:{},
   cardTotals:{},
+  matchCards:{},
+  aiScoreIds:{
+    "Algeria vs Austria": "wv78xivmgz4iokr",
+    "Argentina vs Algeria": "j374oi03rr1tgqo",
+    "Argentina vs Austria": "g6763i5rmmdbo7r",
+    "Australia vs Türkiye": "8lk2dir4wwmaz73",
+    "Austria vs Jordan": "ndkz6i3jvy0ixq3",
+    "Belgium vs Egypt": "edq09iloeweheqx",
+    "Belgium vs Iran": "34kgmioe543ieko",
+    "Bosnia & Herzegovina vs Qatar": "wv78xivmggyiokr",
+    "Brazil vs Haiti": "zrkn6i4e8p2awql",
+    "Brazil vs Morocco": "m2q15izwd69ce76",
+    "Canada vs Bosnia & Herzegovina": "zrkn6i4e1wrcwql",
+    "Canada vs Qatar": "oj7x9ix0mlra47g",
+    "Cape Verde vs Saudi Arabia": "527r3i4l5x3t47e",
+    "Colombia vs DR Congo": "34kgmioe53rheko",
+    "Colombia vs Portugal": "m2q15izwdd9ue76",
+    "Croatia vs Ghana": "jek33i8gnwjb9ko",
+    "Curaçao vs Ivory Coast": "ndqmliw8mn4trkv",
+    "Czechia vs Mexico": "m2q15izw8xobe76",
+    "Czechia vs South Africa": "jr7owip1ww3sgq0",
+    "DR Congo vs Uzbekistan": "69759igzde2fgk2",
+    "Ecuador vs Curaçao": "vrqwni43mmws4qn",
+    "Ecuador vs Germany": "9gklzi1rwj4am7x",
+    "Egypt vs Iran": "m2q15izwdx9te76",
+    "England vs Croatia": "zrkn6i4e882fwql",
+    "England vs Ghana": "oj7x9ix022es47g",
+    "France vs Iraq": "vrqwni43m2wh4qn",
+    "France vs Senegal": "o07dni5v84xfmkn",
+    "Germany vs Curaçao": "o17pjio98l9uy7j",
+    "Germany vs Ivory Coast": "jr7owip1wo3hgq0",
+    "Haiti vs Scotland": "edq09iloeeeieqx",
+    "Iran vs New Zealand": "l6kegi860npfv75",
+    "Iraq vs Norway": "wv78xivmgzyhokr",
+    "Ivory Coast vs Ecuador": "o07dni5v88ximkn",
+    "Japan vs Sweden": "ezk96i3gzr5f1kn",
+    "Jordan vs Algeria": "527r3i4l5x2h47e",
+    "Jordan vs Argentina": "ezk96i3gzz5a1kn",
+    "Mexico vs South Africa": "ezk96i3gjr2f1kn",
+    "Mexico vs South Korea": "l6kegi86rnotv75",
+    "Morocco vs Haiti": "69759igzdd4sgk2",
+    "Netherlands vs Japan": "ndkz6i3jvd3txq3",
+    "Netherlands vs Sweden": "527r3i4l5r3h47e",
+    "New Zealand vs Belgium": "69759igzdx4hgk2",
+    "New Zealand vs Egypt": "xvkjoi8n3ylh879",
+    "Norway vs France": "ndqmliw8mm4urkv",
+    "Norway vs Senegal": "jr7owip1w8wfgq0",
+    "Panama vs Croatia": "63kv9igrwlmix7e",
+    "Panama vs England": "vmqy9ivwoozfgk9",
+    "Paraguay vs Australia": "jek33i8gnnzc9ko",
+    "Portugal vs DR Congo": "l6kegi8600piv75",
+    "Portugal vs Uzbekistan": "xvkjoi8n33ls879",
+    "Qatar vs Switzerland": "ndkz6i3jvv3bxq3",
+    "Saudi Arabia vs Uruguay": "zrkn6i4e8g2swql",
+    "Scotland vs Brazil": "oj7x9ix02veh47g",
+    "Scotland vs Morocco": "34kgmioe553aeko",
+    "Senegal vs Iraq": "9gklzi1rweeim7x",
+    "South Africa vs South Korea": "9gklzi1rww4fm7x",
+    "South Korea vs Czechia": "o17pjio9889ty7j",
+    "Spain vs Cape Verde": "8lk2dir4wdmiz73",
+    "Spain vs Saudi Arabia": "63kv9igrw5pax7e",
+    "Sweden vs Tunisia": "j374oi03ry1cgqo",
+    "Switzerland vs Bosnia & Herzegovina": "527r3i4l553s47e",
+    "Switzerland vs Canada": "vmqy9ivwy50tgk9",
+    "Tunisia vs Japan": "g6763i5rmodho7r",
+    "Tunisia vs Netherlands": "wv78xivmgyyfokr",
+    "Türkiye vs Paraguay": "63kv9igrwwpfx7e",
+    "Türkiye vs USA": "9gklzi1r5dnsm7x",
+    "USA vs Australia": "jr7owip1y4dugq0",
+    "USA vs Paraguay": "o17pjio94dzty7j",
+    "Uruguay vs Cape Verde": "ndkz6i3jvy3hxq3",
+    "Uruguay vs Spain": "jek33i8gnpzu9ko"
+}
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -786,6 +859,8 @@ async function loadFromGitHub(){
     if(data.manualAwards)   CFG.manualAwards   = data.manualAwards;
     if(data.manualOverrides)CFG.manualOverrides = data.manualOverrides;
     if(data.cardTotals)     CFG.cardTotals      = data.cardTotals;
+    if(data.matchCards)     CFG.matchCards      = data.matchCards||{};
+    if(data.aiScoreIds)     CFG.aiScoreIds      = Object.assign({},DEFAULT_CFG.aiScoreIds,data.aiScoreIds||{});
     if(data.pot0Cost)     CFG.pot0Cost     = data.pot0Cost;
     if(data.pot1Cost)     CFG.pot1Cost     = data.pot1Cost;
     if(data.pot2Cost)     CFG.pot2Cost     = data.pot2Cost;
@@ -823,6 +898,8 @@ async function pushToGitHub(cfg){
       manualAwards:    cfg.manualAwards||{},
       manualOverrides: cfg.manualOverrides||{},
       cardTotals:      cfg.cardTotals||{},
+      matchCards:      cfg.matchCards||{},
+      aiScoreIds:      cfg.aiScoreIds||{},
       pot0Cost:      cfg.pot0Cost||15,
       pot1Cost:      cfg.pot1Cost||10,
       pot2Cost:      cfg.pot2Cost||5,
@@ -1428,6 +1505,49 @@ function renderStats(){
     out+='</tbody></table></div></div>';
   })();
 
+  // ── Golden Boot Standings ────────────────────────────────────────
+  (function(){
+    var scorers={};
+    Object.values(OFB_GOALS).forEach(function(goals){
+      goals.forEach(function(g){
+        var key=g.name+'|'+g.team;
+        if(!scorers[key])scorers[key]={name:g.name,team:g.team,goals:0,penalties:0};
+        scorers[key].goals++;
+        if(g.penalty)scorers[key].penalties++;
+      });
+    });
+    var top=Object.values(scorers)
+      .sort(function(a,b){return b.goals!==a.goals?b.goals-a.goals:a.penalties-b.penalties;})
+      .slice(0,10);
+    if(!top.length)return;
+    var allocs2=CFG.allocations||{},tOw={};
+    (CFG.families||[]).forEach(function(fam){
+      fam.members.forEach(function(mem){
+        (allocs2[mem.id]||[]).forEach(function(t){tOw[t]={n:mem.name,c:fam.color};});
+      });
+    });
+    out+='<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    out+='<span class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">⚽ Golden Boot</span>';
+    out+='<span style="font-size:10px;color:#5a6a88">openfootball · non-penalty rank</span></div>';
+    out+='<div class="card"><table><thead><tr style="background:#ffffff05">';
+    ['#','Player','Team','Owner','G','Pen'].forEach(function(hd){
+      out+='<th style="text-align:'+(hd==='Player'||hd==='Team'||hd==='Owner'?'left':'center')+';padding:8px 10px;font-size:11px;color:#5a6a88;font-weight:600">'+hd+'</th>';
+    });
+    out+='</tr></thead><tbody>';
+    top.forEach(function(s,i){
+      var own=tOw[s.team];
+      out+='<tr style="border-top:1px solid #ffffff06">';
+      out+='<td style="padding:7px 10px;text-align:center;color:#5a6a88;font-size:11px">'+(i+1)+'</td>';
+      out+='<td style="padding:7px 10px;font-size:12px;font-weight:600">'+h(s.name)+'</td>';
+      out+='<td style="padding:7px 10px;font-size:12px;white-space:nowrap">'+f(s.team)+' '+h(s.team)+'</td>';
+      out+='<td style="padding:7px 10px;font-size:11px;color:'+(own?own.c:'#5a6a88')+'">'+(own?h(own.n.split(' ')[0]):'&mdash;')+'</td>';
+      out+='<td style="padding:7px 10px;text-align:center;font-weight:800;font-size:15px;color:#00d4aa">'+s.goals+'</td>';
+      out+='<td style="padding:7px 10px;text-align:center;font-size:11px;color:#5a6a88">'+(s.penalties||'&mdash;')+'</td>';
+      out+='</tr>';
+    });
+    out+='</tbody></table></div></div>';
+  })();
+
   document.getElementById('tab-stats').innerHTML=out;
 }
 
@@ -1501,18 +1621,32 @@ function renderScores(){
       goalsHtml='<div style="font-size:10px;color:#5a6a88;margin-top:4px;padding-top:4px;border-top:1px solid #ffffff08;line-height:1.8">'+gLines.join('&nbsp;&nbsp;')+'</div>';
     }
     var cardsHtml='';
-    // Add card info for this match's teams beneath goals
-    var ct=CFG.cardTotals||{};
-    var t1c=ct[m.t1],t2c=ct[m.t2];
-    if((t1c||t2c)&&!isEdit){
-      var cParts=[];
-      if(t1c&&(t1c.yellow>0||t1c.red>0))cParts.push(f(m.t1)+' '+(t1c.yellow>0?t1c.yellow+'🟨 ':'')+( t1c.red>0?t1c.red+'🟥':'').trim());
-      if(t2c&&(t2c.yellow>0||t2c.red>0))cParts.push(f(m.t2)+' '+(t2c.yellow>0?t2c.yellow+'🟨 ':'')+( t2c.red>0?t2c.red+'🟥':'').trim());
-      if(cParts.length){
-      if(cParts.length)cardsHtml='<div style="font-size:10px;color:#5a6a88;margin-top:3px;padding-top:3px;border-top:1px solid #ffffff06">'+cParts.join('&nbsp;&nbsp;')+'</div>';
+    if(!isEdit){
+      var _mc=CFG.matchCards||{};
+      var _md=null;
+      Object.keys(_mc).forEach(function(k){
+        var p=k.split(' vs ');
+        if(p.length===2&&((p[0]===m.t1&&p[1]===m.t2)||(p[0]===m.t2&&p[1]===m.t1)))_md=_mc[k];
+      });
+      if(_md&&((_md.home||[]).length||(_md.away||[]).length)){
+        var _hc=_md.homeTeam===m.t1?(_md.home||[]):(_md.away||[]);
+        var _ac=_md.homeTeam===m.t1?(_md.away||[]):(_md.home||[]);
+        function _fmtC(cards){
+          return cards.map(function(c){
+            var col=c.type==='red'?'#ff4757':'#fbbf24';
+            return '<span style="color:'+col+'">'+h(c.name)+' '+c.minute+"'</span>";
+          }).join('&nbsp; ');
+        }
+        var _hs=_fmtC(_hc),_as=_fmtC(_ac);
+        if(_hs||_as){
+          cardsHtml='<div style="font-size:10px;margin-top:3px;padding-top:3px;border-top:1px solid #ffffff06;display:flex;gap:12px">'+
+            '<div style="flex:1;text-align:right">'+_hs+'</div>'+
+            '<div style="width:1px;background:#ffffff08;flex-shrink:0"></div>'+
+            '<div style="flex:1">'+_as+'</div></div>';
+        }
       }
     }
-    var htHtml=(m.ht1!=null&&m.ht2!=null&&!isEdit)?'<span style="font-size:10px;color:#5a6a88;margin-left:6px">(HT '+m.ht1+'-'+m.ht2+')</span>':'';
+        var htHtml=(m.ht1!=null&&m.ht2!=null&&!isEdit)?'<span style="font-size:10px;color:#5a6a88;margin-left:6px">(HT '+m.ht1+'-'+m.ht2+')</span>':'';
     var onclk=isEdit?'':'onclick="editScore(\''+m.key+'\')"';
     out+='<div '+onclk+' style="padding:10px 14px;background:#111827;border:1px solid '+(isEdit?'#00d4aa40':'#ffffff0e')+';border-radius:8px;cursor:'+(isEdit?'default':'pointer')+'">';
     out+='<div class="score-row-grid" style="display:grid;grid-template-columns:90px 1fr '+(isEdit?'240px':'auto')+' 1fr 80px;align-items:center;gap:8px">';
@@ -1567,97 +1701,123 @@ function clearScore(key){
 
 // NEW ADMIN TAB
 // ═══════════════════════════════════════════════════════════
+// ── refreshCardData ──────────────────────────────────────────────────
 async function refreshCardData(){
   var btn=document.getElementById('card-refresh-btn');
-  if(btn){btn.disabled=true;btn.textContent='Fetching...';}
   var msg=document.getElementById('card-refresh-msg');
-  if(msg)msg.innerHTML='<span style="color:#fbbf24">Fetching from FBref...</span>';
+  if(btn){btn.disabled=true;btn.textContent='Fetching...';}
+  if(msg)msg.innerHTML='<span style="color:#fbbf24">Starting...</span>';
 
-  // Use allorigins CORS proxy to fetch FBref misc stats
-  var fbrefUrl='https://fbref.com/en/comps/1/misc/World-Cup-Miscellaneous-Stats';
+  var ids=CFG.aiScoreIds||{};
+  var matches=getMatches();
 
-  // Try multiple CORS proxies in order
-  // Try direct fetch first (works if FBref allows CORS from this origin)
-  // then fall back to proxies
-  // ScrapingBee API — stored in localStorage alongside GitHub token
-  var sbKey='';try{sbKey=localStorage.getItem('wc26_sb_key')||'';}catch(e){}
-  if(!sbKey){
-    var k=prompt('Enter your ScrapingBee API key (stored locally, never sent to GitHub):');
-    if(!k){if(btn){btn.disabled=false;btn.textContent='🟨🟥 Refresh Card Data';}return;}
-    try{localStorage.setItem('wc26_sb_key',k);}catch(e){}
-    sbKey=k;
-  }
-
-  try{
-    if(msg)msg.innerHTML='<span style="color:#fbbf24">Fetching via ScrapingBee...</span>';
-    // ScrapingBee: render_js=false (FBref is static HTML), premium_proxy=false (not needed for FBref)
-    // stealth_proxy bypasses Cloudflare — costs 75 credits but works on protected sites
-    var sbUrl='https://app.scrapingbee.com/api/v1/?api_key='+encodeURIComponent(sbKey)+
-      '&url='+encodeURIComponent(fbrefUrl)+
-      '&render_js=false&block_resources=true&stealth_proxy=true&timeout=15000';
-    var r=await fetch(sbUrl,{signal:AbortSignal.timeout(60000)});
-    if(r.status===401){
-      try{localStorage.removeItem('wc26_sb_key');}catch(e){}
-      throw new Error('ScrapingBee API key invalid — key cleared, try again');
-    }
-    if(!r.ok)throw new Error('ScrapingBee HTTP '+r.status);
-    var html=await r.text();
-    if(!html||html.length<5000)throw new Error('Response too short ('+html.length+' chars) — try again');
-    console.log('ScrapingBee succeeded: '+html.length+' chars');
-
-    // Parse the HTML table with DOMParser
-    var parser=new DOMParser();
-    var doc=parser.parseFromString(html,'text/html');
-
-    // FBref misc table id: stats_squads_misc_for
-    var table=doc.getElementById('stats_squads_misc_for')||doc.querySelector('table.stats_table');
-    if(!table)throw new Error('Could not find FBref stats table in response');
-
-    var NAME_MAP={
-      'United States':'USA','Bosnia and Herzegovina':'Bosnia & Herzegovina',
-      "Côte d'Ivoire":'Ivory Coast','Korea Republic':'South Korea',
-      'Curaçao':'Curaçao','Cabo Verde':'Cape Verde','DR Congo':'DR Congo',
-      'Czechia':'Czechia'
-    };
-
-    var cardTotals={};
-    var rows=table.querySelectorAll('tbody tr');
-    rows.forEach(function(row){
-      if(row.classList.contains('thead'))return;
-      var teamTd=row.querySelector('[data-stat="team"],[data-stat="squad"]');
-      if(!teamTd)return;
-      var a=teamTd.querySelector('a');
-      var team=(a?a.textContent:teamTd.textContent).trim();
-      team=NAME_MAP[team]||team;
-      var ycTd=row.querySelector('[data-stat="cards_yellow"]');
-      var rcTd=row.querySelector('[data-stat="cards_red"]');
-      if(!ycTd||!rcTd)return;
-      var yc=parseInt(ycTd.textContent.trim())||0;
-      var rc=parseInt(rcTd.textContent.trim())||0;
-      if(team)cardTotals[team]={yellow:yc,red:rc};
+  var toFetch=Object.keys(ids).filter(function(k){
+    var p=k.split(' vs ');
+    if(p.length!==2)return false;
+    return matches.some(function(m){
+      return((m.t1===p[0]&&m.t2===p[1])||(m.t1===p[1]&&m.t2===p[0]))&&m.s1!=null;
     });
+  });
 
-    var count=Object.keys(cardTotals).length;
-    if(count===0)throw new Error('Parsed 0 teams — FBref table structure may have changed');
-
-    // Store in CFG and push
-    cardTotals._updated=Date.now();
-    CFG.cardTotals=cardTotals;
-    calcAutoAwards();
-    var ok=await pushToGitHub(CFG);
-
-    if(msg)msg.innerHTML='<span style="color:#00d4aa">✓ Card data updated — '+count+' teams ('+
-      Object.values(cardTotals).reduce(function(s,v){return s+v.yellow;},0)+' yellows, '+
-      Object.values(cardTotals).reduce(function(s,v){return s+v.red;},0)+' reds)</span>';
-    renderSweep();
-
-  }catch(e){
-    console.error('Card refresh failed:',e);
-    if(msg)msg.innerHTML='<span style="color:#ff4757">✗ Failed: '+e.message+'</span>';
-  }finally{
-    if(btn){btn.disabled=false;btn.textContent='🟨🟥 Refresh Card Data';}
+  if(!toFetch.length){
+    if(msg)msg.innerHTML='<span style="color:#fbbf24">No finished matches with AiScore IDs yet</span>';
+    if(btn){btn.disabled=false;btn.textContent='🟥🟨 Refresh Card Data';}
+    return;
   }
+
+  var matchCards=Object.assign({},CFG.matchCards||{});
+  var errors=0;
+
+  for(var fi=0;fi<toFetch.length;fi++){
+    var matchKey=toFetch[fi];
+    var aid=ids[matchKey];
+    var parts=matchKey.split(' vs ');
+    var t1=parts[0],t2=parts[1];
+
+    if(msg)msg.innerHTML='<span style="color:#fbbf24">Fetching '+(fi+1)+'/'+toFetch.length+': '+h(matchKey)+'...</span>';
+
+    var slug=matchKey.toLowerCase()
+      .replace(' vs ','-')
+      .replace(/\u00fc/g,'u').replace(/\u00e7/g,'c').replace(/\u00e9/g,'e')
+      .replace(/\u00e8/g,'e').replace(/&/g,'and')
+      .replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-');
+    var url='https://m.aiscore.com/match-'+slug+'/'+aid;
+
+    try{
+      var r=await fetch(url,{signal:AbortSignal.timeout(15000)});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      var html=await r.text();
+      if(html.length<2000)throw new Error('Response too short ('+html.length+' chars)');
+
+      var doc=(new DOMParser()).parseFromString(html,'text/html');
+      var homeCards=[],awayCards=[];
+
+      // AiScore card events: img tags with 'yellow' or 'red' in src URL
+      // Each img is inside an event row that also contains minute and player name
+      // Home events are left-aligned, away events right-aligned
+      doc.querySelectorAll('img').forEach(function(img){
+        var src=img.getAttribute('src')||'';
+        var isYellow=src.indexOf('yellow')>=0;
+        var isRed=src.indexOf('red')>=0||src.indexOf('second')>=0;
+        if(!isYellow&&!isRed)return;
+        var cardType=isRed?'red':'yellow';
+
+        // Walk up to find the event row with minute + player name
+        var row=img.parentElement;
+        for(var d=0;d<6;d++){
+          if(!row)break;
+          var txt=(row.innerText||row.textContent||'').trim();
+          var minM=txt.match(/(\d{1,3})(?:\+\d+)?'/);
+          if(minM){
+            var minute=parseInt(minM[1]);
+            // Clean player name: remove minute, common labels
+            var name=txt.replace(/\d{1,3}(?:\+\d+)?'/g,'')
+              .replace(/In:|Out:|Assist:|Goal|Corner/g,'')
+              .replace(/\s+/g,' ').trim().split('\n')[0].trim();
+            if(name.length>2&&name.length<50){
+              var cls=(row.className||'')+(row.parentElement?row.parentElement.className||'':'');
+              var event={name:name,minute:minute,type:cardType};
+              if(cls.indexOf('right')>=0)awayCards.push(event);
+              else homeCards.push(event);
+            }
+            break;
+          }
+          row=row.parentElement;
+        }
+      });
+
+      matchCards[matchKey]={homeTeam:t1,awayTeam:t2,home:homeCards,away:awayCards,_fetched:Date.now()};
+      console.log(matchKey+': '+homeCards.length+'H '+awayCards.length+'A cards');
+    }catch(e){
+      console.warn('AiScore failed '+matchKey+':',e.message);
+      errors++;
+    }
+    await new Promise(function(res){setTimeout(res,300);});
+  }
+
+  // Tally totals from per-match events
+  var cardTotals={_updated:Date.now()};
+  Object.values(matchCards).forEach(function(mc){
+    var t1=mc.homeTeam,t2=mc.awayTeam;
+    if(!cardTotals[t1])cardTotals[t1]={yellow:0,red:0};
+    if(!cardTotals[t2])cardTotals[t2]={yellow:0,red:0};
+    (mc.home||[]).forEach(function(e){if(e.type==='red')cardTotals[t1].red++;else cardTotals[t1].yellow++;});
+    (mc.away||[]).forEach(function(e){if(e.type==='red')cardTotals[t2].red++;else cardTotals[t2].yellow++;});
+  });
+
+  CFG.matchCards=matchCards;
+  CFG.cardTotals=cardTotals;
+  calcAutoAwards();
+  var ok=await pushToGitHub(CFG);
+  var total=Object.keys(matchCards).length;
+  if(msg)msg.innerHTML='<span style="color:'+(ok?'#00d4aa':'#fbbf24')+'">'+(ok?'&#x2713;':'&#x26A0;')+' '+total+' matches'+(errors?' ('+errors+' failed)':'')+
+    (Object.values(cardTotals).filter(function(v){return v&&v.yellow;}).length?' &middot; '+Object.values(cardTotals).reduce(function(s,v){return s+(v.yellow||0);},0)+'Y '+Object.values(cardTotals).reduce(function(s,v){return s+(v.red||0);},0)+'R':'')+
+    '</span>';
+  if(btn){btn.disabled=false;btn.textContent='🟥🟨 Refresh Card Data';}
+  renderSweep();
+  renderStats();
 }
+
 
 function renderAdmin(){
   var _now=Date.now();
