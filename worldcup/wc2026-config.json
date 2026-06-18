@@ -1239,8 +1239,5 @@
   "pot0Cost": 15,
   "pot1Cost": 10,
   "pot2Cost": 5,
-  "pot3Cost": 5,
-  "eloRatings": {
-    "_updated": 1781768611439
-  }
+  "pot3Cost": 5
 }
