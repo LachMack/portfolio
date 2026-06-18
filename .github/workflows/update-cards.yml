@@ -25,6 +25,7 @@ jobs:
       - name: Run card scraper
         env:
           CONFIG_PATH: worldcup/wc2026-config.json
+          DEBUG_FIRST: '1'
         run: python worldcup/update-cards.py
 
       - name: Commit updated card data
