@@ -136,70 +136,80 @@
   },
   "manualOverrides": {},
   "cardTotals": {
-    "Australia": {
-      "yellow": 0,
-      "red": 0
-    },
-    "Bosnia-Herzegovina": {
-      "yellow": 3,
-      "red": 0
-    },
-    "Brazil": {
-      "yellow": 2,
-      "red": 0
-    },
-    "Canada": {
-      "yellow": 2,
-      "red": 0
-    },
-    "Czechia": {
-      "yellow": 0,
-      "red": 0
-    },
-    "Haiti": {
-      "yellow": 1,
-      "red": 0
-    },
-    "South Korea": {
-      "yellow": 1,
-      "red": 0
-    },
-    "Mexico": {
-      "yellow": 1,
-      "red": 1
-    },
-    "Morocco": {
-      "yellow": 0,
-      "red": 0
-    },
-    "Paraguay": {
-      "yellow": 5,
-      "red": 0
-    },
-    "Qatar": {
-      "yellow": 2,
-      "red": 0
-    },
-    "Scotland": {
-      "yellow": 3,
-      "red": 0
-    },
-    "South Africa": {
-      "yellow": 2,
-      "red": 2
-    },
-    "Switzerland": {
-      "yellow": 1,
-      "red": 0
-    },
-    "Türkiye": {
-      "yellow": 1,
-      "red": 0
-    },
-    "USA": {
-      "yellow": 1,
-      "red": 0
-    }
+    "_updated": 1781749327402
+  },
+  "matchCards": {},
+  "aiScoreIds": {
+    "Algeria vs Austria": "wv78xivmgz4iokr",
+    "Argentina vs Algeria": "j374oi03rr1tgqo",
+    "Argentina vs Austria": "g6763i5rmmdbo7r",
+    "Australia vs Türkiye": "8lk2dir4wwmaz73",
+    "Austria vs Jordan": "ndkz6i3jvy0ixq3",
+    "Belgium vs Egypt": "edq09iloeweheqx",
+    "Belgium vs Iran": "34kgmioe543ieko",
+    "Bosnia & Herzegovina vs Qatar": "wv78xivmggyiokr",
+    "Brazil vs Haiti": "zrkn6i4e8p2awql",
+    "Brazil vs Morocco": "m2q15izwd69ce76",
+    "Canada vs Bosnia & Herzegovina": "zrkn6i4e1wrcwql",
+    "Canada vs Qatar": "oj7x9ix0mlra47g",
+    "Cape Verde vs Saudi Arabia": "527r3i4l5x3t47e",
+    "Colombia vs DR Congo": "34kgmioe53rheko",
+    "Colombia vs Portugal": "m2q15izwdd9ue76",
+    "Croatia vs Ghana": "jek33i8gnwjb9ko",
+    "Curaçao vs Ivory Coast": "ndqmliw8mn4trkv",
+    "Czechia vs Mexico": "m2q15izw8xobe76",
+    "Czechia vs South Africa": "jr7owip1ww3sgq0",
+    "DR Congo vs Uzbekistan": "69759igzde2fgk2",
+    "Ecuador vs Curaçao": "vrqwni43mmws4qn",
+    "Ecuador vs Germany": "9gklzi1rwj4am7x",
+    "Egypt vs Iran": "m2q15izwdx9te76",
+    "England vs Croatia": "zrkn6i4e882fwql",
+    "England vs Ghana": "oj7x9ix022es47g",
+    "France vs Iraq": "vrqwni43m2wh4qn",
+    "France vs Senegal": "o07dni5v84xfmkn",
+    "Germany vs Curaçao": "o17pjio98l9uy7j",
+    "Germany vs Ivory Coast": "jr7owip1wo3hgq0",
+    "Haiti vs Scotland": "edq09iloeeeieqx",
+    "Iran vs New Zealand": "l6kegi860npfv75",
+    "Iraq vs Norway": "wv78xivmgzyhokr",
+    "Ivory Coast vs Ecuador": "o07dni5v88ximkn",
+    "Japan vs Sweden": "ezk96i3gzr5f1kn",
+    "Jordan vs Algeria": "527r3i4l5x2h47e",
+    "Jordan vs Argentina": "ezk96i3gzz5a1kn",
+    "Mexico vs South Africa": "ezk96i3gjr2f1kn",
+    "Mexico vs South Korea": "l6kegi86rnotv75",
+    "Morocco vs Haiti": "69759igzdd4sgk2",
+    "Netherlands vs Japan": "ndkz6i3jvd3txq3",
+    "Netherlands vs Sweden": "527r3i4l5r3h47e",
+    "New Zealand vs Belgium": "69759igzdx4hgk2",
+    "New Zealand vs Egypt": "xvkjoi8n3ylh879",
+    "Norway vs France": "ndqmliw8mm4urkv",
+    "Norway vs Senegal": "jr7owip1w8wfgq0",
+    "Panama vs Croatia": "63kv9igrwlmix7e",
+    "Panama vs England": "vmqy9ivwoozfgk9",
+    "Paraguay vs Australia": "jek33i8gnnzc9ko",
+    "Portugal vs DR Congo": "l6kegi8600piv75",
+    "Portugal vs Uzbekistan": "xvkjoi8n33ls879",
+    "Qatar vs Switzerland": "ndkz6i3jvv3bxq3",
+    "Saudi Arabia vs Uruguay": "zrkn6i4e8g2swql",
+    "Scotland vs Brazil": "oj7x9ix02veh47g",
+    "Scotland vs Morocco": "34kgmioe553aeko",
+    "Senegal vs Iraq": "9gklzi1rweeim7x",
+    "South Africa vs South Korea": "9gklzi1rww4fm7x",
+    "South Korea vs Czechia": "o17pjio9889ty7j",
+    "Spain vs Cape Verde": "8lk2dir4wdmiz73",
+    "Spain vs Saudi Arabia": "63kv9igrw5pax7e",
+    "Sweden vs Tunisia": "j374oi03ry1cgqo",
+    "Switzerland vs Bosnia & Herzegovina": "527r3i4l553s47e",
+    "Switzerland vs Canada": "vmqy9ivwy50tgk9",
+    "Tunisia vs Japan": "g6763i5rmodho7r",
+    "Tunisia vs Netherlands": "wv78xivmgyyfokr",
+    "Türkiye vs Paraguay": "63kv9igrwwpfx7e",
+    "Türkiye vs USA": "9gklzi1r5dnsm7x",
+    "USA vs Australia": "jr7owip1y4dugq0",
+    "USA vs Paraguay": "o17pjio94dzty7j",
+    "Uruguay vs Cape Verde": "ndkz6i3jvy3hxq3",
+    "Uruguay vs Spain": "jek33i8gnpzu9ko"
   },
   "pot0Cost": 15,
   "pot1Cost": 10,
