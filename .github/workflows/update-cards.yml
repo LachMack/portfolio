@@ -25,6 +25,9 @@ jobs:
       - name: Debug NUXT structure
         run: python worldcup/debug_nuxt.py
         
+      - name: Find AiScore API
+        run: python worldcup/find_api.py        
+        
       - name: Run card scraper
         env:
           CONFIG_PATH: worldcup/wc2026-config.json
