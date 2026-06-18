@@ -1,169 +1,150 @@
 #!/usr/bin/env node
-/**
- * Fetches AiScore match pages and extracts card events from __NUXT__ data.
- * Called by update-cards.py via subprocess.
- * Usage: node extract_cards.js <url> <t1> <t2>
- * Outputs JSON to stdout.
- */
-
 const https = require('https');
 const url = process.argv[2];
 const t1 = process.argv[3];
 const t2 = process.argv[4];
+const debug = process.argv[5] === 'debug';
 
-if (!url) {
-  process.stdout.write(JSON.stringify({error: 'No URL provided'}));
-  process.exit(1);
-}
+if (!url) { process.stdout.write(JSON.stringify({error:'No URL'})); process.exit(1); }
 
 function fetch(url) {
   return new Promise((resolve, reject) => {
-    const options = {
+    https.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html',
         'Connection': 'close',
       },
       timeout: 12000,
-    };
-    https.get(url, options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
+    }, (res) => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
     }).on('error', reject).on('timeout', () => reject(new Error('timeout')));
   });
 }
 
 async function main() {
   let html;
-  try {
-    html = await fetch(url);
-  } catch(e) {
-    process.stdout.write(JSON.stringify({error: e.message}));
-    process.exit(0);
-  }
+  try { html = await fetch(url); }
+  catch(e) { process.stdout.write(JSON.stringify({error: e.message})); return; }
 
-  if (!html || html.length < 1000) {
-    process.stdout.write(JSON.stringify({error: 'Too short: ' + html.length}));
-    process.exit(0);
-  }
-
-  // Find and execute the __NUXT__ function
-  const nuxtMatch = html.match(/window\.__NUXT__=([\s\S]*?)(?=\n?<\/script>)/);
-  if (!nuxtMatch) {
-    process.stdout.write(JSON.stringify({error: 'No __NUXT__ found'}));
-    process.exit(0);
-  }
+  const nuxtMatch = html.match(/window\.__NUXT__=([\s\S]*?)\s*<\/script>/);
+  if (!nuxtMatch) { process.stdout.write(JSON.stringify({error:'No __NUXT__'})); return; }
 
   let nuxtData;
   try {
-    // Execute the NUXT function in a sandboxed context
-    const fn = new Function(`return ${nuxtMatch[1]}`);
-    nuxtData = fn();
+    nuxtData = (new Function(`return ${nuxtMatch[1]}`))();
   } catch(e) {
-    process.stdout.write(JSON.stringify({error: 'NUXT eval failed: ' + e.message}));
-    process.exit(0);
+    process.stdout.write(JSON.stringify({error:'eval: '+e.message})); return;
   }
 
-  // Walk the data looking for card events
-  // Card type IDs used by sports data: 41=yellow, 42=red, 44=second yellow
-  const YELLOW_TYPES = new Set([41, '41', 'yellow', 'Yellow Card', 'YC']);
-  const RED_TYPES = new Set([42, '42', 44, '44', 'red', 'Red Card', 'RC', 'Second Yellow']);
+  if (debug) {
+    // Print top-level keys and structure to stderr for diagnosis
+    function summarise(obj, depth, maxDepth) {
+      if (depth > maxDepth || obj === null || obj === undefined) return String(obj);
+      if (typeof obj !== 'object') return typeof obj + ':' + String(obj).slice(0,40);
+      if (Array.isArray(obj)) return `Array[${obj.length}]` + (obj.length > 0 ? ' ' + summarise(obj[0], depth+1, maxDepth) : '');
+      const keys = Object.keys(obj);
+      return `{${keys.slice(0,8).map(k => k+':'+summarise(obj[k], depth+1, maxDepth)).join(', ')}${keys.length > 8 ? '...' : ''}}`;
+    }
+    process.stderr.write('NUXT top level: ' + summarise(nuxtData, 0, 1) + '\n');
+    
+    // Find all objects that might be events by searching for numeric keys that look like minutes
+    // Also search for strings like 'yellow', 'red', 'card'
+    function findCardRelated(obj, path, results) {
+      if (!obj || typeof obj !== 'object' || results.length > 20) return;
+      const str = JSON.stringify(obj).toLowerCase();
+      if (str.includes('yellow') || str.includes('red card') || str.includes('incident')) {
+        if (Object.keys(obj).length < 20) {
+          results.push({path, obj: JSON.stringify(obj).slice(0,200)});
+        }
+      }
+      if (Array.isArray(obj)) {
+        obj.forEach((v,i) => findCardRelated(v, path+`[${i}]`, results));
+      } else {
+        Object.keys(obj).forEach(k => findCardRelated(obj[k], path+'.'+k, results));
+      }
+    }
+    const cardRelated = [];
+    findCardRelated(nuxtData, 'root', cardRelated);
+    process.stderr.write('Card-related objects found: ' + cardRelated.length + '\n');
+    cardRelated.slice(0,5).forEach(r => process.stderr.write('  '+r.path+': '+r.obj+'\n'));
+  }
 
-  const homeCards = [];
-  const awayCards = [];
+  // Search for incidents/events with card type indicators
+  const homeCards = [], awayCards = [];
   const seen = new Set();
 
-  function walk(obj, depth) {
-    if (depth > 20 || !obj || typeof obj !== 'object') return;
-    if (Array.isArray(obj)) {
-      obj.forEach(item => walk(item, depth + 1));
-      return;
-    }
+  // AiScore uses incident type IDs - common values:
+  // 41=yellow, 42=red, 44=second yellow, 45=penalty, etc.
+  // Also check string values
+  const YELLOW = new Set([41, '41', 'yellow_card', 'Yellow Card', 'yellow', 'YC', 6]);
+  const RED = new Set([42, '42', 'red_card', 'Red Card', 'red', 'RC', 44, '44', 7, 'second_yellow']);
+
+  function walkForCards(obj, depth) {
+    if (depth > 25 || !obj || typeof obj !== 'object') return;
+    if (Array.isArray(obj)) { obj.forEach(v => walkForCards(v, depth+1)); return; }
 
     const keys = Object.keys(obj);
-    // Look for event-like objects with type + player + minute
-    const hasType = keys.some(k => ['type', 'event_type', 'eventType', 'incidentType', 'incident_type'].includes(k));
-    const hasTime = keys.some(k => ['minute', 'min', 'time', 'matchTime', 'match_time', 'elapsed'].includes(k));
-    const hasPlayer = keys.some(k => ['player', 'name', 'playerName', 'player_name', 'fullName'].includes(k));
+    // Check if this looks like an event/incident object
+    const typeVal = obj.type ?? obj.incidentType ?? obj.incident_type ?? obj.eventType ?? obj.event_type ?? obj.typeId ?? obj.type_id;
+    const isYellow = YELLOW.has(typeVal) || (typeof typeVal === 'string' && typeVal.toLowerCase().includes('yellow'));
+    const isRed = RED.has(typeVal) || (typeof typeVal === 'string' && (typeVal.toLowerCase().includes('red') || typeVal.toLowerCase().includes('second')));
 
-    if (hasType && (hasTime || hasPlayer)) {
-      // Get type value
-      const typeVal = obj.type ?? obj.event_type ?? obj.eventType ?? obj.incidentType ?? obj.incident_type;
-      const isYellow = YELLOW_TYPES.has(typeVal) || (typeof typeVal === 'string' && typeVal.toLowerCase().includes('yellow'));
-      const isRed = RED_TYPES.has(typeVal) || (typeof typeVal === 'string' && (typeVal.toLowerCase().includes('red') || typeVal.toLowerCase().includes('second')));
+    if (isYellow || isRed) {
+      // Try to get player name
+      let name = null;
+      const playerObj = obj.player ?? obj.Player ?? obj.playerInfo;
+      if (playerObj) {
+        name = playerObj.name ?? playerObj.fullName ?? playerObj.shortName ?? playerObj.player_name;
+      }
+      if (!name) {
+        name = obj.playerName ?? obj.player_name ?? obj.name ?? obj.fullName;
+      }
+      if (!name || typeof name !== 'string' || name.length < 2) {
+        keys.forEach(k => walkForCards(obj[k], depth+1));
+        return;
+      }
 
-      if (isYellow || isRed) {
-        // Get player name
-        let name = null;
-        const nameKeys = ['player', 'name', 'playerName', 'player_name', 'fullName'];
-        for (const k of nameKeys) {
-          if (obj[k] && typeof obj[k] === 'string' && obj[k].length > 2) {
-            name = obj[k];
-            break;
-          }
-          // Sometimes player is a nested object
-          if (obj[k] && typeof obj[k] === 'object') {
-            const nested = obj[k];
-            const nestedName = nested.name ?? nested.fullName ?? nested.player_name ?? nested.shortName;
-            if (nestedName && typeof nestedName === 'string' && nestedName.length > 2) {
-              name = nestedName;
-              break;
-            }
-          }
-        }
+      // Get minute
+      let minute = null;
+      const timeVal = obj.minute ?? obj.min ?? obj.time ?? obj.elapsed ?? obj.matchTime ?? obj.match_time ?? obj.incidentTime;
+      if (timeVal !== undefined && timeVal !== null) {
+        minute = parseInt(String(timeVal).split('+')[0].split('.')[0]);
+      }
+      if (!minute || minute <= 0 || minute > 125) {
+        keys.forEach(k => walkForCards(obj[k], depth+1));
+        return;
+      }
 
-        // Get minute
-        let minute = null;
-        const timeKeys = ['minute', 'min', 'time', 'matchTime', 'match_time', 'elapsed'];
-        for (const k of timeKeys) {
-          if (obj[k] !== undefined) {
-            const parsed = parseInt(String(obj[k]).split('+')[0].split('.')[0]);
-            if (!isNaN(parsed) && parsed > 0 && parsed <= 125) {
-              minute = parsed;
-              break;
-            }
-          }
-        }
-
-        if (name && minute) {
-          const cardType = isRed ? 'red' : 'yellow';
-          const key = `${name.slice(0,6)}_${minute}_${cardType}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            // Determine home/away
-            const teamVal = String(obj.team ?? obj.teamId ?? obj.team_id ?? obj.side ?? obj.isHome ?? '').toLowerCase();
-            const isAway = teamVal === 'away' || teamVal === 'false' || teamVal === '0' ||
-                           (t2 && teamVal.includes(t2.toLowerCase().slice(0,4)));
-            const event = {name, minute, type: cardType};
-            if (isAway) awayCards.push(event);
-            else homeCards.push(event);
-          }
-        }
+      const cardType = isRed ? 'red' : 'yellow';
+      const key = name.slice(0,8)+'_'+minute+'_'+cardType;
+      if (!seen.has(key)) {
+        seen.add(key);
+        // Determine home/away
+        const isHome = obj.isHome ?? obj.is_home;
+        const side = String(obj.team ?? obj.side ?? obj.teamId ?? '').toLowerCase();
+        let away = false;
+        if (isHome === false || isHome === 0) away = true;
+        else if (side === 'away' || side === '0' || (t2 && side.includes(t2.toLowerCase().slice(0,4)))) away = true;
+        
+        const event = {name, minute, type: cardType};
+        if (away) awayCards.push(event); else homeCards.push(event);
       }
     }
 
-    keys.forEach(k => walk(obj[k], depth + 1));
+    keys.forEach(k => walkForCards(obj[k], depth+1));
   }
 
-  walk(nuxtData, 0);
-
-  // Sort by minute
-  homeCards.sort((a,b) => a.minute - b.minute);
-  awayCards.sort((a,b) => a.minute - b.minute);
+  walkForCards(nuxtData, 0);
+  homeCards.sort((a,b) => a.minute-b.minute);
+  awayCards.sort((a,b) => a.minute-b.minute);
 
   process.stdout.write(JSON.stringify({
-    home: homeCards,
-    away: awayCards,
-    debug: {
-      htmlLength: html.length,
-      hasNuxt: true,
-      totalEvents: homeCards.length + awayCards.length,
-    }
+    home: homeCards, away: awayCards,
+    debug: {htmlLength: html.length, hasNuxt: true, totalEvents: homeCards.length+awayCards.length}
   }));
 }
 
-main().catch(e => {
-  process.stdout.write(JSON.stringify({error: e.message}));
-  process.exit(0);
-});
+main().catch(e => process.stdout.write(JSON.stringify({error: e.message})));
