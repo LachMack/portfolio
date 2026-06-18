@@ -1,257 +1,196 @@
 #!/usr/bin/env python3
 """
-Fetches card data from AiScore for all finished WC2026 matches
-and updates wc2026-config.json with per-match events + team totals.
+Fetches card data from AiScore for finished WC2026 matches.
+Updates wc2026-config.json with per-match events + team totals.
 """
 
-import json, re, sys, os, time
+import json, re, sys, os, time, socket
 from urllib.request import urlopen, Request
-from urllib.error import URLError
+from urllib.error import URLError, HTTPError
 
 CONFIG_PATH = os.environ.get('CONFIG_PATH', 'worldcup/wc2026-config.json')
+TIMEOUT = 10  # seconds per request
 
-# ── Name map: AiScore display name → our sweep name ──────────────────
-NAME_MAP = {
-    'Mexico': 'Mexico', 'South Africa': 'South Africa',
-    'South Korea': 'South Korea', 'Korea Republic': 'South Korea',
-    'Czechia': 'Czechia', 'Czech Republic': 'Czechia',
-    'Canada': 'Canada', 'Bosnia & Herzegovina': 'Bosnia & Herzegovina',
-    'Bosnia and Herzegovina': 'Bosnia & Herzegovina',
-    'USA': 'USA', 'United States': 'USA',
-    'Paraguay': 'Paraguay', 'Qatar': 'Qatar', 'Switzerland': 'Switzerland',
-    'Brazil': 'Brazil', 'Morocco': 'Morocco', 'Scotland': 'Scotland',
-    'Haiti': 'Haiti', 'Australia': 'Australia', 'Türkiye': 'Türkiye',
-    'Turkey': 'Türkiye', 'Germany': 'Germany',
-    "Côte d'Ivoire": 'Ivory Coast', "Cote d'Ivoire": 'Ivory Coast',
-    'Ivory Coast': 'Ivory Coast',
-    'Netherlands': 'Netherlands', 'Japan': 'Japan',
-    'Sweden': 'Sweden', 'Tunisia': 'Tunisia',
-    'Spain': 'Spain', 'Cabo Verde': 'Cape Verde', 'Cape Verde': 'Cape Verde',
-    'Belgium': 'Belgium', 'Egypt': 'Egypt',
-    'Saudi Arabia': 'Saudi Arabia', 'Uruguay': 'Uruguay',
-    'Iran': 'Iran', 'IR Iran': 'Iran',
-    'New Zealand': 'New Zealand', 'France': 'France',
-    'Senegal': 'Senegal', 'Norway': 'Norway', 'Iraq': 'Iraq',
-    'Argentina': 'Argentina', 'Algeria': 'Algeria',
-    'Austria': 'Austria', 'Jordan': 'Jordan',
-    'Portugal': 'Portugal',
-    'DR Congo': 'DR Congo',
-    'Democratic Republic of the Congo': 'DR Congo',
-    'Congo DR': 'DR Congo',
-    'England': 'England', 'Croatia': 'Croatia',
-    'Ghana': 'Ghana', 'Panama': 'Panama',
-    'Colombia': 'Colombia', 'Uzbekistan': 'Uzbekistan',
-    'Ecuador': 'Ecuador', 'Curaçao': 'Curaçao', 'Curacao': 'Curaçao',
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'identity',
+    'Connection': 'close',
 }
 
-def fetch_html(url, retries=3):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'en-US,en;q=0.9',
-    }
-    for attempt in range(retries):
-        try:
-            req = Request(url, headers=headers)
-            with urlopen(req, timeout=15) as r:
-                return r.read().decode('utf-8', errors='replace')
-        except Exception as e:
-            print(f'  Attempt {attempt+1} failed: {e}')
-            if attempt < retries - 1:
-                time.sleep(2)
+def fetch_html(url):
+    try:
+        req = Request(url, headers=HEADERS)
+        with urlopen(req, timeout=TIMEOUT) as r:
+            return r.read().decode('utf-8', errors='replace')
+    except HTTPError as e:
+        print(f'  HTTP {e.code}')
+    except URLError as e:
+        print(f'  URLError: {e.reason}')
+    except socket.timeout:
+        print(f'  Timed out after {TIMEOUT}s')
+    except Exception as e:
+        print(f'  Error: {type(e).__name__}: {e}')
     return None
 
 def parse_cards(html, t1, t2):
-    """
-    Parse yellow/red card events from AiScore match page HTML.
-    Returns {home: [{name, minute, type}], away: [...]}
-    
-    AiScore timeline structure (from inspecting Mexico vs SA):
-    Events appear as rows with:
-    - img src containing 'yellow_card' or 'red_card' 
-    - nearby text with player name and minute (e.g. "Brian Gutierrez\n17'")
-    Home events are in left-side divs, away in right-side divs.
-    """
     home_cards, away_cards = [], []
-    
-    # Strategy: find img tags with card indicators, then extract context
-    # Pattern: img src with yellow/red, nearby minute pattern, nearby player name
-    
-    # Split into event blocks - AiScore wraps each timeline event
-    # Look for the main event section between score display and HT/FT markers
-    
-    # Find card images and their surrounding context (±500 chars)
-    img_pattern = re.compile(r'<img[^>]+src=["\']([^"\']*(?:yellow|red)[^"\']*)["\'][^>]*>', re.I)
-    
-    for m in img_pattern.finditer(html):
+
+    # Find all card image references and surrounding context
+    img_re = re.compile(r'<img[^>]+src=["\']([^"\']*(?:yellow|red)[^"\']*card[^"\']*)["\']', re.I)
+
+    for m in img_re.finditer(html):
         src = m.group(1).lower()
         is_yellow = 'yellow' in src
         is_red = 'red' in src or 'second' in src
         if not is_yellow and not is_red:
             continue
         card_type = 'red' if is_red else 'yellow'
-        
-        # Get surrounding context (500 chars before the img tag)
-        start = max(0, m.start() - 500)
-        context = html[start:m.end() + 200]
-        
-        # Strip HTML tags for text parsing
-        text = re.sub(r'<[^>]+>', ' ', context)
-        text = re.sub(r'\s+', ' ', text).strip()
-        
-        # Find minute pattern
-        min_match = re.search(r'(\d{1,3})(?:\+\d+)?\s*\'', text)
+
+        # Look at surrounding 600 chars for minute + player name
+        start = max(0, m.start() - 600)
+        context_html = html[start:m.end() + 100]
+        context = re.sub(r'<[^>]+>', ' ', context_html)
+        context = re.sub(r'\s+', ' ', context).strip()
+
+        # Find minute
+        min_match = re.search(r'(\d{1,3})(?:\+\d+)?\s*\'', context)
         if not min_match:
             continue
         minute = int(min_match.group(1))
-        
-        # Extract player name: look for capitalized words near the minute
-        # Remove the minute and common non-name words
-        cleaned = re.sub(r'\d{1,3}(?:\+\d+)?\s*\'', '', text)
-        cleaned = re.sub(r'\b(In|Out|Assist|Goal|Corner|HT|FT|Substitution|Foul)\b', '', cleaned, flags=re.I)
+        if minute > 120:
+            continue
+
+        # Extract player name - look for Title Case words
+        cleaned = re.sub(r'\d{1,3}(?:\+\d+)?\s*\'', ' ', context)
+        cleaned = re.sub(r'\b(In|Out|Assist|Goal|Corner|HT|FT|Full Time|Half Time|Substitution|Penalty|VAR)\b', ' ', cleaned, flags=re.I)
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
-        
-        # Find capitalized name (2+ words or single word with capital)
-        name_match = re.search(r'([A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽ][a-záéíóúàèìòùüñčšž]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽ][a-záéíóúàèìòùüñčšž]+)+)', cleaned)
+
+        name_match = re.search(
+            r'([A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽĆĐ][a-záéíóúàèìòùüñčšžćđ\-]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÜÑČŠŽĆĐ][a-záéíóúàèìòùüñčšžćđ\-]+)+)',
+            cleaned
+        )
         if not name_match:
             continue
         name = name_match.group(1).strip()
-        if len(name) < 3 or len(name) > 50:
+        if len(name) < 4 or len(name) > 45:
             continue
-        
-        # Determine home or away by checking which team name appears nearby
-        # and by position (home events tend to appear before the score, away after)
-        context_text = re.sub(r'<[^>]+>', ' ', context)
-        
-        # Check if t1 (home) team name appears closer than t2 (away)
-        t1_pos = context_text.find(t1)
-        t2_pos = context_text.find(t2)
-        
+
         event = {'name': name, 'minute': minute, 'type': card_type}
-        
-        # Use div class hints if available
-        pre_context = html[start:m.start()]
-        if re.search(r'class=["\'][^"\']*right[^"\']*["\']', pre_context[-200:], re.I):
-            away_cards.append(event)
-        elif re.search(r'class=["\'][^"\']*left[^"\']*["\']', pre_context[-200:], re.I):
-            home_cards.append(event)
-        elif t1_pos >= 0 and (t2_pos < 0 or t1_pos < t2_pos):
-            home_cards.append(event)
-        elif t2_pos >= 0:
+
+        # Determine home/away from div class context before the img
+        pre = html[start:m.start()]
+        last_300 = pre[-300:]
+        if re.search(r'class=["\'][^"\']*\bright\b[^"\']*["\']', last_300, re.I):
             away_cards.append(event)
         else:
-            # Default: use position relative to score block
             home_cards.append(event)
-    
-    # Deduplicate by (name, minute, type)
+
     def dedup(cards):
-        seen, result = set(), []
-        for c in cards:
-            key = (c['name'], c['minute'], c['type'])
-            if key not in seen:
-                seen.add(key)
-                result.append(c)
-        return sorted(result, key=lambda x: x['minute'])
-    
+        seen, out = set(), []
+        for c in sorted(cards, key=lambda x: x['minute']):
+            k = (c['name'][:8], c['minute'], c['type'])
+            if k not in seen:
+                seen.add(k)
+                out.append(c)
+        return out
+
     return {'home': dedup(home_cards), 'away': dedup(away_cards)}
 
 
+def build_slug(match_key):
+    slug = match_key.lower().replace(' vs ', '-')
+    replacements = [
+        ('ü','u'),('ç','c'),('é','e'),('è','e'),('ê','e'),
+        ('à','a'),('á','a'),('ã','a'),('â','a'),
+        ('ó','o'),('ô','o'),('ú','u'),('ñ','n'),
+        ('&',' and '),("'",''),('ş','s'),('ğ','g'),
+    ]
+    for old, new in replacements:
+        slug = slug.replace(old, new)
+    slug = re.sub(r'[^a-z0-9-]', '-', slug)
+    slug = re.sub(r'-+', '-', slug).strip('-')
+    return slug
+
+
 def main():
-    # Load current config
     print(f'Loading {CONFIG_PATH}...')
     with open(CONFIG_PATH) as f:
         config = json.load(f)
-    
+
     ai_ids = config.get('aiScoreIds', {})
     if not ai_ids:
         print('No aiScoreIds in config — nothing to do')
         sys.exit(0)
-    
-    # Determine which matches are finished (have scores in OFB data or manual)
-    # For the GitHub Action we'll just try all matches and skip if page says "upcoming"
-    
+
+    print(f'Found {len(ai_ids)} match IDs in config')
+
     match_cards = config.get('matchCards', {})
-    card_totals = {}
     errors = 0
     fetched = 0
     skipped = 0
-    
-    for match_key, aid in ai_ids.items():
+
+    for match_key, aid in sorted(ai_ids.items()):
         parts = match_key.split(' vs ')
         if len(parts) != 2:
             continue
         t1, t2 = parts
-        
-        # Build URL slug
-        slug = match_key.lower()
-        slug = slug.replace(' vs ', '-')
-        for old, new in [('ü','u'),('ç','c'),('é','e'),('è','e'),
-                         ('ã','a'),('ó','o'),('&','and'),("'",'')]:
-            slug = slug.replace(old, new)
-        slug = re.sub(r'[^a-z0-9-]', '-', slug)
-        slug = re.sub(r'-+', '-', slug).strip('-')
-        
+
+        slug = build_slug(match_key)
         url = f'https://m.aiscore.com/match-{slug}/{aid}'
-        print(f'Fetching {match_key}...')
-        
+        print(f'\n[{fetched+skipped+errors+1}/{len(ai_ids)}] {match_key}')
+
         html = fetch_html(url)
         if not html:
-            print(f'  FAILED to fetch')
             errors += 1
             continue
-        
-        # Check if match is finished
-        if 'Full Time' not in html and 'FT' not in html:
-            print(f'  Skipping — not finished yet')
+
+        if len(html) < 1000:
+            print(f'  Too short ({len(html)} chars) — skipping')
             skipped += 1
             continue
-        
+
+        # Check if finished
+        is_finished = 'Full Time' in html or '>FT<' in html or 'FT 1' in html or 'FT 2' in html or 'FT 0' in html
+        if not is_finished:
+            print(f'  Not finished yet — skipping')
+            skipped += 1
+            continue
+
         cards = parse_cards(html, t1, t2)
-        total_cards = len(cards['home']) + len(cards['away'])
-        print(f'  Found {len(cards["home"])} home, {len(cards["away"])} away cards')
-        
+        total = len(cards['home']) + len(cards['away'])
+        print(f'  ✓ {len(cards["home"])} home cards, {len(cards["away"])} away cards')
+
         match_cards[match_key] = {
-            'homeTeam': t1,
-            'awayTeam': t2,
-            'home': cards['home'],
-            'away': cards['away'],
+            'homeTeam': t1, 'awayTeam': t2,
+            'home': cards['home'], 'away': cards['away'],
             '_fetched': int(time.time() * 1000)
         }
         fetched += 1
-        time.sleep(0.5)  # be polite
-    
-    # Tally card totals from match events
+        time.sleep(0.3)
+
+    # Tally totals
+    card_totals = {'_updated': int(time.time() * 1000)}
     for mc in match_cards.values():
-        t1 = mc['homeTeam']
-        t2 = mc['awayTeam']
-        if t1 not in card_totals:
-            card_totals[t1] = {'yellow': 0, 'red': 0}
-        if t2 not in card_totals:
-            card_totals[t2] = {'yellow': 0, 'red': 0}
-        for e in mc.get('home', []):
-            if e['type'] == 'red':
-                card_totals[t1]['red'] += 1
-            else:
-                card_totals[t1]['yellow'] += 1
-        for e in mc.get('away', []):
-            if e['type'] == 'red':
-                card_totals[t2]['red'] += 1
-            else:
-                card_totals[t2]['yellow'] += 1
-    
-    card_totals['_updated'] = int(time.time() * 1000)
-    
-    # Update config
+        for team_key, events in [('homeTeam', 'home'), ('awayTeam', 'away')]:
+            team = mc[team_key]
+            if team not in card_totals:
+                card_totals[team] = {'yellow': 0, 'red': 0}
+            for e in mc.get(events, []):
+                card_totals[team]['red' if e['type'] == 'red' else 'yellow'] += 1
+
     config['matchCards'] = match_cards
     config['cardTotals'] = card_totals
-    
+
     with open(CONFIG_PATH, 'w') as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
-    
-    print(f'\nDone: {fetched} fetched, {skipped} skipped, {errors} errors')
-    total_y = sum(v.get('yellow',0) for k,v in card_totals.items() if k != '_updated')
-    total_r = sum(v.get('red',0) for k,v in card_totals.items() if k != '_updated')
-    print(f'Card totals: {total_y} yellows, {total_r} reds across {len(match_cards)} matches')
+
+    total_y = sum(v.get('yellow', 0) for k, v in card_totals.items() if isinstance(v, dict))
+    total_r = sum(v.get('red', 0) for k, v in card_totals.items() if isinstance(v, dict))
+    print(f'\n{"="*50}')
+    print(f'Done: {fetched} fetched, {skipped} skipped, {errors} errors')
+    print(f'Totals: {total_y} yellows, {total_r} reds across {len(match_cards)} matches')
 
 if __name__ == '__main__':
     main()
