@@ -11,21 +11,23 @@ SCRIPT_DIR = Path(__file__).parent
 NODE_SCRIPT = SCRIPT_DIR / 'extract_cards.js'
 
 
-def get_cards_via_node(url, t1, t2):
+def get_cards_via_node(url, t1, t2, debug=False):
     """Call Node.js script to fetch and parse NUXT data from AiScore."""
+    args = ['node', str(NODE_SCRIPT), url, t1, t2]
+    if debug:
+        args.append('debug')
     try:
-        result = subprocess.run(
-            ['node', str(NODE_SCRIPT), url, t1, t2],
-            capture_output=True, text=True, timeout=20
-        )
+        result = subprocess.run(args, capture_output=True, text=True, timeout=20)
+        if debug and result.stderr:
+            print(f'  DEBUG stderr:')
+            for line in result.stderr.strip().split('\n'):
+                print(f'    {line}')
         if result.stdout:
             data = json.loads(result.stdout)
             if 'error' in data:
                 print(f'  Node error: {data["error"]}')
                 return None
             return data
-        if result.stderr:
-            print(f'  Node stderr: {result.stderr[:200]}')
         return None
     except subprocess.TimeoutExpired:
         print(f'  Node timeout after 20s')
@@ -88,7 +90,8 @@ def main():
         url = f'https://m.aiscore.com/match-{slug}/{aid}'
         print(f'\n[{i}/{len(ai_ids)}] {match_key}')
 
-        data = get_cards_via_node(url, t1, t2)
+        is_debug = (i == 1 and os.environ.get("DEBUG_FIRST","0") == "1")
+        data = get_cards_via_node(url, t1, t2, debug=is_debug)
         if data is None:
             errors += 1
             continue
