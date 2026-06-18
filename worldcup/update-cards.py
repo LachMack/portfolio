@@ -1,54 +1,161 @@
 #!/usr/bin/env python3
 """
-Fetches card data from AiScore using Node.js to evaluate __NUXT__ data.
+Fetches card data from ESPN's public API for finished WC2026 matches.
+ESPN returns clean JSON - no scraping needed.
+
+Endpoints:
+  Scoreboard: site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=200&dates=20260611-20260719
+  Summary:    site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event={id}
 """
 
-import json, re, sys, os, time, subprocess
-from pathlib import Path
+import json, re, sys, os, time
+from urllib.request import urlopen, Request
+from urllib.error import URLError, HTTPError
 
 CONFIG_PATH = os.environ.get('CONFIG_PATH', 'worldcup/wc2026-config.json')
-SCRIPT_DIR = Path(__file__).parent
-NODE_SCRIPT = SCRIPT_DIR / 'extract_cards.js'
 
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (compatible; curl/7.68)',
+    'Accept': 'application/json',
+}
 
-def get_cards_via_node(url, t1, t2, debug=False):
-    """Call Node.js script to fetch and parse NUXT data from AiScore."""
-    args = ['node', str(NODE_SCRIPT), url, t1, t2]
-    if debug:
-        args.append('debug')
+SCOREBOARD_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=200&dates=20260611-20260719'
+SUMMARY_URL    = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event={}'
+
+# ESPN team name → our sweep name
+NAME_MAP = {
+    'Mexico': 'Mexico', 'South Africa': 'South Africa',
+    'South Korea': 'South Korea', 'Korea Republic': 'South Korea',
+    'Czech Republic': 'Czechia', 'Czechia': 'Czechia',
+    'Canada': 'Canada', 'Bosnia and Herzegovina': 'Bosnia & Herzegovina',
+    'Bosnia & Herzegovina': 'Bosnia & Herzegovina',
+    'USA': 'USA', 'United States': 'USA',
+    'Paraguay': 'Paraguay', 'Qatar': 'Qatar', 'Switzerland': 'Switzerland',
+    'Brazil': 'Brazil', 'Morocco': 'Morocco', 'Scotland': 'Scotland',
+    'Haiti': 'Haiti', 'Australia': 'Australia', 'Turkiye': 'Türkiye',
+    'Turkey': 'Türkiye', 'Türkiye': 'Türkiye', 'Germany': 'Germany',
+    "Ivory Coast": 'Ivory Coast', "Cote d'Ivoire": 'Ivory Coast',
+    "Côte d'Ivoire": 'Ivory Coast',
+    'Netherlands': 'Netherlands', 'Japan': 'Japan',
+    'Sweden': 'Sweden', 'Tunisia': 'Tunisia',
+    'Spain': 'Spain', 'Cabo Verde': 'Cape Verde', 'Cape Verde': 'Cape Verde',
+    'Belgium': 'Belgium', 'Egypt': 'Egypt',
+    'Saudi Arabia': 'Saudi Arabia', 'Uruguay': 'Uruguay',
+    'Iran': 'Iran', 'New Zealand': 'New Zealand',
+    'France': 'France', 'Senegal': 'Senegal',
+    'Norway': 'Norway', 'Iraq': 'Iraq',
+    'Argentina': 'Argentina', 'Algeria': 'Algeria',
+    'Austria': 'Austria', 'Jordan': 'Jordan',
+    'Portugal': 'Portugal', 'DR Congo': 'DR Congo',
+    'Congo, DR': 'DR Congo', 'Democratic Republic of Congo': 'DR Congo',
+    'England': 'England', 'Croatia': 'Croatia',
+    'Ghana': 'Ghana', 'Panama': 'Panama',
+    'Colombia': 'Colombia', 'Uzbekistan': 'Uzbekistan',
+    'Ecuador': 'Ecuador', 'Curacao': 'Curaçao', 'Curaçao': 'Curaçao',
+}
+
+def fetch_json(url):
     try:
-        result = subprocess.run(args, capture_output=True, text=True, timeout=20)
-        if debug and result.stderr:
-            print(f'  DEBUG stderr:')
-            for line in result.stderr.strip().split('\n'):
-                print(f'    {line}')
-        if result.stdout:
-            data = json.loads(result.stdout)
-            if 'error' in data:
-                print(f'  Node error: {data["error"]}')
-                return None
-            return data
-        return None
-    except subprocess.TimeoutExpired:
-        print(f'  Node timeout after 20s')
-        return None
+        req = Request(url, headers=HEADERS)
+        with urlopen(req, timeout=15) as r:
+            return json.loads(r.read().decode('utf-8'))
+    except HTTPError as e:
+        print(f'  HTTP {e.code}: {url}')
+    except URLError as e:
+        print(f'  URLError: {e.reason}')
     except Exception as e:
-        print(f'  Node call failed: {e}')
-        return None
+        print(f'  Error: {type(e).__name__}: {e}')
+    return None
 
 
-def build_slug(match_key):
-    slug = match_key.lower().replace(' vs ', '-')
-    for old, new in [
-        ('ü','u'),('ç','c'),('é','e'),('è','e'),('ê','e'),
-        ('à','a'),('á','a'),('ã','a'),('â','a'),
-        ('ó','o'),('ô','o'),('ú','u'),('ñ','n'),
-        ('&',' and '),("'",''),('ş','s'),('ğ','g'),
-    ]:
-        slug = slug.replace(old, new)
-    slug = re.sub(r'[^a-z0-9-]', '-', slug)
-    slug = re.sub(r'-+', '-', slug).strip('-')
-    return slug
+def normalise(name):
+    return NAME_MAP.get(name, name)
+
+
+def parse_summary(data, t1, t2):
+    """Extract card events from ESPN match summary JSON."""
+    home_cards, away_cards = [], []
+
+    # ESPN incidents are in data['header']['competitions'][0]['details']
+    # or data['plays'] for play-by-play
+    # Card type IDs: 93=yellow card, 94=red card, 95=second yellow
+
+    # Try header > competitions > details first
+    try:
+        details = data['header']['competitions'][0].get('details', [])
+        for d in details:
+            type_id = d.get('type', {}).get('id')
+            type_text = d.get('type', {}).get('text', '').lower()
+            is_yellow = type_id in ('93', 93) or 'yellow' in type_text
+            is_red = type_id in ('94', 94, '95', 95) or 'red card' in type_text or 'second yellow' in type_text
+            if not is_yellow and not is_red:
+                continue
+
+            athlete = d.get('athletesInvolved', [{}])
+            name = athlete[0].get('displayName', '') if athlete else ''
+            if not name:
+                continue
+
+            clock = d.get('clock', {})
+            minute_str = clock.get('displayValue', '0')
+            try:
+                minute = int(minute_str.split(':')[0].split('+')[0])
+            except Exception:
+                continue
+
+            card_type = 'red' if is_red else 'yellow'
+            team_id = d.get('team', {}).get('id', '')
+            home_id = str(data['header']['competitions'][0]['competitors'][0]['team']['id'])
+            event = {'name': name, 'minute': minute, 'type': card_type}
+            if team_id == home_id:
+                home_cards.append(event)
+            else:
+                away_cards.append(event)
+
+    except (KeyError, IndexError, TypeError):
+        pass
+
+    # Fallback: try plays array
+    if not home_cards and not away_cards:
+        try:
+            plays = data.get('plays', [])
+            home_id = str(data['header']['competitions'][0]['competitors'][0]['team']['id'])
+            for play in plays:
+                type_id = str(play.get('type', {}).get('id', ''))
+                type_text = play.get('type', {}).get('text', '').lower()
+                is_yellow = type_id == '93' or 'yellow' in type_text
+                is_red = type_id in ('94','95') or 'red' in type_text
+                if not is_yellow and not is_red:
+                    continue
+                participants = play.get('participants', [{}])
+                name = participants[0].get('athlete', {}).get('displayName', '') if participants else ''
+                if not name:
+                    continue
+                clock = play.get('clock', {})
+                try:
+                    minute = int(clock.get('displayValue','0').split(':')[0].split('+')[0])
+                except Exception:
+                    continue
+                team_id = str(play.get('team', {}).get('id', ''))
+                card_type = 'red' if is_red else 'yellow'
+                event = {'name': name, 'minute': minute, 'type': card_type}
+                if team_id == home_id:
+                    home_cards.append(event)
+                else:
+                    away_cards.append(event)
+        except (KeyError, IndexError, TypeError):
+            pass
+
+    def dedup(cards):
+        seen, out = set(), []
+        for c in sorted(cards, key=lambda x: x['minute']):
+            k = (c['name'][:8], c['minute'], c['type'])
+            if k not in seen:
+                seen.add(k)
+                out.append(c)
+        return out
+
+    return {'home': dedup(home_cards), 'away': dedup(away_cards)}
 
 
 def main():
@@ -56,70 +163,92 @@ def main():
     with open(CONFIG_PATH) as f:
         config = json.load(f)
 
-    ai_ids = config.get('aiScoreIds', {})
-    if not ai_ids:
-        print('No aiScoreIds in config')
-        sys.exit(0)
-
-    # Check Node.js is available
-    try:
-        node_ver = subprocess.run(['node', '--version'], capture_output=True, text=True, timeout=5)
-        print(f'Node.js: {node_ver.stdout.strip()}')
-    except Exception:
-        print('ERROR: Node.js not available')
+    # Step 1: fetch scoreboard to get all match event IDs
+    print('Fetching ESPN scoreboard...')
+    scoreboard = fetch_json(SCOREBOARD_URL)
+    if not scoreboard:
+        print('ERROR: Could not fetch scoreboard')
         sys.exit(1)
 
-    if not NODE_SCRIPT.exists():
-        print(f'ERROR: {NODE_SCRIPT} not found')
-        sys.exit(1)
+    events = scoreboard.get('events', [])
+    print(f'Found {len(events)} events on ESPN scoreboard')
 
-    print(f'Found {len(ai_ids)} match IDs')
+    # Build map of "T1 vs T2" → ESPN event ID for finished matches
+    espn_matches = {}
+    for event in events:
+        try:
+            comp = event['competitions'][0]
+            status = comp['status']['type']['completed']
+            if not status:
+                continue
+            competitors = comp['competitors']
+            home = normalise(competitors[0]['team']['displayName'])
+            away = normalise(competitors[1]['team']['displayName'])
+            eid = event['id']
+            espn_matches[f'{home} vs {away}'] = eid
+            espn_matches[f'{away} vs {home}'] = eid  # also index reversed
+        except (KeyError, IndexError):
+            continue
 
+    print(f'{len(espn_matches)//2} finished matches found on ESPN')
+
+    # Step 2: fetch each finished match summary
     match_cards = config.get('matchCards', {})
     errors = 0
     fetched = 0
     skipped = 0
 
-    for i, (match_key, aid) in enumerate(sorted(ai_ids.items()), 1):
-        parts = match_key.split(' vs ')
-        if len(parts) != 2:
+    # Get all match keys from config (our canonical names)
+    ai_ids = config.get('aiScoreIds', {})
+    match_keys = list(ai_ids.keys()) if ai_ids else list(espn_matches.keys())
+
+    # Deduplicate to canonical "T1 vs T2" only
+    canonical = set()
+    for k in espn_matches:
+        parts = k.split(' vs ')
+        if len(parts) == 2:
+            fwd = k
+            rev = f'{parts[1]} vs {parts[0]}'
+            if fwd not in canonical and rev not in canonical:
+                canonical.add(fwd)
+
+    processed = 0
+    for match_key in sorted(canonical):
+        eid = espn_matches.get(match_key)
+        if not eid:
             continue
-        t1, t2 = parts
 
-        slug = build_slug(match_key)
-        url = f'https://m.aiscore.com/match-{slug}/{aid}'
-        print(f'\n[{i}/{len(ai_ids)}] {match_key}')
+        parts = match_key.split(' vs ')
+        t1, t2 = parts[0], parts[1]
+        processed += 1
 
-        is_debug = (i == 1 and os.environ.get("DEBUG_FIRST","0") == "1")
-        data = get_cards_via_node(url, t1, t2, debug=is_debug)
-        if data is None:
+        print(f'\n[{processed}] {match_key} (ESPN id: {eid})')
+        url = SUMMARY_URL.format(eid)
+        data = fetch_json(url)
+
+        if not data:
             errors += 1
             continue
 
-        debug = data.get('debug', {})
-        home_cards = data.get('home', [])
-        away_cards = data.get('away', [])
-
-        if not debug.get('hasNuxt'):
-            print(f'  No NUXT data — skipping')
-            skipped += 1
-            continue
-
-        print(f'  ✓ {len(home_cards)} home, {len(away_cards)} away cards (html: {debug.get("htmlLength",0):,})')
-        if home_cards:
-            print(f'    Home: {[(c["name"], c["minute"], c["type"]) for c in home_cards]}')
-        if away_cards:
-            print(f'    Away: {[(c["name"], c["minute"], c["type"]) for c in away_cards]}')
+        cards = parse_summary(data, t1, t2)
+        print(f'  ✓ {len(cards["home"])} home, {len(cards["away"])} away cards')
+        if cards['home']:
+            print(f'    Home: {[(c["name"], c["minute"], c["type"]) for c in cards["home"]]}')
+        if cards['away']:
+            print(f'    Away: {[(c["name"], c["minute"], c["type"]) for c in cards["away"]]}')
 
         match_cards[match_key] = {
             'homeTeam': t1, 'awayTeam': t2,
-            'home': home_cards, 'away': away_cards,
+            'home': cards['home'], 'away': cards['away'],
             '_fetched': int(time.time() * 1000)
         }
         fetched += 1
         time.sleep(0.2)
 
-    # Tally totals from per-match events
+    if not fetched and not errors:
+        print('\nNo finished matches found — nothing to update')
+
+    # Tally totals
     card_totals = {'_updated': int(time.time() * 1000)}
     for mc in match_cards.values():
         for team_key, events_key in [('homeTeam', 'home'), ('awayTeam', 'away')]:
