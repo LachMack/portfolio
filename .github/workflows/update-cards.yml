@@ -2,9 +2,8 @@ name: Update WC2026 Card Data
 
 on:
   schedule:
-    # Run every 6 hours during tournament (Jun 11 - Jul 19 2026)
     - cron: '0 */6 * * *'
-  workflow_dispatch:  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
   update-cards:
@@ -15,11 +14,34 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Debug HTML structure
+        run: |
+          python3 - << 'EOF'
+          import urllib.request, re
+          url = 'https://m.aiscore.com/match-mexico-south-africa/ezk96i3gjr2f1kn'
+          req = urllib.request.Request(url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html', 'Connection': 'close'
+          })
+          html = urllib.request.urlopen(req, timeout=10).read().decode('utf-8', errors='replace')
+          print(f"Length: {len(html)}")
+          print(f"icon-yellow-card: {'icon-yellow-card' in html}")
+          print(f"icon-red-card: {'icon-red-card' in html}")
+          print(f"xlink: {'xlink' in html}")
+          print(f"Gutierrez: {'Gutierrez' in html}")
+          print(f"__NUXT__: {'__NUXT__' in html}")
+          print(f"Full Time: {'Full Time' in html}")
+          body_start = html.find('<body')
+          print(f"\nBody snippet:\n{html[body_start:body_start+1000]}")
+          EOF
 
       - name: Run card scraper
         env:
@@ -30,6 +52,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
           git add worldcup/wc2026-config.json
           git diff --staged --quiet || git commit -m "Auto-update card data $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
