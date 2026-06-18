@@ -21,17 +21,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-    
-      - name: Debug NUXT structure
-        run: python worldcup/debug_nuxt.py
-        
-      - name: Find AiScore API
-        run: python worldcup/find_api.py        
-        
+
       - name: Run card scraper
         env:
           CONFIG_PATH: worldcup/wc2026-config.json
-          DEBUG_FIRST: '1'
         run: python worldcup/update-cards.py
 
       - name: Commit updated card data
