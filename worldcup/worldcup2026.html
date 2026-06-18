@@ -1389,33 +1389,44 @@ function renderStats(){
   if(!rows.length) out+='<tr><td colspan="11" style="text-align:center;padding:40px;color:#5a6a88">Stats appear once scores are entered</td></tr>';
   out+='</tbody></table></div>';
   // ── Card Standings ───────────────────────────────────────────────
-  var ct=CFG.cardTotals||{};
-  if(Object.keys(ct).length>0){
-    var cardTeams=Object.entries(ct).map(function(e){return{team:e[0],y:e[1].yellow||0,r:e[1].red||0};})
-      .filter(function(x){return x.y>0||x.r>0;})
-      .sort(function(a,b){return b.r!==a.r?b.r-a.r:b.y-a.y;});
-    var _al=CFG.allocations||{},_tOw={};
-    (CFG.families||[]).forEach(function(fam){fam.members.forEach(function(mem){(_al[mem.id]||[]).forEach(function(t){_tOw[t]={name:mem.name,color:fam.color};});});});
-    out+='<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-      '<div class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">🟥🟨 Card Standings</div>'+
-      '<div style="font-size:10px;color:#5a6a88">Reds win · Yellows tiebreak</div></div>';
-    out+='<div class="card"><table><thead><tr style="background:#ffffff05">';
-    ['#','Team','Owner','🟥 Red','🟨 Yellow'].forEach(function(hd){
-      out+='<th style="text-align:'+(hd==='Team'||hd==='Owner'?'left':'center')+';padding:8px 10px;font-size:11px;color:#5a6a88;font-weight:600;white-space:nowrap">'+hd+'</th>';
+  // ── Card Standings ───────────────────────────────────────────────
+  (function(){
+    var sct=CFG.cardTotals||{};
+    if(!Object.keys(sct).length)return;
+    var al=CFG.allocations||{},tOw={};
+    (CFG.families||[]).forEach(function(fam){
+      fam.members.forEach(function(mem){
+        (al[mem.id]||[]).forEach(function(t){tOw[t]={name:mem.name,color:fam.color};});
+      });
     });
+    var rows=Object.entries(sct)
+      .filter(function(e){return typeof e[1].yellow==='number'&&(e[1].yellow>0||e[1].red>0);})
+      .map(function(e){return{team:e[0],y:e[1].yellow||0,r:e[1].red||0};})
+      .sort(function(a,b){return b.r!==a.r?b.r-a.r:b.y-a.y;});
+    if(!rows.length)return;
+    out+='<div style="margin-top:16px">';
+    out+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    out+='<span class="font-display" style="font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8b9ab8">&#x1F7E5;&#x1F7E8; Card Standings</span>';
+    out+='<span style="font-size:10px;color:#5a6a88">Reds win &middot; Yellows tiebreak</span></div>';
+    out+='<div class="card"><table><thead><tr style="background:#ffffff05">';
+    out+='<th style="padding:8px 10px;text-align:center;font-size:11px;color:#5a6a88;font-weight:600">#</th>';
+    out+='<th style="padding:8px 10px;text-align:left;font-size:11px;color:#5a6a88;font-weight:600">Team</th>';
+    out+='<th style="padding:8px 10px;text-align:left;font-size:11px;color:#5a6a88;font-weight:600">Owner</th>';
+    out+='<th style="padding:8px 10px;text-align:center;font-size:11px;color:#ff4757;font-weight:600">&#x1F7E5;</th>';
+    out+='<th style="padding:8px 10px;text-align:center;font-size:11px;color:#fbbf24;font-weight:600">&#x1F7E8;</th>';
     out+='</tr></thead><tbody>';
-    cardTeams.forEach(function(ct,i){
-      var owner=allMembers.find(function(m){return (allocs[m.id]||[]).includes(ct.team);});
+    rows.forEach(function(c,i){
+      var own=tOw[c.team];
       out+='<tr style="border-top:1px solid #ffffff06">';
-      var owner=_tOw[ct.team];
-      out+='<td style="padding:7px 10px;font-size:12px;white-space:nowrap">'+f(ct.team)+' '+h(ct.team)+'</td>';
-      out+='<td style="padding:7px 10px;font-size:11px;color:'+(owner?owner.famColor:'#5a6a88')+'">'+(owner?h(owner.name.split(' ')[0]):'—')+'</td>';
-      out+='<td style="padding:7px 10px;font-size:11px;color:'+(owner?owner.color:'#5a6a88')+'">'+(owner?h(owner.name.split(' ')[0]):'—')+'</td>';
-      out+='<td style="padding:7px 10px;text-align:center;font-weight:700;color:#ff4757">'+ct.r+'</td>';
-      out+='<td style="padding:7px 10px;text-align:center;font-weight:700;color:#fbbf24">'+ct.y+'</td>';
+      out+='<td style="padding:7px 10px;text-align:center;color:#5a6a88;font-size:11px">'+(i+1)+'</td>';
+      out+='<td style="padding:7px 10px;font-size:12px;white-space:nowrap">'+f(c.team)+' '+h(c.team)+'</td>';
+      out+='<td style="padding:7px 10px;font-size:11px;color:'+(own?own.color:'#5a6a88')+'">'+(own?h(own.name.split(' ')[0]):'&mdash;')+'</td>';
+      out+='<td style="padding:7px 10px;text-align:center;font-weight:700;color:#ff4757">'+c.r+'</td>';
+      out+='<td style="padding:7px 10px;text-align:center;font-weight:700;color:#fbbf24">'+c.y+'</td>';
+      out+='</tr>';
     });
     out+='</tbody></table></div></div>';
-  }
+  })();
 
   document.getElementById('tab-stats').innerHTML=out;
 }
@@ -1528,7 +1539,7 @@ function renderScores(){
       out+='<span style="font-size:11px;color:#5a6a88;border:1px dashed #ffffff14;padding:3px 8px;border-radius:4px;white-space:nowrap">click to enter</span>';
     }
     out+='</div>';
-    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;gap:3px">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+t2cards+'</span>';
+    out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+'</span>';
     out+='<span style="font-size:10px;color:#5a6a88;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(m.gr)+'</span>';
     out+='</div>';
     if(goalsHtml)out+=goalsHtml;
