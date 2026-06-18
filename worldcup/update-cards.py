@@ -227,7 +227,8 @@ def debug_html(html, match_key):
     print(f'  Has icon-yellow-card: {"icon-yellow-card" in html}')
     print(f'  Has xlink: {"xlink" in html}')
     print(f'  Has Full Time: {"Full Time" in html}')
-    print(f'  Has FT: {bool(re.search(r"\\bFT\\b", html))}')
+    has_ft = bool(re.search(r"\bFT\b", html))
+    print(f'  Has FT: {has_ft}')
     # Show script tags
     scripts = re.findall(r'<script([^>]*)>', html)
     print(f'  Script tags: {len(scripts)}')
