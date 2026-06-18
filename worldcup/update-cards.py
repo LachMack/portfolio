@@ -288,6 +288,8 @@ def main():
             for e in mc.get(events_key, []):
                 card_totals[team]['red' if e['type'] == 'red' else 'yellow'] += 1
 
+    update_elo(config)
+
     config['matchCards'] = match_cards
     config['cardTotals'] = card_totals
 
@@ -302,3 +304,64 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# ── Elo ratings update ──────────────────────────────────────────────────────
+ELO_URL   = 'https://www.eloratings.net/2026_World_Cup.tsv'
+
+ELO_CODES = {
+    'ES':'Spain','AR':'Argentina','FR':'France','EN':'England',
+    'CO':'Colombia','BR':'Brazil','PT':'Portugal','NL':'Netherlands',
+    'DE':'Germany','NO':'Norway','JP':'Japan','EC':'Ecuador',
+    'HR':'Croatia','MX':'Mexico','BE':'Belgium','UY':'Uruguay',
+    'CH':'Switzerland','AT':'Austria','TR':'Türkiye','MA':'Morocco',
+    'AU':'Australia','SN':'Senegal','SQ':'Scotland','KR':'South Korea',
+    'PY':'Paraguay','US':'USA','CA':'Canada','DZ':'Algeria',
+    'IR':'Iran','SE':'Sweden','CI':'Ivory Coast','PA':'Panama',
+    'UZ':'Uzbekistan','CZ':'Czechia','EG':'Egypt','CD':'DR Congo',
+    'JO':'Jordan','BA':'Bosnia & Herzegovina','CV':'Cape Verde',
+    'SA':'Saudi Arabia','IQ':'Iraq','TN':'Tunisia','NZ':'New Zealand',
+    'HT':'Haiti','ZA':'South Africa','GH':'Ghana','QA':'Qatar',
+    'CW':'Curaçao',
+}
+
+def fetch_elo():
+    try:
+        req = Request(ELO_URL, headers=HEADERS)
+        with urlopen(req, timeout=10) as r:
+            return r.read().decode('utf-8', errors='replace')
+    except Exception as e:
+        print(f'  Elo fetch error: {e}')
+        return None
+
+def update_elo(config):
+    print('\nFetching Elo ratings...')
+    tsv = fetch_elo()
+    if not tsv:
+        print('  Skipped')
+        return
+
+    elo_data = {}
+    for line in tsv.strip().splitlines():
+        p = line.strip().split('\t')
+        if len(p) < 4:
+            continue
+        code = p[2]
+        team = ELO_CODES.get(code)
+        if not team:
+            continue
+        try:
+            elo = int(p[3])
+            delta = p[-1].replace('−', '-').replace('+', '')
+            delta = int(delta) if delta not in ('0', '') else 0
+        except (ValueError, IndexError):
+            continue
+        elo_data[team] = {'elo': elo, 'delta': delta}
+
+    elo_data['_updated'] = int(time.time() * 1000)
+    config['eloRatings'] = elo_data
+    print(f'  ✓ {len(elo_data)-1} teams updated')
+    top3 = sorted([(t,v) for t,v in elo_data.items() if t != '_updated'], key=lambda x: -x[1]['elo'])[:3]
+    for t, v in top3:
+        sign = '+' if v['delta'] > 0 else ''
+        print(f'    {t}: {v["elo"]} ({sign}{v["delta"]})')
