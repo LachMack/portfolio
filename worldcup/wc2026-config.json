@@ -136,7 +136,7 @@
   },
   "manualOverrides": {},
   "cardTotals": {
-    "_updated": 1781840014192,
+    "_updated": 1781844403492,
     "Algeria": {
       "yellow": 0,
       "red": 0
@@ -351,7 +351,7 @@
       "awayTeam": "Algeria",
       "home": [],
       "away": [],
-      "_fetched": 1781840005860
+      "_fetched": 1781844394564
     },
     "Argentina vs Austria": {
       "homeTeam": "Argentina",
@@ -371,7 +371,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840006281
+      "_fetched": 1781844394856
     },
     "Austria vs Jordan": {
       "homeTeam": "Austria",
@@ -384,7 +384,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781840006544
+      "_fetched": 1781844395133
     },
     "Belgium vs Egypt": {
       "homeTeam": "Belgium",
@@ -413,7 +413,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840006806
+      "_fetched": 1781844395431
     },
     "Belgium vs Iran": {
       "homeTeam": "Belgium",
@@ -452,7 +452,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781840007095
+      "_fetched": 1781844395719
     },
     "Canada vs Bosnia & Herzegovina": {
       "homeTeam": "Canada",
@@ -488,7 +488,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840007739
+      "_fetched": 1781844396284
     },
     "Cape Verde vs Saudi Arabia": {
       "homeTeam": "Cape Verde",
@@ -554,7 +554,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840008054
+      "_fetched": 1781844396556
     },
     "DR Congo vs Uzbekistan": {
       "homeTeam": "DR Congo",
@@ -589,7 +589,7 @@
       "awayTeam": "Croatia",
       "home": [],
       "away": [],
-      "_fetched": 1781840008314
+      "_fetched": 1781844396903
     },
     "England vs Ghana": {
       "homeTeam": "England",
@@ -610,14 +610,14 @@
       "awayTeam": "Senegal",
       "home": [],
       "away": [],
-      "_fetched": 1781840008600
+      "_fetched": 1781844397181
     },
     "Germany vs Curaçao": {
       "homeTeam": "Germany",
       "awayTeam": "Curaçao",
       "home": [],
       "away": [],
-      "_fetched": 1781840008992
+      "_fetched": 1781844397510
     },
     "Germany vs Ivory Coast": {
       "homeTeam": "Germany",
@@ -653,7 +653,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840009520
+      "_fetched": 1781844398106
     },
     "Iran vs New Zealand": {
       "homeTeam": "Iran",
@@ -666,7 +666,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781840009831
+      "_fetched": 1781844398401
     },
     "Iraq vs Norway": {
       "homeTeam": "Iraq",
@@ -679,7 +679,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781840010155
+      "_fetched": 1781844398689
     },
     "Ivory Coast vs Ecuador": {
       "homeTeam": "Ivory Coast",
@@ -708,7 +708,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840010446
+      "_fetched": 1781844399073
     },
     "Japan vs Sweden": {
       "homeTeam": "Japan",
@@ -768,7 +768,7 @@
           "type": "red"
         }
       ],
-      "_fetched": 1781840010714
+      "_fetched": 1781844399396
     },
     "Mexico vs South Korea": {
       "homeTeam": "Mexico",
@@ -786,7 +786,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840010972
+      "_fetched": 1781844399670
     },
     "Morocco vs Haiti": {
       "homeTeam": "Morocco",
@@ -816,7 +816,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781840011249
+      "_fetched": 1781844399946
     },
     "Netherlands vs Sweden": {
       "homeTeam": "Netherlands",
@@ -910,7 +910,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840011868
+      "_fetched": 1781844400735
     },
     "Saudi Arabia vs Uruguay": {
       "homeTeam": "Saudi Arabia",
@@ -923,7 +923,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781840012159
+      "_fetched": 1781844401032
     },
     "Scotland vs Brazil": {
       "homeTeam": "Scotland",
@@ -964,7 +964,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1781840012453
+      "_fetched": 1781844401325
     },
     "Spain vs Cape Verde": {
       "homeTeam": "Spain",
@@ -983,7 +983,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840012738
+      "_fetched": 1781844401931
     },
     "Spain vs Saudi Arabia": {
       "homeTeam": "Spain",
@@ -1003,7 +1003,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840013084
+      "_fetched": 1781844402269
     },
     "Switzerland vs Bosnia & Herzegovina": {
       "homeTeam": "Switzerland",
@@ -1091,7 +1091,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840013690
+      "_fetched": 1781844402995
     },
     "Uruguay vs Cape Verde": {
       "homeTeam": "Uruguay",
@@ -1139,7 +1139,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840007472
+      "_fetched": 1781844395994
     },
     "Ghana vs Panama": {
       "homeTeam": "Ghana",
@@ -1163,7 +1163,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840009255
+      "_fetched": 1781844397786
     },
     "Portugal vs Congo DR": {
       "homeTeam": "Portugal",
@@ -1192,7 +1192,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840011548
+      "_fetched": 1781844400439
     },
     "Uzbekistan vs Colombia": {
       "homeTeam": "Uzbekistan",
@@ -1211,7 +1211,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1781840013992
+      "_fetched": 1781844403292
     },
     "Switzerland vs Bosnia-Herzegovina": {
       "homeTeam": "Switzerland",
@@ -1240,7 +1240,7 @@
           "type": "red"
         }
       ],
-      "_fetched": 1781840013401
+      "_fetched": 1781844402570
     }
   },
   "aiScoreIds": {
@@ -1512,6 +1512,6 @@
       "elo": 1427,
       "delta": -7
     },
-    "_updated": 1781840014449
+    "_updated": 1781844403847
   }
 }
