@@ -999,6 +999,7 @@ async function pushToGitHub(cfg){
       cardTotals:      cfg.cardTotals||{},
       matchCards:      cfg.matchCards||{},
       aiScoreIds:      cfg.aiScoreIds||{},
+      eloRatings:      cfg.eloRatings||{},
       pot0Cost:      cfg.pot0Cost||15,
       pot1Cost:      cfg.pot1Cost||10,
       pot2Cost:      cfg.pot2Cost||5,
@@ -2377,6 +2378,7 @@ function setManualAward(prizeKey, memberId){
 
 
 async function saveAdmin(){
+  if(!CFG.prizes)CFG.prizes={};
   [0,1,2,3].forEach(function(p){
     var el=document.getElementById('pot'+p+'Cost');
     if(el)CFG['pot'+p+'Cost']=+(el.value)||0;
