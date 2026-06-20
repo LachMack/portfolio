@@ -1,5 +1,5 @@
 {
-  "sweepName": "World Cup 2026 ÃÂ¢ÃÂÃÂ Daralads Sweep",
+  "sweepName": "World Cup 2026 Ã¢ÂÂ Daralads Sweep",
   "buyIn": 20,
   "prizes": {
     "champion": 61,
@@ -34,7 +34,7 @@
       "teams": [
         "Netherlands",
         "Argentina",
-        "TÃÂÃÂ¼rkiye",
+        "TÃÂ¼rkiye",
         "Austria",
         "Canada",
         "Scotland",
@@ -78,7 +78,7 @@
         "Tunisia",
         "Sweden",
         "Uzbekistan",
-        "CuraÃÂÃÂ§ao"
+        "CuraÃÂ§ao"
       ]
     },
     {
@@ -97,8 +97,8 @@
   ],
   "manualAwards": {
     "firstGoal": "Blake",
-    "goldenBoot": "Cooper",
-    "bestGD": "Cooper",
+    "goldenBoot": "Cael",
+    "bestGD": "Cael",
     "worstGD": "Jasper",
     "mostCleanSheets": "Blake",
     "mostYellow": "Jasper",
@@ -162,7 +162,7 @@
       "yellow": 1,
       "red": 0
     },
-    "TÃÂÃÂ¼rkiye": {
+    "TÃÂ¼rkiye": {
       "yellow": 1,
       "red": 0
     },
@@ -254,13 +254,7 @@
     "Ecuador vs CuraÃÂ§ao": "vrqwni43mmws4qn",
     "Germany vs CuraÃÂ§ao": "o17pjio98l9uy7j",
     "TÃÂ¼rkiye vs Paraguay": "63kv9igrwwpfx7e",
-    "TÃÂ¼rkiye vs USA": "9gklzi1r5dnsm7x",
-    "Australia vs TÃÂÃÂ¼rkiye": "8lk2dir4wwmaz73",
-    "CuraÃÂÃÂ§ao vs Ivory Coast": "ndqmliw8mn4trkv",
-    "Ecuador vs CuraÃÂÃÂ§ao": "vrqwni43mmws4qn",
-    "Germany vs CuraÃÂÃÂ§ao": "o17pjio98l9uy7j",
-    "TÃÂÃÂ¼rkiye vs Paraguay": "63kv9igrwwpfx7e",
-    "TÃÂÃÂ¼rkiye vs USA": "9gklzi1r5dnsm7x"
+    "TÃÂ¼rkiye vs USA": "9gklzi1r5dnsm7x"
   },
   "eloRatings": {}
 }
