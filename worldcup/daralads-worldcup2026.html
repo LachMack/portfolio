@@ -823,7 +823,7 @@ function renderKnockout(){
       [{t:m.t1,s:m.s1,w:h1w,k:t1k},{t:m.t2,s:m.s2,w:h2w,k:t2k}].forEach(function(side,si){
         out+='<div class="ko-team'+(side.w?' winner':'')+'">'+
           '<span class="name" style="font-weight:'+(side.w?700:400)+';color:'+(side.k?'#e8eeff':'#5a6a88')+';font-style:'+(side.k?'normal':'italic')+';font-size:'+(side.k?11:10)+'px">'+
-          (side.k?f(side.t)+' ':'')+h(side.k?side.t:fmtKOTeam(side.t))+'</span>'+
+          (side.k?f(side.t)+' ':'')+h(side.k?side.t:fmtKOTeam(side.t))+(side.k?ownerBadge(side.t,'font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;margin-left:3px'):'')+'</span>'+
           '<span class="score" style="color:'+(side.w?'#00d4aa':'#f0f4ff')+'">'+(done?side.s:'')+'</span>'+
           '</div>';
       });
@@ -1294,7 +1294,7 @@ function renderGroups(){
       var gd=s.gf-s.ga;
       out+='<tr style="background:'+(i<2?c+'0c':'transparent')+'">';
       out+='<td style="width:16px;color:#5a6a88;font-size:10px;text-align:center">'+(i+1)+'</td>';
-      out+='<td style="text-align:left;font-weight:500;font-size:12px">'+(isKnown(s.name)?f(s.name)+' ':'')+h(s.name)+'</td>';
+      out+='<td style="text-align:left;font-weight:500;font-size:12px">'+(isKnown(s.name)?f(s.name)+' ':'')+h(s.name)+ownerBadge(s.name)+'</td>';
       out+='<td style="color:#5a6a88">'+s.p+'</td><td>'+s.w+'</td>';
       out+='<td style="color:#5a6a88">'+s.d+'</td><td style="color:#5a6a88">'+s.l+'</td>';
       out+='<td style="font-weight:600;color:'+(gd>0?'#00d4aa':gd<0?'#ff4757':'#5a6a88')+'">'+(gd>0?'+':'')+gd+'</td>';
@@ -1319,6 +1319,21 @@ function renderGroups(){
   document.getElementById('tab-groups').innerHTML=out;
 }
 
+
+var PERSON_COLORS_D=['#00d4aa','#60a5fa','#f472b6','#fbbf24','#a78bfa','#fb923c'];
+function getTeamOwner(team){
+  var ps=CFG.participants||[];
+  for(var i=0;i<ps.length;i++){
+    if((ps[i].teams||[]).includes(team))return{name:ps[i].name,color:PERSON_COLORS_D[i%PERSON_COLORS_D.length]};
+  }
+  return null;
+}
+function ownerBadge(team,style){
+  var o=getTeamOwner(team);
+  if(!o)return '';
+  var s=style||'font-size:10px;padding:1px 5px;border-radius:3px;font-weight:600;margin-left:4px';
+  return '<span style="background:'+o.color+'22;color:'+o.color+';border:1px solid '+o.color+'44;'+s+'">'+h(o.name)+'</span>';
+}
 
 function renderScores(){
   var matches=getMatches();
