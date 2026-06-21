@@ -938,7 +938,7 @@ function renderStats(){
       var col=own?PCLRS[pIdx[own]%PCLRS.length]:'#5a6a88';
       out+='<tr style="border-top:1px solid #ffffff06">';
       out+='<td style="padding:7px 10px;text-align:center;color:#5a6a88;font-size:11px">'+(i+1)+'</td>';
-      out+='<td style="padding:7px 10px;font-size:12px;font-weight:600">'+h(s.name)+'</td>';
+      out+='<td style="padding:7px 10px;font-size:12px;font-weight:600">'+h(s.name)+ownerBadge(s.name)+'</td>';
       out+='<td style="padding:7px 10px;font-size:12px;white-space:nowrap">'+f(s.team)+' '+h(s.team)+'</td>';
       out+='<td style="padding:7px 10px;font-size:11px;color:'+col+'">'+(own||'&mdash;')+'</td>';
       out+='<td style="padding:7px 10px;text-align:center;font-weight:800;font-size:15px;color:#00d4aa">'+s.goals+'</td>';
@@ -1310,7 +1310,7 @@ function renderGroups(){
       var aestTime=m.ofbTime?venueToAEST(m.ofbTime,m.gr,m.d):'';
       var aestLbl=aestTime?'<div style="font-size:9px;color:#5a6a88;text-align:center;line-height:1.3;margin-top:2px">'+aestTime+'</div>':'';
       out+='<div style="text-align:center;min-width:70px"><span class="font-display" style="font-weight:700;font-size:'+(done?14:11)+'px;color:'+(done?'#f0f4ff':'#5a6a88')+'">'+(done?m.s1+'–'+m.s2:fmtDate(m.d))+'</span>'+aestLbl+'</div>';
-      out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+'">'+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+'</span>';
+      out+='<span style="font-weight:'+(done?600:400)+';color:'+(done?'#e8eeff':'#8b9ab8')+'">'+ownerBadge(m.t2,'font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;margin-right:4px')+h(m.t2)+' '+(isKnown(m.t2)?f(m.t2):'')+'</span>';
       out+='</div>';
     });
     out+='</div></div>';
@@ -1413,7 +1413,7 @@ function renderScores(){
     var aestTimeStr=m.ofbTime?venueToAEST(m.ofbTime,m.gr,m.d):'';
     out+='<div style="font-size:11px">'+metaLabel+'<div style="margin-top:3px;color:#5a6a88">'+fmtDate(m.d)+(aestTimeStr?' <span style="color:#5a6a88">·</span> '+aestTimeStr:'')+'</div></div>';
 
-    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;justify-content:flex-end;gap:3px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+'</span>';
+    out+='<span style="font-weight:'+(done?600:400)+';text-align:right;color:'+(done?'#e8eeff':'#8b9ab8')+';font-size:13px;display:flex;align-items:center;justify-content:flex-end;gap:3px">'+(isKnown(m.t1)?f(m.t1)+' ':'')+h(m.t1)+ownerBadge(m.t1,'font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;margin-right:4px')+'</span>';
     out+='<div style="text-align:center;min-width:80px">';
     if(isEdit){
       var v1=m.s1!=null?m.s1:'',v2=m.s2!=null?m.s2:'';
