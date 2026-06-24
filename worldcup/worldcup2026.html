@@ -695,8 +695,9 @@ const OFB_NAMES={
   "Cote d'Ivoire":'Ivory Coast',
   'Bosnia and Herzegovina':'Bosnia & Herzegovina',
   'Korea Republic':'South Korea',
-  'Congo DR':'DR Congo',
-  'Cabo Verde':'Cape Verde',
+  'Congo DR':'DR Congo','DR Congo':'DR Congo',
+  'Cabo Verde':'Cape Verde','Cape Verde':'Cape Verde',
+  'Bosnia & Herzegovina':'Bosnia & Herzegovina','Bosnia-Herzegovina':'Bosnia & Herzegovina',
   'United States':'USA',
   'IR Iran':'Iran'
 };
@@ -1714,8 +1715,8 @@ function renderStats(){
       var own=tOw[s.team];
       out+='<tr style="border-top:1px solid #ffffff06">';
       out+='<td style="padding:7px 10px;text-align:center;color:#5a6a88;font-size:11px">'+(i+1)+'</td>';
-      out+='<td style="padding:7px 10px;font-size:12px;font-weight:600">'+h(s.name)+ownerBadge(s.name)+'</td>';
-      out+='<td style="padding:7px 10px;font-size:12px;white-space:nowrap">'+f(s.team)+' '+h(s.team)+'</td>';
+      out+='<td style="padding:7px 10px;font-size:12px;font-weight:600">'+h(s.name)+'</td>';
+      out+='<td style="padding:7px 10px;font-size:12px;white-space:nowrap">'+f(s.team)+' '+h(s.team)+ownerBadge(s.team)+' '+h(s.team)+'</td>';
       out+='<td style="padding:7px 10px;font-size:11px;color:'+(own?own.c:'#5a6a88')+'">'+(own?h(own.n.split(' ')[0]):'&mdash;')+'</td>';
       out+='<td style="padding:7px 10px;text-align:center;font-weight:800;font-size:15px;color:#00d4aa">'+s.goals+'</td>';
       out+='<td style="padding:7px 10px;text-align:center;font-size:11px;color:#5a6a88">'+(s.penalties||'&mdash;')+'</td>';
