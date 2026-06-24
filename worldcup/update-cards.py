@@ -28,6 +28,8 @@ NAME_MAP = {
     'South Korea': 'South Korea', 'Korea Republic': 'South Korea',
     'Czech Republic': 'Czechia', 'Czechia': 'Czechia',
     'Canada': 'Canada', 'Bosnia and Herzegovina': 'Bosnia & Herzegovina',
+    'Bosnia-Herzegovina': 'Bosnia & Herzegovina',
+    'Bosnia & Herzegovina': 'Bosnia & Herzegovina',
     'Bosnia & Herzegovina': 'Bosnia & Herzegovina',
     'USA': 'USA', 'United States': 'USA',
     'Paraguay': 'Paraguay', 'Qatar': 'Qatar', 'Switzerland': 'Switzerland',
@@ -51,7 +53,7 @@ NAME_MAP = {
     'England': 'England', 'Croatia': 'Croatia',
     'Ghana': 'Ghana', 'Panama': 'Panama',
     'Colombia': 'Colombia', 'Uzbekistan': 'Uzbekistan',
-    'Ecuador': 'Ecuador', 'Curacao': 'Curaçao', 'Curaçao': 'Curaçao',
+    'Ecuador': 'Ecuador', 'Curacao': 'Curaçao', 'Curaçao': 'Curaçao', 'Curaçao': 'Curaçao',
 }
 
 def fetch_json(url):
