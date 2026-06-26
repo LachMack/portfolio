@@ -126,7 +126,7 @@
   "manualAwards": {
     "firstGoal": "livia",
     "goldenBoot": "rach",
-    "bestGD": "elina",
+    "bestGD": "richard",
     "worstGD": "xanthe",
     "mostCleanSheets": "livia",
     "mostYellow": "gil",
@@ -134,7 +134,7 @@
   },
   "manualOverrides": {},
   "cardTotals": {
-    "_updated": 1782503653984,
+    "_updated": 1782273262914,
     "Algeria": {
       "yellow": 1,
       "red": 0
@@ -148,7 +148,7 @@
       "red": 0
     },
     "Australia": {
-      "yellow": 5,
+      "yellow": 4,
       "red": 0
     },
     "TÃÂÃÂÃÂÃÂ¼rkiye": {
@@ -172,19 +172,19 @@
       "red": 0
     },
     "Bosnia & Herzegovina": {
-      "yellow": 6,
+      "yellow": 5,
       "red": 1
     },
     "Qatar": {
-      "yellow": 4,
+      "yellow": 3,
       "red": 2
     },
     "Brazil": {
-      "yellow": 5,
+      "yellow": 3,
       "red": 0
     },
     "Haiti": {
-      "yellow": 7,
+      "yellow": 4,
       "red": 0
     },
     "Morocco": {
@@ -192,7 +192,7 @@
       "red": 0
     },
     "Canada": {
-      "yellow": 7,
+      "yellow": 3,
       "red": 0
     },
     "Cape Verde": {
@@ -204,7 +204,7 @@
       "red": 0
     },
     "Colombia": {
-      "yellow": 3,
+      "yellow": 1,
       "red": 0
     },
     "DR Congo": {
@@ -228,7 +228,7 @@
       "red": 0
     },
     "Ivory Coast": {
-      "yellow": 4,
+      "yellow": 3,
       "red": 0
     },
     "Czechia": {
@@ -236,11 +236,11 @@
       "red": 0
     },
     "Mexico": {
-      "yellow": 2,
+      "yellow": 1,
       "red": 1
     },
     "South Africa": {
-      "yellow": 5,
+      "yellow": 4,
       "red": 2
     },
     "Uzbekistan": {
@@ -248,11 +248,11 @@
       "red": 0
     },
     "Ecuador": {
-      "yellow": 7,
+      "yellow": 3,
       "red": 0
     },
     "Germany": {
-      "yellow": 1,
+      "yellow": 0,
       "red": 0
     },
     "England": {
@@ -272,7 +272,7 @@
       "red": 0
     },
     "Scotland": {
-      "yellow": 5,
+      "yellow": 4,
       "red": 0
     },
     "New Zealand": {
@@ -284,15 +284,15 @@
       "red": 0
     },
     "Japan": {
-      "yellow": 1,
+      "yellow": 0,
       "red": 0
     },
     "Sweden": {
-      "yellow": 5,
+      "yellow": 3,
       "red": 0
     },
     "South Korea": {
-      "yellow": 4,
+      "yellow": 3,
       "red": 0
     },
     "Netherlands": {
@@ -304,11 +304,11 @@
       "red": 0
     },
     "Paraguay": {
-      "yellow": 9,
-      "red": 3
+      "yellow": 7,
+      "red": 2
     },
     "Switzerland": {
-      "yellow": 4,
+      "yellow": 2,
       "red": 0
     },
     "Uruguay": {
@@ -324,15 +324,11 @@
       "red": 0
     },
     "USA": {
-      "yellow": 5,
+      "yellow": 4,
       "red": 0
     },
-    "Bosnia-Herzegovina": {
-      "yellow": 5,
-      "red": 1
-    },
     "Congo DR": {
-      "yellow": 2,
+      "yellow": 1,
       "red": 0
     },
     "TÃÂÃÂ¼rkiye": {
@@ -350,14 +346,6 @@
     "CuraÃÂ§ao": {
       "yellow": 5,
       "red": 0
-    },
-    "Türkiye": {
-      "yellow": 2,
-      "red": 0
-    },
-    "Curaçao": {
-      "yellow": 7,
-      "red": 0
     }
   },
   "matchCards": {
@@ -373,7 +361,7 @@
       "awayTeam": "Algeria",
       "home": [],
       "away": [],
-      "_fetched": 1782503637283
+      "_fetched": 1782273249918
     },
     "Argentina vs Austria": {
       "homeTeam": "Argentina",
@@ -402,7 +390,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503637581
+      "_fetched": 1782273250186
     },
     "Australia vs TÃÂÃÂÃÂÃÂ¼rkiye": {
       "homeTeam": "Australia",
@@ -428,7 +416,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1782503638137
+      "_fetched": 1782273250702
     },
     "Belgium vs Egypt": {
       "homeTeam": "Belgium",
@@ -457,7 +445,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503638418
+      "_fetched": 1782273250998
     },
     "Belgium vs Iran": {
       "homeTeam": "Belgium",
@@ -481,26 +469,14 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503638692
+      "_fetched": 1782273251337
     },
     "Bosnia & Herzegovina vs Qatar": {
       "homeTeam": "Bosnia & Herzegovina",
       "awayTeam": "Qatar",
-      "home": [
-        {
-          "name": "Ermin Mahmic",
-          "minute": 82,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Ahmed Fathy",
-          "minute": 78,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503638975
+      "home": [],
+      "away": [],
+      "_fetched": 1781756233863
     },
     "Brazil vs Haiti": {
       "homeTeam": "Brazil",
@@ -529,7 +505,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503639263
+      "_fetched": 1782273251591
     },
     "Brazil vs Morocco": {
       "homeTeam": "Brazil",
@@ -541,47 +517,20 @@
           "type": "yellow"
         },
         {
-          "name": "Roger Ibañez",
+          "name": "Roger IbaÃÂ±ez",
           "minute": 43,
           "type": "yellow"
         }
       ],
       "away": [],
-      "_fetched": 1782503639546
+      "_fetched": 1782273251847
     },
     "Canada vs Bosnia & Herzegovina": {
       "homeTeam": "Canada",
       "awayTeam": "Bosnia & Herzegovina",
-      "home": [
-        {
-          "name": "Alistair Johnston",
-          "minute": 11,
-          "type": "yellow"
-        },
-        {
-          "name": "Luc de Fougerolles",
-          "minute": 53,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Ermedin Demirovic",
-          "minute": 45,
-          "type": "yellow"
-        },
-        {
-          "name": "Jovo Lukic",
-          "minute": 45,
-          "type": "yellow"
-        },
-        {
-          "name": "Nikola Katic",
-          "minute": 90,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503639831
+      "home": [],
+      "away": [],
+      "_fetched": 1781756236313
     },
     "Canada vs Qatar": {
       "homeTeam": "Canada",
@@ -610,7 +559,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503640116
+      "_fetched": 1782273252422
     },
     "Cape Verde vs Saudi Arabia": {
       "homeTeam": "Cape Verde",
@@ -651,21 +600,15 @@
       "homeTeam": "Czechia",
       "awayTeam": "Mexico",
       "home": [],
-      "away": [
-        {
-          "name": "Edson Álvarez",
-          "minute": 64,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503640954
+      "away": [],
+      "_fetched": 1781756247936
     },
     "Czechia vs South Africa": {
       "homeTeam": "Czechia",
       "awayTeam": "South Africa",
       "home": [
         {
-          "name": "Ladislav Krejcí",
+          "name": "Ladislav KrejcÃÂ­",
           "minute": 75,
           "type": "yellow"
         }
@@ -682,7 +625,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503641240
+      "_fetched": 1782273252714
     },
     "DR Congo vs Uzbekistan": {
       "homeTeam": "DR Congo",
@@ -701,31 +644,9 @@
     "Ecuador vs Germany": {
       "homeTeam": "Ecuador",
       "awayTeam": "Germany",
-      "home": [
-        {
-          "name": "Piero Hincapié",
-          "minute": 43,
-          "type": "yellow"
-        },
-        {
-          "name": "Alan Franco",
-          "minute": 50,
-          "type": "yellow"
-        },
-        {
-          "name": "Gonzalo Plata",
-          "minute": 89,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Aleksandar Pavlovic",
-          "minute": 44,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503641806
+      "home": [],
+      "away": [],
+      "_fetched": 1781756255046
     },
     "Egypt vs Iran": {
       "homeTeam": "Egypt",
@@ -739,7 +660,7 @@
       "awayTeam": "Croatia",
       "home": [],
       "away": [],
-      "_fetched": 1782503642091
+      "_fetched": 1782273253306
     },
     "England vs Ghana": {
       "homeTeam": "England",
@@ -753,12 +674,12 @@
       ],
       "away": [
         {
-          "name": "Iñaki Williams",
+          "name": "IÃÂ±aki Williams",
           "minute": 60,
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503642368
+      "_fetched": 1782273253562
     },
     "France vs Iraq": {
       "homeTeam": "France",
@@ -771,14 +692,14 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503642637
+      "_fetched": 1782273253822
     },
     "France vs Senegal": {
       "homeTeam": "France",
       "awayTeam": "Senegal",
       "home": [],
       "away": [],
-      "_fetched": 1782503642921
+      "_fetched": 1782273254095
     },
     "Germany vs CuraÃÂÃÂÃÂÃÂ§ao": {
       "homeTeam": "Germany",
@@ -792,7 +713,7 @@
       "awayTeam": "Ivory Coast",
       "home": [],
       "away": [],
-      "_fetched": 1782503643519
+      "_fetched": 1782273254621
     },
     "Haiti vs Scotland": {
       "homeTeam": "Haiti",
@@ -821,7 +742,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503644088
+      "_fetched": 1782273255149
     },
     "Iran vs New Zealand": {
       "homeTeam": "Iran",
@@ -834,7 +755,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1782503644367
+      "_fetched": 1782273255413
     },
     "Iraq vs Norway": {
       "homeTeam": "Iraq",
@@ -847,7 +768,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1782503644653
+      "_fetched": 1782273255748
     },
     "Ivory Coast vs Ecuador": {
       "homeTeam": "Ivory Coast",
@@ -859,12 +780,12 @@
           "type": "yellow"
         },
         {
-          "name": "Franck Kessié",
+          "name": "Franck KessiÃÂ©",
           "minute": 38,
           "type": "yellow"
         },
         {
-          "name": "Guela Doué",
+          "name": "Guela DouÃÂ©",
           "minute": 40,
           "type": "yellow"
         }
@@ -876,31 +797,14 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503644940
+      "_fetched": 1782273256026
     },
     "Japan vs Sweden": {
       "homeTeam": "Japan",
       "awayTeam": "Sweden",
-      "home": [
-        {
-          "name": "Shogo Taniguchi",
-          "minute": 77,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Isak Hien",
-          "minute": 32,
-          "type": "yellow"
-        },
-        {
-          "name": "Viktor Gyökeres",
-          "minute": 85,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503645190
+      "home": [],
+      "away": [],
+      "_fetched": 1781756289068
     },
     "Jordan vs Algeria": {
       "homeTeam": "Jordan",
@@ -919,7 +823,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503645513
+      "_fetched": 1782273256291
     },
     "Jordan vs Argentina": {
       "homeTeam": "Jordan",
@@ -933,12 +837,12 @@
       "awayTeam": "South Africa",
       "home": [
         {
-          "name": "Brian Gutiérrez",
+          "name": "Brian GutiÃÂ©rrez",
           "minute": 23,
           "type": "yellow"
         },
         {
-          "name": "César Montes",
+          "name": "CÃÂ©sar Montes",
           "minute": 90,
           "type": "red"
         }
@@ -965,7 +869,7 @@
           "type": "red"
         }
       ],
-      "_fetched": 1782503645763
+      "_fetched": 1782273256552
     },
     "Mexico vs South Korea": {
       "homeTeam": "Mexico",
@@ -983,30 +887,14 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503646047
+      "_fetched": 1782273256835
     },
     "Morocco vs Haiti": {
       "homeTeam": "Morocco",
       "awayTeam": "Haiti",
       "home": [],
-      "away": [
-        {
-          "name": "Johny Placide",
-          "minute": 79,
-          "type": "yellow"
-        },
-        {
-          "name": "Duckens Nazon",
-          "minute": 80,
-          "type": "yellow"
-        },
-        {
-          "name": "Josué Casimir",
-          "minute": 90,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503646301
+      "away": [],
+      "_fetched": 1781756297575
     },
     "Netherlands vs Japan": {
       "homeTeam": "Netherlands",
@@ -1029,7 +917,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1782503646583
+      "_fetched": 1782273257104
     },
     "Netherlands vs Sweden": {
       "homeTeam": "Netherlands",
@@ -1052,7 +940,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503646886
+      "_fetched": 1782273257367
     },
     "New Zealand vs Belgium": {
       "homeTeam": "New Zealand",
@@ -1083,7 +971,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503647216
+      "_fetched": 1782273257631
     },
     "Norway vs France": {
       "homeTeam": "Norway",
@@ -1097,14 +985,14 @@
       "awayTeam": "Senegal",
       "home": [],
       "away": [],
-      "_fetched": 1782503647464
+      "_fetched": 1782273257895
     },
     "Panama vs Croatia": {
       "homeTeam": "Panama",
       "awayTeam": "Croatia",
       "home": [
         {
-          "name": "Édgar Yoel Bárcenas",
+          "name": "ÃÂdgar Yoel BÃÂ¡rcenas",
           "minute": 61,
           "type": "yellow"
         }
@@ -1116,7 +1004,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503647747
+      "_fetched": 1782273258161
     },
     "Panama vs England": {
       "homeTeam": "Panama",
@@ -1128,21 +1016,9 @@
     "Paraguay vs Australia": {
       "homeTeam": "Paraguay",
       "awayTeam": "Australia",
-      "home": [
-        {
-          "name": "Diego Gómez",
-          "minute": 77,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Jackson Irvine",
-          "minute": 46,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503647995
+      "home": [],
+      "away": [],
+      "_fetched": 1781756312235
     },
     "Portugal vs DR Congo": {
       "homeTeam": "Portugal",
@@ -1168,7 +1044,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503648555
+      "_fetched": 1782273258703
     },
     "Qatar vs Switzerland": {
       "homeTeam": "Qatar",
@@ -1192,7 +1068,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503648846
+      "_fetched": 1782273259031
     },
     "Saudi Arabia vs Uruguay": {
       "homeTeam": "Saudi Arabia",
@@ -1205,31 +1081,14 @@
         }
       ],
       "away": [],
-      "_fetched": 1782503649095
+      "_fetched": 1782273259302
     },
     "Scotland vs Brazil": {
       "homeTeam": "Scotland",
       "awayTeam": "Brazil",
-      "home": [
-        {
-          "name": "Ryan Christie",
-          "minute": 89,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Danilo",
-          "minute": 62,
-          "type": "yellow"
-        },
-        {
-          "name": "Fabinho",
-          "minute": 82,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503649348
+      "home": [],
+      "away": [],
+      "_fetched": 1781756318756
     },
     "Scotland vs Morocco": {
       "homeTeam": "Scotland",
@@ -1248,7 +1107,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503649603
+      "_fetched": 1782273259590
     },
     "Senegal vs Iraq": {
       "homeTeam": "Senegal",
@@ -1260,21 +1119,9 @@
     "South Africa vs South Korea": {
       "homeTeam": "South Africa",
       "awayTeam": "South Korea",
-      "home": [
-        {
-          "name": "Aubrey Modiba",
-          "minute": 73,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Cho Gue-Sung",
-          "minute": 79,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503649867
+      "home": [],
+      "away": [],
+      "_fetched": 1781756322398
     },
     "South Korea vs Czechia": {
       "homeTeam": "South Korea",
@@ -1287,7 +1134,7 @@
         }
       ],
       "away": [],
-      "_fetched": 1782503650156
+      "_fetched": 1782273259853
     },
     "Spain vs Cape Verde": {
       "homeTeam": "Spain",
@@ -1306,7 +1153,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503650426
+      "_fetched": 1782273260191
     },
     "Spain vs Saudi Arabia": {
       "homeTeam": "Spain",
@@ -1324,7 +1171,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503650730
+      "_fetched": 1782273260460
     },
     "Sweden vs Tunisia": {
       "homeTeam": "Sweden",
@@ -1337,74 +1184,35 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503650996
+      "_fetched": 1782273260815
     },
     "Switzerland vs Bosnia & Herzegovina": {
       "homeTeam": "Switzerland",
       "awayTeam": "Bosnia & Herzegovina",
-      "home": [
-        {
-          "name": "Nico Elvedi",
-          "minute": 65,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Amar Dedic",
-          "minute": 59,
-          "type": "yellow"
-        },
-        {
-          "name": "Edin Dzeko",
-          "minute": 61,
-          "type": "yellow"
-        },
-        {
-          "name": "Tarik Muharemovic",
-          "minute": 80,
-          "type": "red"
-        }
-      ],
-      "_fetched": 1782503651321
+      "home": [],
+      "away": [],
+      "_fetched": 1781756328858
     },
     "Switzerland vs Canada": {
       "homeTeam": "Switzerland",
       "awayTeam": "Canada",
-      "home": [
-        {
-          "name": "Granit Xhaka",
-          "minute": 32,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Cyle Larin",
-          "minute": 32,
-          "type": "yellow"
-        },
-        {
-          "name": "Liam Millar",
-          "minute": 87,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503651621
+      "home": [],
+      "away": [],
+      "_fetched": 1781756329922
     },
     "Tunisia vs Japan": {
       "homeTeam": "Tunisia",
       "awayTeam": "Japan",
       "home": [],
       "away": [],
-      "_fetched": 1782503651911
+      "_fetched": 1782273261340
     },
     "Tunisia vs Netherlands": {
       "homeTeam": "Tunisia",
       "awayTeam": "Netherlands",
       "home": [],
       "away": [],
-      "_fetched": 1782503652162
+      "_fetched": 1781756333900
     },
     "TÃÂÃÂÃÂÃÂ¼rkiye vs Paraguay": {
       "homeTeam": "TÃÂÃÂÃÂÃÂ¼rkiye",
@@ -1462,7 +1270,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503652976
+      "_fetched": 1782273261888
     },
     "USA vs Paraguay": {
       "homeTeam": "USA",
@@ -1476,17 +1284,17 @@
       ],
       "away": [
         {
-          "name": "Juan Jose Cáceres",
+          "name": "Juan Jose CÃÂ¡ceres",
           "minute": 10,
           "type": "yellow"
         },
         {
-          "name": "Miguel Almirón",
+          "name": "Miguel AlmirÃÂ³n",
           "minute": 53,
           "type": "yellow"
         },
         {
-          "name": "Diego Gómez",
+          "name": "Diego GÃÂ³mez",
           "minute": 79,
           "type": "yellow"
         },
@@ -1496,12 +1304,12 @@
           "type": "yellow"
         },
         {
-          "name": "Júnior Alonso",
+          "name": "JÃÂºnior Alonso",
           "minute": 90,
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503653253
+      "_fetched": 1782273262189
     },
     "Uruguay vs Cape Verde": {
       "homeTeam": "Uruguay",
@@ -1513,7 +1321,7 @@
           "type": "yellow"
         },
         {
-          "name": "Mathías Olivera",
+          "name": "MathÃÂ­as Olivera",
           "minute": 58,
           "type": "yellow"
         }
@@ -1530,7 +1338,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503653502
+      "_fetched": 1782273262448
     },
     "Uruguay vs Spain": {
       "homeTeam": "Uruguay",
@@ -1585,7 +1393,7 @@
       ],
       "away": [
         {
-          "name": "César Blackman",
+          "name": "CÃÂ©sar Blackman",
           "minute": 72,
           "type": "yellow"
         },
@@ -1595,7 +1403,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503643804
+      "_fetched": 1782273254885
     },
     "Portugal vs Congo DR": {
       "homeTeam": "Portugal",
@@ -1607,12 +1415,12 @@
           "type": "yellow"
         },
         {
-          "name": "Nélson Semedo",
+          "name": "NÃÂ©lson Semedo",
           "minute": 88,
           "type": "yellow"
         },
         {
-          "name": "Tomás Araújo",
+          "name": "TomÃÂ¡s AraÃÂºjo",
           "minute": 90,
           "type": "yellow"
         }
@@ -1624,7 +1432,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503648303
+      "_fetched": 1782273258433
     },
     "Uzbekistan vs Colombia": {
       "homeTeam": "Uzbekistan",
@@ -1643,7 +1451,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782503653784
+      "_fetched": 1782273262714
     },
     "Switzerland vs Bosnia-Herzegovina": {
       "homeTeam": "Switzerland",
@@ -1839,150 +1647,6 @@
         }
       ],
       "_fetched": 1782273261603
-    },
-    "Australia vs Türkiye": {
-      "homeTeam": "Australia",
-      "awayTeam": "Türkiye",
-      "home": [],
-      "away": [
-        {
-          "name": "Yunus Akgün",
-          "minute": 86,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503637863
-    },
-    "Colombia vs Congo DR": {
-      "homeTeam": "Colombia",
-      "awayTeam": "Congo DR",
-      "home": [
-        {
-          "name": "Jhon Lucumí",
-          "minute": 56,
-          "type": "yellow"
-        },
-        {
-          "name": "Jefferson Lerma",
-          "minute": 90,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Charles Pickel",
-          "minute": 90,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503640400
-    },
-    "Curaçao vs Ivory Coast": {
-      "homeTeam": "Curaçao",
-      "awayTeam": "Ivory Coast",
-      "home": [
-        {
-          "name": "Juninho Bacuna",
-          "minute": 75,
-          "type": "yellow"
-        },
-        {
-          "name": "Gervane Kastaneer",
-          "minute": 83,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Nicolas Pépé",
-          "minute": 35,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503640691
-    },
-    "Ecuador vs Curaçao": {
-      "homeTeam": "Ecuador",
-      "awayTeam": "Curaçao",
-      "home": [
-        {
-          "name": "Jordy Alcívar",
-          "minute": 38,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Leandro Bacuna",
-          "minute": 39,
-          "type": "yellow"
-        },
-        {
-          "name": "Juninho Bacuna",
-          "minute": 53,
-          "type": "yellow"
-        },
-        {
-          "name": "Livano Comenencia",
-          "minute": 56,
-          "type": "yellow"
-        },
-        {
-          "name": "Juriën Gaari",
-          "minute": 75,
-          "type": "yellow"
-        },
-        {
-          "name": "Gervane Kastaneer",
-          "minute": 90,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503641525
-    },
-    "Germany vs Curaçao": {
-      "homeTeam": "Germany",
-      "awayTeam": "Curaçao",
-      "home": [],
-      "away": [],
-      "_fetched": 1782503643208
-    },
-    "Türkiye vs Paraguay": {
-      "homeTeam": "Türkiye",
-      "awayTeam": "Paraguay",
-      "home": [
-        {
-          "name": "Eren Elmali",
-          "minute": 71,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Matías Galarza",
-          "minute": 4,
-          "type": "yellow"
-        },
-        {
-          "name": "Miguel Almirón",
-          "minute": 45,
-          "type": "red"
-        }
-      ],
-      "_fetched": 1782503652448
-    },
-    "Türkiye vs USA": {
-      "homeTeam": "Türkiye",
-      "awayTeam": "USA",
-      "home": [],
-      "away": [
-        {
-          "name": "Sebastian Berhalter",
-          "minute": 19,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782503652703
     }
   },
   "aiScoreIds": {
@@ -2081,201 +1745,7 @@
     "TÃÂÃÂÃÂÃÂ¼rkiye vs Paraguay": "63kv9igrwwpfx7e",
     "TÃÂÃÂÃÂÃÂ¼rkiye vs USA": "9gklzi1r5dnsm7x"
   },
-  "eloRatings": {
-    "Argentina": {
-      "elo": 2144,
-      "delta": 29
-    },
-    "Spain": {
-      "elo": 2134,
-      "delta": -23
-    },
-    "France": {
-      "elo": 2090,
-      "delta": 27
-    },
-    "England": {
-      "elo": 2028,
-      "delta": 4
-    },
-    "Brazil": {
-      "elo": 2009,
-      "delta": 18
-    },
-    "Colombia": {
-      "elo": 2006,
-      "delta": 24
-    },
-    "Portugal": {
-      "elo": 1988,
-      "delta": -1
-    },
-    "Netherlands": {
-      "elo": 1980,
-      "delta": 32
-    },
-    "Norway": {
-      "elo": 1951,
-      "delta": 37
-    },
-    "Germany": {
-      "elo": 1916,
-      "delta": -16
-    },
-    "Switzerland": {
-      "elo": 1914,
-      "delta": 23
-    },
-    "Mexico": {
-      "elo": 1912,
-      "delta": 37
-    },
-    "Japan": {
-      "elo": 1910,
-      "delta": 4
-    },
-    "Ecuador": {
-      "elo": 1902,
-      "delta": -36
-    },
-    "Croatia": {
-      "elo": 1896,
-      "delta": -16
-    },
-    "Morocco": {
-      "elo": 1877,
-      "delta": 50
-    },
-    "Belgium": {
-      "elo": 1869,
-      "delta": -25
-    },
-    "Türkiye": {
-      "elo": 1852,
-      "delta": -59
-    },
-    "Uruguay": {
-      "elo": 1851,
-      "delta": -41
-    },
-    "Austria": {
-      "elo": 1841,
-      "delta": 11
-    },
-    "Senegal": {
-      "elo": 1817,
-      "delta": -43
-    },
-    "Paraguay": {
-      "elo": 1815,
-      "delta": -19
-    },
-    "Australia": {
-      "elo": 1800,
-      "delta": 23
-    },
-    "USA": {
-      "elo": 1781,
-      "delta": 55
-    },
-    "Algeria": {
-      "elo": 1780,
-      "delta": 8
-    },
-    "Iran": {
-      "elo": 1766,
-      "delta": -6
-    },
-    "Canada": {
-      "elo": 1748,
-      "delta": -40
-    },
-    "Scotland": {
-      "elo": 1745,
-      "delta": -37
-    },
-    "Ivory Coast": {
-      "elo": 1743,
-      "delta": 48
-    },
-    "Sweden": {
-      "elo": 1742,
-      "delta": 30
-    },
-    "Egypt": {
-      "elo": 1740,
-      "delta": 44
-    },
-    "South Korea": {
-      "elo": 1723,
-      "delta": -35
-    },
-    "Czechia": {
-      "elo": 1680,
-      "delta": -60
-    },
-    "Uzbekistan": {
-      "elo": 1677,
-      "delta": -37
-    },
-    "Panama": {
-      "elo": 1668,
-      "delta": -62
-    },
-    "DR Congo": {
-      "elo": 1666,
-      "delta": 14
-    },
-    "Jordan": {
-      "elo": 1632,
-      "delta": -48
-    },
-    "Cape Verde": {
-      "elo": 1625,
-      "delta": 47
-    },
-    "Bosnia & Herzegovina": {
-      "elo": 1622,
-      "delta": 27
-    },
-    "Saudi Arabia": {
-      "elo": 1593,
-      "delta": 17
-    },
-    "Iraq": {
-      "elo": 1586,
-      "delta": -21
-    },
-    "Ghana": {
-      "elo": 1584,
-      "delta": 74
-    },
-    "South Africa": {
-      "elo": 1575,
-      "delta": 58
-    },
-    "Tunisia": {
-      "elo": 1562,
-      "delta": -66
-    },
-    "New Zealand": {
-      "elo": 1549,
-      "delta": -13
-    },
-    "Haiti": {
-      "elo": 1517,
-      "delta": -31
-    },
-    "Curaçao": {
-      "elo": 1438,
-      "delta": 4
-    },
-    "Qatar": {
-      "elo": 1411,
-      "delta": -10
-    },
-    "_updated": 1782503654231
-  },
+  "eloRatings": {},
   "pot0Cost": 15,
   "pot1Cost": 10,
   "pot2Cost": 5,
