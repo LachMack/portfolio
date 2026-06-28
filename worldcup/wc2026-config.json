@@ -129,7 +129,7 @@
     "bestGD": "richard",
     "worstGD": "nat",
     "mostCleanSheets": "livia",
-    "mostYellow": "gil",
+    "mostYellow": "maya",
     "mostRed": "gil"
   },
   "manualOverrides": {},
@@ -151,7 +151,7 @@
       "yellow": 5,
       "red": 0
     },
-    "TÃÂÃÂÃÂÃÂ¼rkiye": {
+    "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye": {
       "yellow": 1,
       "red": 0
     },
@@ -172,8 +172,8 @@
       "red": 0
     },
     "Bosnia & Herzegovina": {
-      "yellow": 6,
-      "red": 1
+      "yellow": 11,
+      "red": 2
     },
     "Qatar": {
       "yellow": 4,
@@ -223,7 +223,7 @@
       "yellow": 2,
       "red": 0
     },
-    "CuraÃÂÃÂÃÂÃÂ§ao": {
+    "CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao": {
       "yellow": 0,
       "red": 0
     },
@@ -327,12 +327,16 @@
       "yellow": 5,
       "red": 0
     },
-    "Bosnia-Herzegovina": {
-      "yellow": 5,
-      "red": 1
-    },
     "Congo DR": {
       "yellow": 2,
+      "red": 0
+    },
+    "TÃÂÃÂÃÂÃÂ¼rkiye": {
+      "yellow": 2,
+      "red": 0
+    },
+    "CuraÃÂÃÂÃÂÃÂ§ao": {
+      "yellow": 5,
       "red": 0
     },
     "TÃÂÃÂ¼rkiye": {
@@ -343,19 +347,11 @@
       "yellow": 5,
       "red": 0
     },
-    "TÃÂ¼rkiye": {
+    "TÃ¼rkiye": {
       "yellow": 2,
       "red": 0
     },
-    "CuraÃÂ§ao": {
-      "yellow": 5,
-      "red": 0
-    },
-    "Türkiye": {
-      "yellow": 2,
-      "red": 0
-    },
-    "Curaçao": {
+    "CuraÃ§ao": {
       "yellow": 7,
       "red": 0
     }
@@ -404,13 +400,13 @@
       ],
       "_fetched": 1782588317975
     },
-    "Australia vs TÃÂÃÂÃÂÃÂ¼rkiye": {
+    "Australia vs TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye": {
       "homeTeam": "Australia",
-      "awayTeam": "TÃÂÃÂÃÂÃÂ¼rkiye",
+      "awayTeam": "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye",
       "home": [],
       "away": [
         {
-          "name": "Yunus AkgÃÂÃÂÃÂÃÂ¼n",
+          "name": "Yunus AkgÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼n",
           "minute": 86,
           "type": "yellow"
         }
@@ -541,7 +537,7 @@
           "type": "yellow"
         },
         {
-          "name": "Roger Ibañez",
+          "name": "Roger IbaÃ±ez",
           "minute": 43,
           "type": "yellow"
         }
@@ -662,8 +658,8 @@
       "away": [],
       "_fetched": 1781756244438
     },
-    "CuraÃÂÃÂÃÂÃÂ§ao vs Ivory Coast": {
-      "homeTeam": "CuraÃÂÃÂÃÂÃÂ§ao",
+    "CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao vs Ivory Coast": {
+      "homeTeam": "CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao",
       "awayTeam": "Ivory Coast",
       "home": [],
       "away": [],
@@ -675,7 +671,7 @@
       "home": [],
       "away": [
         {
-          "name": "Edson Álvarez",
+          "name": "Edson Ãlvarez",
           "minute": 64,
           "type": "yellow"
         }
@@ -687,7 +683,7 @@
       "awayTeam": "South Africa",
       "home": [
         {
-          "name": "Ladislav Krejcí",
+          "name": "Ladislav KrejcÃ­",
           "minute": 75,
           "type": "yellow"
         }
@@ -713,9 +709,9 @@
       "away": [],
       "_fetched": 1781756252593
     },
-    "Ecuador vs CuraÃÂÃÂÃÂÃÂ§ao": {
+    "Ecuador vs CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao": {
       "homeTeam": "Ecuador",
-      "awayTeam": "CuraÃÂÃÂÃÂÃÂ§ao",
+      "awayTeam": "CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao",
       "home": [],
       "away": [],
       "_fetched": 1781756253815
@@ -725,7 +721,7 @@
       "awayTeam": "Germany",
       "home": [
         {
-          "name": "Piero Hincapié",
+          "name": "Piero HincapiÃ©",
           "minute": 43,
           "type": "yellow"
         },
@@ -812,7 +808,7 @@
       ],
       "away": [
         {
-          "name": "Iñaki Williams",
+          "name": "IÃ±aki Williams",
           "minute": 60,
           "type": "yellow"
         }
@@ -839,9 +835,9 @@
       "away": [],
       "_fetched": 1782588324793
     },
-    "Germany vs CuraÃÂÃÂÃÂÃÂ§ao": {
+    "Germany vs CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao": {
       "homeTeam": "Germany",
-      "awayTeam": "CuraÃÂÃÂÃÂÃÂ§ao",
+      "awayTeam": "CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao",
       "home": [],
       "away": [],
       "_fetched": 1781898805699
@@ -918,12 +914,12 @@
           "type": "yellow"
         },
         {
-          "name": "Franck Kessié",
+          "name": "Franck KessiÃ©",
           "minute": 38,
           "type": "yellow"
         },
         {
-          "name": "Guela Doué",
+          "name": "Guela DouÃ©",
           "minute": 40,
           "type": "yellow"
         }
@@ -954,7 +950,7 @@
           "type": "yellow"
         },
         {
-          "name": "Viktor Gyökeres",
+          "name": "Viktor GyÃ¶keres",
           "minute": 85,
           "type": "yellow"
         }
@@ -992,12 +988,12 @@
       "awayTeam": "South Africa",
       "home": [
         {
-          "name": "Brian Gutiérrez",
+          "name": "Brian GutiÃ©rrez",
           "minute": 23,
           "type": "yellow"
         },
         {
-          "name": "César Montes",
+          "name": "CÃ©sar Montes",
           "minute": 90,
           "type": "red"
         }
@@ -1060,7 +1056,7 @@
           "type": "yellow"
         },
         {
-          "name": "Josué Casimir",
+          "name": "JosuÃ© Casimir",
           "minute": 90,
           "type": "yellow"
         }
@@ -1167,7 +1163,7 @@
       ],
       "away": [
         {
-          "name": "Aurélien Tchouaméni",
+          "name": "AurÃ©lien TchouamÃ©ni",
           "minute": 74,
           "type": "yellow"
         }
@@ -1186,7 +1182,7 @@
       "awayTeam": "Croatia",
       "home": [
         {
-          "name": "Édgar Yoel Bárcenas",
+          "name": "Ãdgar Yoel BÃ¡rcenas",
           "minute": 61,
           "type": "yellow"
         }
@@ -1212,7 +1208,7 @@
       "awayTeam": "Australia",
       "home": [
         {
-          "name": "Diego Gómez",
+          "name": "Diego GÃ³mez",
           "minute": 77,
           "type": "yellow"
         }
@@ -1515,15 +1511,15 @@
       "away": [],
       "_fetched": 1782588336293
     },
-    "TÃÂÃÂÃÂÃÂ¼rkiye vs Paraguay": {
-      "homeTeam": "TÃÂÃÂÃÂÃÂ¼rkiye",
+    "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye vs Paraguay": {
+      "homeTeam": "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye",
       "awayTeam": "Paraguay",
       "home": [],
       "away": [],
       "_fetched": 1781756335194
     },
-    "TÃÂÃÂÃÂÃÂ¼rkiye vs USA": {
-      "homeTeam": "TÃÂÃÂÃÂÃÂ¼rkiye",
+    "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye vs USA": {
+      "homeTeam": "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye",
       "awayTeam": "USA",
       "home": [],
       "away": [],
@@ -1585,17 +1581,17 @@
       ],
       "away": [
         {
-          "name": "Juan Jose Cáceres",
+          "name": "Juan Jose CÃ¡ceres",
           "minute": 10,
           "type": "yellow"
         },
         {
-          "name": "Miguel Almirón",
+          "name": "Miguel AlmirÃ³n",
           "minute": 53,
           "type": "yellow"
         },
         {
-          "name": "Diego Gómez",
+          "name": "Diego GÃ³mez",
           "minute": 79,
           "type": "yellow"
         },
@@ -1605,7 +1601,7 @@
           "type": "yellow"
         },
         {
-          "name": "Júnior Alonso",
+          "name": "JÃºnior Alonso",
           "minute": 90,
           "type": "yellow"
         }
@@ -1622,7 +1618,7 @@
           "type": "yellow"
         },
         {
-          "name": "Mathías Olivera",
+          "name": "MathÃ­as Olivera",
           "minute": 58,
           "type": "yellow"
         }
@@ -1656,19 +1652,19 @@
           "type": "yellow"
         },
         {
-          "name": "Agustín Canobbio",
+          "name": "AgustÃ­n Canobbio",
           "minute": 90,
           "type": "red"
         },
         {
-          "name": "Nicolás de la Cruz",
+          "name": "NicolÃ¡s de la Cruz",
           "minute": 90,
           "type": "yellow"
         }
       ],
       "away": [
         {
-          "name": "Álex Baena",
+          "name": "Ãlex Baena",
           "minute": 46,
           "type": "yellow"
         }
@@ -1721,7 +1717,7 @@
       ],
       "away": [
         {
-          "name": "César Blackman",
+          "name": "CÃ©sar Blackman",
           "minute": 72,
           "type": "yellow"
         },
@@ -1743,12 +1739,12 @@
           "type": "yellow"
         },
         {
-          "name": "Nélson Semedo",
+          "name": "NÃ©lson Semedo",
           "minute": 88,
           "type": "yellow"
         },
         {
-          "name": "Tomás Araújo",
+          "name": "TomÃ¡s AraÃºjo",
           "minute": 90,
           "type": "yellow"
         }
@@ -1810,6 +1806,89 @@
       ],
       "_fetched": 1782273261083
     },
+    "Australia vs TÃÂÃÂÃÂÃÂ¼rkiye": {
+      "homeTeam": "Australia",
+      "awayTeam": "TÃÂÃÂÃÂÃÂ¼rkiye",
+      "home": [],
+      "away": [
+        {
+          "name": "Yunus AkgÃÂÃÂÃÂÃÂ¼n",
+          "minute": 86,
+          "type": "yellow"
+        }
+      ],
+      "_fetched": 1782071288176
+    },
+    "Ecuador vs CuraÃÂÃÂÃÂÃÂ§ao": {
+      "homeTeam": "Ecuador",
+      "awayTeam": "CuraÃÂÃÂÃÂÃÂ§ao",
+      "home": [
+        {
+          "name": "Jordy AlcÃÂÃÂÃÂÃÂ­var",
+          "minute": 38,
+          "type": "yellow"
+        }
+      ],
+      "away": [
+        {
+          "name": "Leandro Bacuna",
+          "minute": 39,
+          "type": "yellow"
+        },
+        {
+          "name": "Juninho Bacuna",
+          "minute": 53,
+          "type": "yellow"
+        },
+        {
+          "name": "Livano Comenencia",
+          "minute": 56,
+          "type": "yellow"
+        },
+        {
+          "name": "JuriÃÂÃÂÃÂÃÂ«n Gaari",
+          "minute": 75,
+          "type": "yellow"
+        },
+        {
+          "name": "Gervane Kastaneer",
+          "minute": 90,
+          "type": "yellow"
+        }
+      ],
+      "_fetched": 1782071290853
+    },
+    "Germany vs CuraÃÂÃÂÃÂÃÂ§ao": {
+      "homeTeam": "Germany",
+      "awayTeam": "CuraÃÂÃÂÃÂÃÂ§ao",
+      "home": [],
+      "away": [],
+      "_fetched": 1782071291714
+    },
+    "TÃÂÃÂÃÂÃÂ¼rkiye vs Paraguay": {
+      "homeTeam": "TÃÂÃÂÃÂÃÂ¼rkiye",
+      "awayTeam": "Paraguay",
+      "home": [
+        {
+          "name": "Eren Elmali",
+          "minute": 71,
+          "type": "yellow"
+        }
+      ],
+      "away": [
+        {
+          "name": "MatÃÂÃÂÃÂÃÂ­as Galarza",
+          "minute": 4,
+          "type": "yellow"
+        },
+        {
+          "name": "Miguel AlmirÃÂÃÂÃÂÃÂ³n",
+          "minute": 45,
+          "type": "red"
+        }
+      ],
+      "_fetched": 1782071297806
+    },
     "Australia vs TÃÂÃÂ¼rkiye": {
       "homeTeam": "Australia",
       "awayTeam": "TÃÂÃÂ¼rkiye",
@@ -1821,7 +1900,7 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782071288176
+      "_fetched": 1782273250446
     },
     "Ecuador vs CuraÃÂÃÂ§ao": {
       "homeTeam": "Ecuador",
@@ -1860,14 +1939,14 @@
           "type": "yellow"
         }
       ],
-      "_fetched": 1782071290853
+      "_fetched": 1782273252980
     },
     "Germany vs CuraÃÂÃÂ§ao": {
       "homeTeam": "Germany",
       "awayTeam": "CuraÃÂÃÂ§ao",
       "home": [],
       "away": [],
-      "_fetched": 1782071291714
+      "_fetched": 1782273254360
     },
     "TÃÂÃÂ¼rkiye vs Paraguay": {
       "homeTeam": "TÃÂÃÂ¼rkiye",
@@ -1891,98 +1970,15 @@
           "type": "red"
         }
       ],
-      "_fetched": 1782071297806
-    },
-    "Australia vs TÃÂ¼rkiye": {
-      "homeTeam": "Australia",
-      "awayTeam": "TÃÂ¼rkiye",
-      "home": [],
-      "away": [
-        {
-          "name": "Yunus AkgÃÂ¼n",
-          "minute": 86,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782273250446
-    },
-    "Ecuador vs CuraÃÂ§ao": {
-      "homeTeam": "Ecuador",
-      "awayTeam": "CuraÃÂ§ao",
-      "home": [
-        {
-          "name": "Jordy AlcÃÂ­var",
-          "minute": 38,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "Leandro Bacuna",
-          "minute": 39,
-          "type": "yellow"
-        },
-        {
-          "name": "Juninho Bacuna",
-          "minute": 53,
-          "type": "yellow"
-        },
-        {
-          "name": "Livano Comenencia",
-          "minute": 56,
-          "type": "yellow"
-        },
-        {
-          "name": "JuriÃÂ«n Gaari",
-          "minute": 75,
-          "type": "yellow"
-        },
-        {
-          "name": "Gervane Kastaneer",
-          "minute": 90,
-          "type": "yellow"
-        }
-      ],
-      "_fetched": 1782273252980
-    },
-    "Germany vs CuraÃÂ§ao": {
-      "homeTeam": "Germany",
-      "awayTeam": "CuraÃÂ§ao",
-      "home": [],
-      "away": [],
-      "_fetched": 1782273254360
-    },
-    "TÃÂ¼rkiye vs Paraguay": {
-      "homeTeam": "TÃÂ¼rkiye",
-      "awayTeam": "Paraguay",
-      "home": [
-        {
-          "name": "Eren Elmali",
-          "minute": 71,
-          "type": "yellow"
-        }
-      ],
-      "away": [
-        {
-          "name": "MatÃÂ­as Galarza",
-          "minute": 4,
-          "type": "yellow"
-        },
-        {
-          "name": "Miguel AlmirÃÂ³n",
-          "minute": 45,
-          "type": "red"
-        }
-      ],
       "_fetched": 1782273261603
     },
-    "Australia vs Türkiye": {
+    "Australia vs TÃ¼rkiye": {
       "homeTeam": "Australia",
-      "awayTeam": "Türkiye",
+      "awayTeam": "TÃ¼rkiye",
       "home": [],
       "away": [
         {
-          "name": "Yunus Akgün",
+          "name": "Yunus AkgÃ¼n",
           "minute": 86,
           "type": "yellow"
         }
@@ -1994,7 +1990,7 @@
       "awayTeam": "Congo DR",
       "home": [
         {
-          "name": "Jhon Lucumí",
+          "name": "Jhon LucumÃ­",
           "minute": 56,
           "type": "yellow"
         },
@@ -2013,8 +2009,8 @@
       ],
       "_fetched": 1782588321651
     },
-    "Curaçao vs Ivory Coast": {
-      "homeTeam": "Curaçao",
+    "CuraÃ§ao vs Ivory Coast": {
+      "homeTeam": "CuraÃ§ao",
       "awayTeam": "Ivory Coast",
       "home": [
         {
@@ -2030,19 +2026,19 @@
       ],
       "away": [
         {
-          "name": "Nicolas Pépé",
+          "name": "Nicolas PÃ©pÃ©",
           "minute": 35,
           "type": "yellow"
         }
       ],
       "_fetched": 1782588321978
     },
-    "Ecuador vs Curaçao": {
+    "Ecuador vs CuraÃ§ao": {
       "homeTeam": "Ecuador",
-      "awayTeam": "Curaçao",
+      "awayTeam": "CuraÃ§ao",
       "home": [
         {
-          "name": "Jordy Alcívar",
+          "name": "Jordy AlcÃ­var",
           "minute": 38,
           "type": "yellow"
         }
@@ -2064,7 +2060,7 @@
           "type": "yellow"
         },
         {
-          "name": "Juriën Gaari",
+          "name": "JuriÃ«n Gaari",
           "minute": 75,
           "type": "yellow"
         },
@@ -2076,15 +2072,15 @@
       ],
       "_fetched": 1782588322881
     },
-    "Germany vs Curaçao": {
+    "Germany vs CuraÃ§ao": {
       "homeTeam": "Germany",
-      "awayTeam": "Curaçao",
+      "awayTeam": "CuraÃ§ao",
       "home": [],
       "away": [],
       "_fetched": 1782588325120
     },
-    "Türkiye vs Paraguay": {
-      "homeTeam": "Türkiye",
+    "TÃ¼rkiye vs Paraguay": {
+      "homeTeam": "TÃ¼rkiye",
       "awayTeam": "Paraguay",
       "home": [
         {
@@ -2095,20 +2091,20 @@
       ],
       "away": [
         {
-          "name": "Matías Galarza",
+          "name": "MatÃ­as Galarza",
           "minute": 4,
           "type": "yellow"
         },
         {
-          "name": "Miguel Almirón",
+          "name": "Miguel AlmirÃ³n",
           "minute": 45,
           "type": "red"
         }
       ],
       "_fetched": 1782588336601
     },
-    "Türkiye vs USA": {
-      "homeTeam": "Türkiye",
+    "TÃ¼rkiye vs USA": {
+      "homeTeam": "TÃ¼rkiye",
       "awayTeam": "USA",
       "home": [],
       "away": [
@@ -2215,11 +2211,15 @@
     "Ecuador vs CuraÃÂÃÂÃÂÃÂ§ao": "vrqwni43mmws4qn",
     "Germany vs CuraÃÂÃÂÃÂÃÂ§ao": "o17pjio98l9uy7j",
     "TÃÂÃÂÃÂÃÂ¼rkiye vs Paraguay": "63kv9igrwwpfx7e",
-    "TÃÂÃÂÃÂÃÂ¼rkiye vs USA": "9gklzi1r5dnsm7x"
+    "TÃÂÃÂÃÂÃÂ¼rkiye vs USA": "9gklzi1r5dnsm7x",
+    "Australia vs TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye": "8lk2dir4wwmaz73",
+    "CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao vs Ivory Coast": "ndqmliw8mn4trkv",
+    "Ecuador vs CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao": "vrqwni43mmws4qn",
+    "Germany vs CuraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ao": "o17pjio98l9uy7j",
+    "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye vs Paraguay": "63kv9igrwwpfx7e",
+    "TÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¼rkiye vs USA": "9gklzi1r5dnsm7x"
   },
-  "eloRatings": {
-    "_updated": 1782588338908
-  },
+  "eloRatings": {},
   "pot0Cost": 15,
   "pot1Cost": 10,
   "pot2Cost": 5,
