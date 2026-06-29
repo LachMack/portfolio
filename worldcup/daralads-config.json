@@ -99,13 +99,14 @@
     "firstGoal": "Blake",
     "goldenBoot": "Cooper",
     "bestGD": "Cael",
-    "worstGD": "Cael",
+    "worstGD": "Cooper",
     "mostCleanSheets": "Blake",
     "mostYellow": "Jasper",
     "mostRed": "Riley"
   },
   "manualOverrides": {
-    "goldenBoot": true
+    "goldenBoot": true,
+    "worstGD": true
   },
   "cardTotals": {
     "Australia": {
