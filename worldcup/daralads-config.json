@@ -1,5 +1,5 @@
 {
-  "sweepName": "World Cup 2026 â Daralads Sweep",
+  "sweepName": "World Cup 2026 Ã¢ÂÂ Daralads Sweep",
   "buyIn": 20,
   "prizes": {
     "champion": 0,
@@ -34,7 +34,7 @@
       "teams": [
         "Netherlands",
         "Argentina",
-        "TÃ¼rkiye",
+        "TÃÂ¼rkiye",
         "Austria",
         "Canada",
         "Scotland",
@@ -78,7 +78,7 @@
         "Tunisia",
         "Sweden",
         "Uzbekistan",
-        "CuraÃ§ao"
+        "CuraÃÂ§ao"
       ]
     },
     {
@@ -181,7 +181,13 @@
     "Ecuador vs CuraÃ§ao": "vrqwni43mmws4qn",
     "Germany vs CuraÃ§ao": "o17pjio98l9uy7j",
     "TÃ¼rkiye vs Paraguay": "63kv9igrwwpfx7e",
-    "TÃ¼rkiye vs USA": "9gklzi1r5dnsm7x"
+    "TÃ¼rkiye vs USA": "9gklzi1r5dnsm7x",
+    "Australia vs TÃÂ¼rkiye": "8lk2dir4wwmaz73",
+    "CuraÃÂ§ao vs Ivory Coast": "ndqmliw8mn4trkv",
+    "Ecuador vs CuraÃÂ§ao": "vrqwni43mmws4qn",
+    "Germany vs CuraÃÂ§ao": "o17pjio98l9uy7j",
+    "TÃÂ¼rkiye vs Paraguay": "63kv9igrwwpfx7e",
+    "TÃÂ¼rkiye vs USA": "9gklzi1r5dnsm7x"
   },
   "eloRatings": {}
 }
