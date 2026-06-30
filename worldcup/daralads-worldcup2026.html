@@ -743,54 +743,81 @@ function fmtKOTeam(code){
 
 
 // ── Knockout team resolver ────────────────────────────────────────────
-function resolveKOTeams(matches){
+function resolveKOTeams(rawMatches){
   // Build group standings from finished group matches
-  var sm=buildStandings(matches);
-  // Build map: group letter -> [1st, 2nd, 3rd] by pts/gd
+  var sm=buildStandings(rawMatches);
+
+  // Map: group letter -> teams sorted by pts/gd/gf
   var grpRankings={};
   Object.entries(sm).forEach(function(e){
-    var grp=e[0], tms=e[1];
+    var grp=e[0],tms=e[1];
     var sorted=Object.entries(tms).map(function(te){
-      var s=te[1]; return{name:te[0],pts:s.pts,gd:s.gf-s.ga,gf:s.gf};
+      var s=te[1];return{name:te[0],pts:s.pts,gd:s.gf-s.ga,gf:s.gf,ga:s.ga,p:s.p};
     }).sort(function(a,b){return b.pts-a.pts||b.gd-a.gd||b.gf-a.gf;});
-    grpRankings[grp]=sorted.map(function(t){return t.name;});
+    grpRankings[grp]=sorted;
   });
 
-  // Build map: match num -> winner/loser
-  var matchResults={};
-  matches.forEach(function(m){
-    if(m.num&&m.s1!=null&&m.s2!=null&&isKnown(m.t1)&&isKnown(m.t2)){
-      var winner=m.s1>m.s2?m.t1:m.s1<m.s2?m.t2:null;
-      var loser=m.s1>m.s2?m.t2:m.s1<m.s2?m.t1:null;
-      if(winner){matchResults[m.num]={W:winner,L:loser};}
-    }
+  // Best 3rd: collect all 3rd-place teams across all 12 groups, take top 8 by pts/gd/gf
+  var thirds=[];
+  Object.entries(grpRankings).forEach(function(e){
+    if(e[1][2]&&e[1][2].p>0)thirds.push(Object.assign({group:e[0]},e[1][2]));
   });
+  thirds.sort(function(a,b){return b.pts-a.pts||b.gd-a.gd||b.gf-a.gf;});
+  var best8thirds=thirds.slice(0,8).map(function(t){return t.name;});
 
-  // Resolve a slot code to a team name (or return original if unknown)
-  function resolveSlot(code){
+  // Resolve group/3rd slots (pass 1 - no match results needed)
+  var thirdsIdx=0;
+  function resolveGroupSlot(code){
     if(!code||isKnown(code))return code;
-    // "1A" -> 1st place group A, "2B" -> 2nd place group B
     var gm=code.match(/^([1-3])([A-L])$/);
     if(gm){
-      var rank=parseInt(gm[1])-1, grp=gm[2];
-      return(grpRankings[grp]&&grpRankings[grp][rank])||code;
+      var rank=parseInt(gm[1])-1,grp=gm[2];
+      return(grpRankings[grp]&&grpRankings[grp][rank]&&grpRankings[grp][rank].name)||code;
     }
-    // "W73" -> winner of match 73
+    if(code==='Best 3rd'){
+      var t=best8thirds[thirdsIdx]||code;
+      thirdsIdx++;
+      return t;
+    }
+    return code; // W/L slots handled in pass 2
+  }
+
+  // Pass 1: resolve group/3rd slots
+  thirdsIdx=0;
+  var pass1=rawMatches.map(function(m){
+    if(m.g)return m;
+    var rt1=resolveGroupSlot(m.t1),rt2=resolveGroupSlot(m.t2);
+    return Object.assign({},m,{t1:rt1,t2:rt2});
+  });
+
+  // Build matchResults from pass1 scores (OFB stores by key, scores in OFB[m.key])
+  var matchResults={};
+  pass1.forEach(function(m){
+    if(!m.num||m.s1==null||m.s2==null)return;
+    if(!isKnown(m.t1)||!isKnown(m.t2))return;
+    var winner=m.s1>m.s2?m.t1:m.s1<m.s2?m.t2:null;
+    var loser=m.s1>m.s2?m.t2:m.s1<m.s2?m.t1:null;
+    if(winner)matchResults[m.num]={W:winner,L:loser};
+  });
+
+  // Pass 2: resolve W/L slots using pass1 results
+  function resolveWLSlot(code){
+    if(!code||isKnown(code))return code;
     var wm=code.match(/^W(\d+)$/);
-    if(wm){return(matchResults[parseInt(wm[1])]&&matchResults[parseInt(wm[1])].W)||code;}
-    // "L73" -> loser of match 73
+    if(wm)return(matchResults[parseInt(wm[1])]&&matchResults[parseInt(wm[1])].W)||code;
     var lm=code.match(/^L(\d+)$/);
-    if(lm){return(matchResults[parseInt(lm[1])]&&matchResults[parseInt(lm[1])].L)||code;}
+    if(lm)return(matchResults[parseInt(lm[1])]&&matchResults[parseInt(lm[1])].L)||code;
     return code;
   }
 
-  return matches.map(function(m){
-    if(m.g)return m; // group stage - no resolution needed
-    var rt1=resolveSlot(m.t1), rt2=resolveSlot(m.t2);
+  return pass1.map(function(m){
+    if(m.g)return m;
+    var rt1=resolveWLSlot(m.t1),rt2=resolveWLSlot(m.t2);
     if(rt1===m.t1&&rt2===m.t2)return m;
     return Object.assign({},m,{t1:rt1,t2:rt2});
   });
 }
+
 
 function getMatches(){
   var raw=MATCHES.map(function(m,i){
@@ -1237,6 +1264,7 @@ async function loadFromOpenFootball(){
 }
 
 function findMatchKey(t1,t2,date){
+  // Search resolved matches (KO slots resolved to real team names)
   var matches=getMatches();
   for(var i=0;i<matches.length;i++){
     var m=matches[i];
@@ -1244,7 +1272,7 @@ function findMatchKey(t1,t2,date){
       return m.key;
     }
   }
-  // Fallback: match by teams only (different date format)
+  // Fallback: match by teams only (ignore date)
   for(var i=0;i<matches.length;i++){
     var m=matches[i];
     if((m.t1===t1&&m.t2===t2)||(m.t1===t2&&m.t2===t1)){
@@ -1253,7 +1281,6 @@ function findMatchKey(t1,t2,date){
   }
   return null;
 }
-
 function setStatus(type,msg,color){
   var el=document.getElementById('status-bar');
   if(el){el.textContent=msg;el.style.color=color;}
@@ -1290,11 +1317,25 @@ async function loadFromGitHub(){
     if(data.manualOverrides)CFG.manualOverrides = data.manualOverrides;
     if(data.cardTotals){
       var _ct=data.cardTotals;var _ctNorm={};
-      var _nameNorm={'Bosnia-Herzegovina':'Bosnia & Herzegovina','Bosnia and Herzegovina':'Bosnia & Herzegovina',
-        'Curacao':'Curaçao','Curaçao':'Curaçao'};
-      Object.keys(_ct).forEach(function(k){var nk=_nameNorm[k]||k;
-        if(!_ctNorm[nk])_ctNorm[nk]={yellow:0,red:0};
+      var _nameNorm={
+        'Bosnia-Herzegovina':'Bosnia & Herzegovina',
+        'Bosnia and Herzegovina':'Bosnia & Herzegovina',
+        'Curacao':'Curaçao',
+        'Curaçao':'Curaçao',
+        'Korea Republic':'South Korea',
+        'Czech Republic':'Czechia',
+        'Turkey':'Türkiye',
+        'Turkiye':'Türkiye',
+        "Cote d'Ivoire":'Ivory Coast',
+        'Congo DR':'DR Congo',
+        'Cabo Verde':'Cape Verde',
+        'United States':'USA',
+        'IR Iran':'Iran'
+      };
+      Object.keys(_ct).forEach(function(k){
         if(k==='_updated'){_ctNorm._updated=_ct._updated;return;}
+        var nk=_nameNorm[k]||k;
+        if(!_ctNorm[nk])_ctNorm[nk]={yellow:0,red:0};
         _ctNorm[nk].yellow=(_ctNorm[nk].yellow||0)+(_ct[k].yellow||0);
         _ctNorm[nk].red=(_ctNorm[nk].red||0)+(_ct[k].red||0);
       });
@@ -1885,10 +1926,10 @@ function renderSweep(){
     var pts=0,notes=[];
     (p.teams||[]).forEach(function(t){
       var r=getTeamResult(t,matches,sm);
-      if(r==='champion'){pts+=prz.champion||0;notes.push(t+' 🏆');}
-      else if(r==='runner'){pts+=prz.runner||0;notes.push(t+' 🥈');}
-      else if(r==='third'){pts+=prz.third||0;notes.push(t+' 🥉');}
-      else if(r==='advanced'){pts+=prz.groupAdvance||0;notes.push(t+' ✓');}
+      if(r==='champion'){pts+=prz.champion||0;notes.push(h(t)+' 🏆');}
+      else if(r==='runner'){pts+=prz.runner||0;notes.push(h(t)+' 🥈');}
+      else if(r==='third'){pts+=prz.third||0;notes.push(h(t)+' 🥉');}
+      else if(r==='advanced'){pts+=prz.groupAdvance||0;notes.push(h(t)+' ✓');}
     });
     MANUAL_PRIZE_DEFS.forEach(function(pd){
       if(awards[pd.k]===p.name&&(prz[pd.k]||0)>0){pts+=prz[pd.k];notes.push(pd.icon+' '+pd.label);}
