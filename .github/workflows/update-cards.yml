@@ -1,9 +1,9 @@
 name: Update WC2026 Card Data
 
-on:
-  schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
+#on:
+#  schedule:
+#    - cron: '0 */6 * * *'
+#  workflow_dispatch:
 
 jobs:
   update-cards:
